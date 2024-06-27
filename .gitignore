@@ -17,15 +17,15 @@ db.sqlite3
 **/migrations/*
 !**/migrations/__init__.py
 
-# Static and media files
-staticfiles/
-static/
-media/
-css/
-js/
-images/
-data/
-plugins/
+# # Static and media files
+# staticfiles/
+# static/
+# media/
+# css/
+# js/
+# images/
+# data/
+# plugins/
 
 # Private directories
 venv/
