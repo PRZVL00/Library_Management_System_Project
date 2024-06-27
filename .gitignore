@@ -1,0 +1,68 @@
+# Logs
+*.log
+
+# Compiled files
+*.pot
+*.pyc
+*.py[cod]
+*$py.class
+*.so
+__pycache__/
+
+# Django specific
+db.sqlite3
+*.sqlite3
+
+# Django migrations
+**/migrations/*
+!**/migrations/__init__.py
+
+# Static and media files
+staticfiles/
+static/
+media/
+css/
+js/
+images/
+data/
+plugins/
+
+# Private directories
+venv/
+env/
+
+# Python packaging
+*.egg-info/
+.eggs/
+*.egg
+
+# MySQL specific
+*.sql
+*.bak
+*.backup
+
+# IDEs and editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Virtualenv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Pyre type checker
+.pyre/
