@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard - Mazer Admin Dashboard</title>
+        {% include "_references.html" %}
+    </head>
+    <body class='d-flex flex-column vh-100'>
+        <script src="assets/static/js/initTheme.js"></script>
+        <div id="app">
+            {% include "_sideNavigation.html" %}
+            <div id="main">
+                {% include "_header.html" %}
+                <div class="page-heading">
+                    <h3>Dashboard</h3>
+                </div>
+                <div class="page-content">
+                    <!--Start Your Page Here-->
+
+                </div>
+                {% include "_footer.html" %}
+            </div>
+        </div>
+    </body>
+</html>
