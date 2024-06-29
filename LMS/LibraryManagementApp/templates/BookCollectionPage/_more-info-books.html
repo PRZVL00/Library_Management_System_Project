@@ -1,0 +1,56 @@
+{% load static %}
+<div class="modal fade" id="book-info-modal" tabindex="-1" role="dialog"
+    aria-labelledby="book-info" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-centered modal-dialog-scrollable"
+        role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="book-info">Book Name
+                </h5>
+                <button type="button" class="close" data-bs-dismiss="modal"
+                    aria-label="Close">
+                <i data-feather="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-7 col-sm-7 col-md-7 col-lg-7 col-xl-7">
+                        <h5>Year: 20XX</h5>
+                        <h5>ISBN: 20XX</h5>
+                        <figure>
+                            <figcaption>
+                                <b>
+                                    Author/s
+                                </b>
+                            </figcaption>
+                            <ul>
+                                <li>FirstName LastName</li>
+                                <li>FirstName LastName</li>
+                                <li>FirstName LastName</li>
+                            </ul>
+                        </figure>
+                    </div>
+                    <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5">
+                        <img class="card-img-top img-fluid" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: auto; object-fit: contain;">
+                    </div>
+                </div>
+                
+                <h5>Summary</h5>
+                <p>
+                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. Harum natus rerum officia labore possimus doloribus eum voluptatum quae vitae corrupti incidunt suscipit accusantium dolores nihil quam sunt tempore, illum minima.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-secondary"
+                    data-bs-dismiss="modal">
+                <i class="bx bx-x d-block d-sm-none"></i>
+                <span class="d-none d-sm-block">Close</span>
+                </button>
+                <button type="button" class="btn btn-primary ms-1" data-bs-dismiss="modal">
+                <i class="bx bx-check d-block d-sm-none"></i>
+                <span class="d-none d-sm-block">Add to Shelf</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

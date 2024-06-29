@@ -1,0 +1,520 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard - Mazer Admin Dashboard</title>
+        {% include "_references.html" %}
+
+        {% comment %} <style>
+            .card-img-container {
+                display: flex;
+                justify-content: center;
+            }
+            .card-img-top {
+                width: auto;
+                height: 200px;
+                object-fit: contain;
+            }
+        </style> {% endcomment %}
+    </head>
+    <body class='d-flex flex-column vh-100'>
+        <script src="assets/static/js/initTheme.js"></script>
+        <div id="app">
+            {% include "_sideNavigation.html" %}
+            <div id="main">
+                {% include "_header.html" %}
+                <div class="page-heading">
+                    <h3>Book Collection</h3>
+                </div>
+                <div class="page-content">
+                    <!--Start Your Page Here-->
+                    <div class='row'> <!--Row Start-->
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+                    </div> <!--Row End-->
+
+                    <div class='row'> <!--Row Start-->
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+                    </div> <!--Row End-->
+
+                    
+                    <div class='row'> <!--Row Start-->
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+                    </div> <!--Row End-->
+
+                    <div class='row'> <!--Row Start-->
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                          </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-3"> <!--Column Start-->
+                            <div class="card">
+                                <div class="card-content">
+                                    <div style="display: flex; justify-content: center;">
+                                        <img class="card-img-top img-fluid mt-3" src="{% static 'assets/static/images/BookSample.png' %}" alt="Card image cap" style="width: auto; height: 200px; object-fit: contain;">
+                                    </div>                                                                
+                                    <div class="card-body">
+                                        <h3 class="card-title text-center">Book Name</h3>
+                                        <h5 class="card-subtitle text-center">Year</h5>
+                                        <h5 class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN">XXXXXXXXXXXXX</h5>
+                                        <figure>
+                                            <figcaption>
+                                                <b>
+                                                    Author/s
+                                                </b>
+                                            </figcaption>
+                                            <ul>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                                <li>FirstName LastName</li>
+                                            </ul>
+                                        </figure>
+                                        <button class="btn btn-primary w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
+                                        <button class="btn btn-primary w-100 my-1">Add to Shelf</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!--Column End-->
+                    </div> <!--Row End-->
+                </div>
+                {% include "BookCollectionPage/_more-info-books.html" %}
+                {% include "_footer.html" %}
+            </div>
+        </div>
+    </body>
+</html>
+
+<script>
+    $(document).ready(function () {
+        var tooltipTriggerList = $('[data-bs-toggle="tooltip"]');
+        var tooltipList = tooltipTriggerList.map(function () {
+            return new bootstrap.Tooltip(this);
+        });
+    });    
+</script>
