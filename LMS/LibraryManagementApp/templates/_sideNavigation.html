@@ -48,6 +48,14 @@
                     <span>Dashboard</span>
                     </a>
                 </li>
+
+                <li class="sidebar-title">Books</li>
+                <li class="sidebar-item {% if request.path == '/book-collection/' %}active{% endif %}">
+                    <a href="{% url "book-collection" %}" class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Book Collection</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
