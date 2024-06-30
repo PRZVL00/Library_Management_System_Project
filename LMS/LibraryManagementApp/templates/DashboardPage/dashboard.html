@@ -5,10 +5,11 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Dashboard - Mazer Admin Dashboard</title>
-        {% include "_references.html" %}
+        {% include "_CSSreferences.html" %}
     </head>
     <body class='d-flex flex-column vh-100'>
-        <script src="assets/static/js/initTheme.js"></script>
+        <script src="{% static 'assets/static/js/initTheme.js' %}"></script>
+        
         <div id="app">
             {% include "_sideNavigation.html" %}
             <div id="main">
@@ -23,5 +24,6 @@
                 {% include "_footer.html" %}
             </div>
         </div>
+        {% include "_JSreferences.html" %}
     </body>
 </html>
