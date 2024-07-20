@@ -9,3 +9,6 @@ def Dashboard(request):
 
 def BookCollection(request):
     return render(request, 'BookCollectionPage/book-collection.html', {})
+
+def BorrowReturn(request):
+    return render(request, 'BorrowReturnPage/borrow-return.html', {})

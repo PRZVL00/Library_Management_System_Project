@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Library Management System</title>
+        {% include "_CSSreferences.html" %}
+        
+        <style>
+            @media (max-width: 992px) {
+                .card {
+                    min-width: calc((100% / 2) - .5rem); /* Adjust for 2 cards on medium screens */
+                }
+            }
+            
+            @media (max-width: 768px) {
+                .card {
+                    min-width: calc(100% - .5rem); /* Adjust for 1 card on small screens */
+                }
+            }
+        </style>
+    </head>
+    <body class='d-flex flex-column vh-100'>
+        <script src="{% static "assets/static/js/initTheme.js" %}"></script>
+        <div id="app">
+            {% include "_sideNavigation.html" %}
+            <div id="main">
+                <!--Header-->
+                <header class="mb-3">
+                    <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                    </a>
+                </header>
+                <div class="page-heading row">
+                    <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+                        <h3>Borrow and Return</h3>
+                    </div>
+                    <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-end align-items-center">
+                        <!-- Icon with notification dot -->
+                        <div class="position-relative me-3">
+                            <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
+                            <span class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                3
+                                <span class="visually-hidden">unread messages</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>               
+                <!--Main Page-->                           
+                <div class="page-content">
+                    <!--Start Your Page Here-->
+                    <div class="row mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1" style="align-items: normal;">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" placeholder="Search a Book Here..." aria-label="Book's Name" aria-describedby="button-addon2">
+                            <button class="btn btn-sm btn-outline-primary" type="button" id="button-addon2">Search</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-3 col-xxl-3">
+                            {% include "BorrowReturnPage/_profile.html" %}
+                        </div>
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-9 col-xl-9 col-xxl-9">
+                            <div class="card">
+                                <div class="card-content">
+                                    {% include "BorrowReturnPage/_reserved-books.html" %}
+                                    <hr class="mx-2">
+                                    {% include "BorrowReturnPage/_borrowed-books.html" %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% include "_footer.html" %}
+            </div>
+        </div>
+        {% include "_JSreferences.html" %}
+    </body>
+</html>
+
+<script>
+    $(document).ready(function(){
+        function initializeSlider(sliderId) {
+            var slider = $('#' + sliderId);
+            var cardDeck = slider.find('.card-deck');
+            var totalCards = cardDeck.children('.card').length;
+            var cardWidth = cardDeck.children('.card').outerWidth(true);
+            var currentIndex = 0;
+
+            // Add indicators
+            var indicatorsContainer = slider.find('.indicators');
+            for (var i = 0; i < totalCards; i++) {
+                indicatorsContainer.append('<div class="indicator" data-index="' + i + '"></div>');
+            }
+            updateIndicators();
+
+            slider.find('#nextBtn').click(function(){
+                var numVisible = visibleCards();
+                if (currentIndex < totalCards - numVisible) {
+                    currentIndex++;
+                    updateSlider();
+                }
+            });
+
+            slider.find('#prevBtn').click(function(){
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateSlider();
+                }
+            });
+
+            slider.find('.indicator').click(function(){
+                currentIndex = $(this).data('index');
+                updateSlider();
+            });
+
+            // Adjust card width on window resize
+            $(window).resize(function(){
+                cardWidth = cardDeck.children('.card').outerWidth(true);
+                updateSlider();
+            });
+
+            function visibleCards() {
+                var viewportWidth = $(window).width();
+                if (viewportWidth < 576) return 1;  // Extra small devices (phones)
+                if (viewportWidth < 768) return 2;  // Small devices (tablets)
+                if (viewportWidth < 992) return 3;  // Medium devices (small desktops)
+                return 5;  // Large devices (desktops and larger)
+            }
+
+            function updateSlider() {
+                var numVisible = visibleCards();
+                cardDeck.css('transform', 'translateX(' + (-currentIndex * cardWidth) + 'px)');
+                updateIndicators();
+                // Disable next button if at the end
+                slider.find('#nextBtn').prop('disabled', currentIndex >= totalCards - numVisible);
+            }
+
+            function updateIndicators() {
+                var numVisible = visibleCards();
+                slider.find('.indicator').removeClass('active');
+                for (var i = currentIndex; i < currentIndex + numVisible; i++) {
+                    slider.find('.indicator').eq(i).addClass('active');
+                }
+            }
+        }
+
+        // Initialize each slider
+        initializeSlider('slider1');
+        initializeSlider('slider2');
+    });
+</script>
