@@ -62,6 +62,12 @@
                     <span>Borrow and Return</span>
                     </a>
                 </li>
+                <li class="sidebar-item {% if request.path == '/account-management/' %}active{% endif %}">
+                    <a href="{% url "account-management" %}" class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Account Management</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>

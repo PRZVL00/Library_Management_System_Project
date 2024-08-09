@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Library Management System</title>
+        {% include "_CSSreferences.html" %}
+    </head>
+    <body class='d-flex flex-column vh-100'>
+        <script src="{% static "assets/static/js/initTheme.js" %}"></script>
+        <div id="app">
+            {% include "_sideNavigation.html" %}
+            <div id="main">
+                <!--Header-->
+                <header class="mb-3">
+                    <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                    </a>
+                </header>
+                <div class="page-heading row">
+                    <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+                        <h3>Borrow and Return</h3>
+                    </div>
+                    <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-end align-items-center">
+                        <!-- Icon with notification dot -->
+                        <div class="position-relative me-3">
+                            <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
+                            <span class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                3
+                                <span class="visually-hidden">unread messages</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>               
+                <!--Main Page-->                           
+                <div class="page-content">
+                    <!--Start Your Page Here-->
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="table1">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>City</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Harding</td>
+                                    <td>Lorem.ipsum.dolor@etnetuset.com</td>
+                                    <td>0800 1111</td>
+                                    <td>Obaix</td>
+                                    <td>
+                                        <span class="badge bg-success">Active</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Emmanuel</td>
+                                    <td>eget.lacus.Mauris@feugiatSednec.org</td>
+                                    <td>(016977) 8208</td>
+                                    <td>Saint-Remy-Geest</td>
+                                    <td>
+                                        <span class="badge bg-success">Active</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% include "_footer.html" %}
+            </div>
+        </div>
+        {% include "_JSreferences.html" %}
+    </body>
+</html>
+
+<script>
+    $( document ).ready(function() {
+        $("#table1").DataTable({
+            
+        });
+    });
+
+</script>
