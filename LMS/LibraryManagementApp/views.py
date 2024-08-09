@@ -12,3 +12,6 @@ def BookCollection(request):
 
 def BorrowReturn(request):
     return render(request, 'BorrowReturnPage/borrow-return.html', {})
+
+def AccountManagement(request):
+    return render(request, 'AccountManagement/account-management.html', {})
