@@ -40,36 +40,50 @@
                         <table class="table table-striped" id="table1">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Student ID #</th>
+                                    <th>Contact Number</th>
                                     <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>City</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Harding</td>
-                                    <td>Lorem.ipsum.dolor@etnetuset.com</td>
-                                    <td>0800 1111</td>
-                                    <td>Obaix</td>
+                                    <td>Sheik</td>
+                                    <td>Bautista</td>
+                                    <td>TUPC-19-0598</td>
+                                    <td>09494448765</td>
+                                    <td>sheik@gmail.com</td>
                                     <td>
-                                        <span class="badge bg-success">Active</span>
+                                        <button class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Active</button>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Emmanuel</td>
-                                    <td>eget.lacus.Mauris@feugiatSednec.org</td>
-                                    <td>(016977) 8208</td>
-                                    <td>Saint-Remy-Geest</td>
+                                    <td>Josiah</td>
+                                    <td>Bautista</td>
+                                    <td>TUPC-19-0598</td>
+                                    <td>09494448765</td>
+                                    <td>josiah@gmail.com</td>
                                     <td>
-                                        <span class="badge bg-success">Active</span>
+                                        <button class="btn btn-sm btn-outline-secondary w-100" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Inactive</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Sample</td>
+                                    <td>Bautista</td>
+                                    <td>TUPC-19-0598</td>
+                                    <td>09494448765</td>
+                                    <td>Sample@gmail.com</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Ban</button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+                {% include "AccountManagement/_account-edit.html" %}
                 {% include "_footer.html" %}
             </div>
         </div>
@@ -79,9 +93,7 @@
 
 <script>
     $( document ).ready(function() {
-        $("#table1").DataTable({
-            
-        });
+        $("#table1").DataTable();
     });
 
 </script>
