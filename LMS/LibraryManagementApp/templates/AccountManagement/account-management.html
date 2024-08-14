@@ -53,7 +53,7 @@
                                     <td>Sheik</td>
                                     <td>Bautista</td>
                                     <td>TUPC-19-0598</td>
-                                    <td>09494448765</td>
+                                    <td>0949-444-8765</td>
                                     <td>sheik@gmail.com</td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Active</button>
@@ -63,7 +63,7 @@
                                     <td>Josiah</td>
                                     <td>Bautista</td>
                                     <td>TUPC-19-0598</td>
-                                    <td>09494448765</td>
+                                    <td>0949-444-8765</td>
                                     <td>josiah@gmail.com</td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-secondary w-100" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Inactive</button>
@@ -73,7 +73,7 @@
                                     <td>Sample</td>
                                     <td>Bautista</td>
                                     <td>TUPC-19-0598</td>
-                                    <td>09494448765</td>
+                                    <td>0949-444-8765</td>
                                     <td>Sample@gmail.com</td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Ban</button>
@@ -94,6 +94,11 @@
 <script>
     $( document ).ready(function() {
         $("#table1").DataTable();
+
+        $('#save-button').click(function() {
+            console.log("Form saved");
+            // $('#account-edit-form').submit();
+        });
     });
 
 </script>
