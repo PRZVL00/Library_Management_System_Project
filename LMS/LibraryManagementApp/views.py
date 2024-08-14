@@ -14,4 +14,4 @@ def BorrowReturn(request):
     return render(request, 'BorrowReturnPage/borrow-return.html', {})
 
 def AccountManagement(request):
-    return render(request, 'AccountManagement/account-management.html', {})
+    return render(request, 'AccountManagementPage/account-management.html', {})
