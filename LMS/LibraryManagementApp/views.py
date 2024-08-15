@@ -15,3 +15,6 @@ def BorrowReturn(request):
 
 def AccountManagement(request):
     return render(request, 'AccountManagementPage/account-management.html', {})
+
+def Bag(request):
+    return render(request, 'BagPage/bag.html', {})

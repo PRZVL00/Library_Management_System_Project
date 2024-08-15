@@ -1,101 +1,115 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Library Management System</title>
-        {% include "_CSSreferences.html" %}
-    </head>
-    <body class='d-flex flex-column vh-100'>
-        <script src="{% static "assets/static/js/initTheme.js" %}"></script>
-        <div id="app">
-            {% include "_sideNavigation.html" %}
-            <div id="main">
-                <!--Header-->
-                <header class="mb-3">
-                    <a href="#" class="burger-btn d-block d-xl-none">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    {% include "_CSSreferences.html" %}
+</head>
+
+<body class='d-flex flex-column vh-100'>
+    <script src={% static "assets/static/js/initTheme.js" %}></script>
+    <div id="app">
+        {% include "_sideNavigation.html" %}
+        <div id="main">
+            <!--Header-->
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
                     <i class="bi bi-justify fs-3"></i>
-                    </a>
-                </header>
-                <div class="page-heading row">
-                    <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
-                        <h3>Borrow and Return</h3>
-                    </div>
-                    <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-end align-items-center">
-                        <!-- Icon with notification dot -->
-                        <div class="position-relative me-3">
-                            <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
-                            <span class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                3
-                                <span class="visually-hidden">unread messages</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>               
-                <!--Main Page-->                           
-                <div class="page-content">
-                    <!--Start Your Page Here-->
-                    <div class="table-responsive">
-                        <table class="table table-striped" id="table1">
-                            <thead>
-                                <tr>
-                                    <th>First Name</th>
-                                    <th>Last Name</th>
-                                    <th>Student ID #</th>
-                                    <th>Contact Number</th>
-                                    <th>Email</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Sheik</td>
-                                    <td>Bautista</td>
-                                    <td>TUPC-19-0598</td>
-                                    <td>0949-444-8765</td>
-                                    <td>sheik@gmail.com</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Active</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Josiah</td>
-                                    <td>Bautista</td>
-                                    <td>TUPC-19-0598</td>
-                                    <td>0949-444-8765</td>
-                                    <td>josiah@gmail.com</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-secondary w-100" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Inactive</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Sample</td>
-                                    <td>Bautista</td>
-                                    <td>TUPC-19-0598</td>
-                                    <td>0949-444-8765</td>
-                                    <td>Sample@gmail.com</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Ban</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                </a>
+            </header>
+            <div class="page-heading row">
+                <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+                    <h3>Borrow and Return</h3>
+                </div>
+                <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-end align-items-center">
+                    <!-- Icon with notification dot -->
+                    <div class="position-relative me-3">
+                        <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
+                        <span
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            3
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
                     </div>
                 </div>
-                {% include "AccountManagementPage/_account-edit.html" %}
-                {% include "_footer.html" %}
             </div>
+            <!--Main Page-->
+            <div class="page-content">
+                <!--Start Your Page Here-->
+                <div class="table-responsive">
+                    <table class="table table-striped" id="table1">
+                        <thead>
+                            <tr>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Student ID #</th>
+                                <th>Contact Number</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Sheik</td>
+                                <td>Bautista</td>
+                                <td>TUPC-19-0598</td>
+                                <td>0949-444-8765</td>
+                                <td>sheik@gmail.com</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal"
+                                        data-bs-target="#account-edit-modal">Active</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Josiah</td>
+                                <td>Bautista</td>
+                                <td>TUPC-19-0598</td>
+                                <td>0949-444-8765</td>
+                                <td>josiah@gmail.com</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-secondary w-100" data-bs-toggle="modal"
+                                        data-bs-target="#account-edit-modal">Inactive</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Sample</td>
+                                <td>Bautista</td>
+                                <td>TUPC-19-0598</td>
+                                <td>0949-444-8765</td>
+                                <td>Sample@gmail.com</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-danger w-100" data-bs-toggle="modal"
+                                        data-bs-target="#account-edit-modal">Ban</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% include "AccountManagementPage/_account-edit.html" %}
+            {% include "_footer.html" %}
         </div>
-        {% include "_JSreferences.html" %}
-    </body>
+    </div>
+    {% include "_JSreferences.html" %}
+</body>
+
 </html>
 
 <script>
-    $( document ).ready(function() {
-        $("#table1").DataTable();
+    $(document).ready(function () {
+        $("#table1").DataTable({
+            dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
+                'rt' +
+                '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
+            buttons: ['copy', 'excel', 'pdf'],
+            responsive: false,
+            scrollX: true
+        });
 
-        $('#save-button').click(function() {
+        $('#save-button').click(function () {
             console.log("Form saved");
             // $('#account-edit-form').submit();
         });

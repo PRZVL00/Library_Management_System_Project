@@ -43,7 +43,7 @@
             <ul class="menu">
                 <li class="sidebar-title">Dashboard</li>
                 <li class="sidebar-item {% if request.path == '/dashboard/' %}active{% endif %}">
-                    <a href="{% url "dashboard" %}" class='sidebar-link'>
+                    <a href={% url "dashboard" %} class='sidebar-link'>
                     <i class="bi bi-grid-fill"></i>
                     <span>Dashboard</span>
                     </a>
@@ -51,19 +51,29 @@
 
                 <li class="sidebar-title">Books</li>
                 <li class="sidebar-item {% if request.path == '/book-collection/' %}active{% endif %}">
-                    <a href="{% url "book-collection" %}" class='sidebar-link'>
+                    <a href={% url "book-collection" %} class='sidebar-link'>
                     <i class="bi bi-grid-fill"></i>
                     <span>Book Collection</span>
                     </a>
                 </li>
+
+                <li class="sidebar-title">Book Transaction</li>
                 <li class="sidebar-item {% if request.path == '/borrow-return/' %}active{% endif %}">
-                    <a href="{% url "borrow-return" %}" class='sidebar-link'>
+                    <a href={% url "borrow-return" %} class='sidebar-link'>
                     <i class="bi bi-grid-fill"></i>
                     <span>Borrow and Return</span>
                     </a>
+                </li>   
+                <li class="sidebar-item {% if request.path == '/bag/' %}active{% endif %}">
+                    <a href={% url "bag" %} class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Bag</span>
+                    </a>
                 </li>
+
+                <li class="sidebar-title">Account</li>
                 <li class="sidebar-item {% if request.path == '/account-management/' %}active{% endif %}">
-                    <a href="{% url "account-management" %}" class='sidebar-link'>
+                    <a href={% url "account-management" %} class='sidebar-link'>
                     <i class="bi bi-grid-fill"></i>
                     <span>Account Management</span>
                     </a>
