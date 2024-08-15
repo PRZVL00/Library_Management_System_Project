@@ -7,4 +7,6 @@ urlpatterns = [
     path('book-collection/', views.BookCollection, name="book-collection"),
     path('borrow-return/', views.BorrowReturn, name="borrow-return"),
     path('account-management/', views.AccountManagement, name="account-management"),
+    path('bag/', views.Bag, name="bag"),
+
 ]
