@@ -10,7 +10,8 @@
 </head>
 
 <body class='d-flex flex-column vh-100'>
-    <script src={% static "assets/static/js/initTheme.js" %}></script>
+    <script src={% static 'assets/static/js/initTheme.js' %}></script>
+
     <div id="app">
         {% include "_sideNavigation.html" %}
         <div id="main">
@@ -22,7 +23,7 @@
             </header>
             <div class="page-heading row">
                 <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
-                    <h3>Account Management</h3>
+                    <h3>Logbook</h3>
                 </div>
                 <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-end align-items-center">
                     <!-- Icon with notification dot -->
@@ -40,50 +41,36 @@
             <div class="page-content">
                 <!--Start Your Page Here-->
                 <div class="table-responsive">
-                    <table class="table table-striped" id="table1">
+                    <!-- Modal for edit profile will be used here but with some changes -->
+                    <!-- Buttons for each input field will be disabled and also the input fields -->
+                    <!-- Reset Password will be remove and save buttons and cancel will be replaced as close -->
+                    <table class="table table-striped" id="logs">
                         <thead>
                             <tr>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Student ID #</th>
-                                <th>Contact Number</th>
-                                <th>Email</th>
-                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Sheik</td>
-                                <td>Bautista</td>
-                                <td>TUPC-19-0598</td>
-                                <td>0949-444-8765</td>
-                                <td>sheik@gmail.com</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal"
-                                        data-bs-target="#account-edit-modal">Active</button>
-                                </td>
+                                <td>08-15-2024</td>
+                                <td><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Sheik Bautista</a></td>
+                                <td>01:15</td>
+                                <td>01:15</td>
                             </tr>
                             <tr>
-                                <td>Josiah</td>
-                                <td>Bautista</td>
-                                <td>TUPC-19-0598</td>
-                                <td>0949-444-8765</td>
-                                <td>josiah@gmail.com</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary w-100" data-bs-toggle="modal"
-                                        data-bs-target="#account-edit-modal">Inactive</button>
-                                </td>
+                                <td>08-15-2024</td>
+                                <td><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Sheik Bautista</a></td>
+                                <td>01:15</td>
+                                <td>01:15</td>
                             </tr>
                             <tr>
-                                <td>Sample</td>
-                                <td>Bautista</td>
-                                <td>TUPC-19-0598</td>
-                                <td>0949-444-8765</td>
-                                <td>Sample@gmail.com</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-danger w-100" data-bs-toggle="modal"
-                                        data-bs-target="#account-edit-modal">Ban</button>
-                                </td>
+                                <td>08-15-2024</td>
+                                <td><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Sheik Bautista</a></td>
+                                    <td>01:15</td>
+                                <td>01:15</td>
                             </tr>
                         </tbody>
                     </table>
@@ -98,21 +85,18 @@
 
 </html>
 
+
 <script>
     $(document).ready(function () {
-        $("#table1").DataTable({
+        $('#logs').DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
-                'rt' +
-                '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
+                 'rt' +
+                 '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
             buttons: ['copy', 'excel', 'pdf'],
             responsive: false,
             scrollX: true
         });
-
-        $('#save-button').click(function () {
-            console.log("Form saved");
-            // $('#account-edit-form').submit();
-        });
     });
-
 </script>
+
+

@@ -8,5 +8,6 @@ urlpatterns = [
     path('borrow-return/', views.BorrowReturn, name="borrow-return"),
     path('account-management/', views.AccountManagement, name="account-management"),
     path('bag/', views.Bag, name="bag"),
+    path('logbook/', views.Logbook, name="logbook"),
 
 ]

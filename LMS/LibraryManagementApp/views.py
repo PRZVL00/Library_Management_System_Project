@@ -18,3 +18,6 @@ def AccountManagement(request):
 
 def Bag(request):
     return render(request, 'BagPage/bag.html', {})
+
+def Logbook(request):
+    return render(request, 'LogbookPage/logbook.html', {})
