@@ -24,3 +24,6 @@ def Logbook(request):
 
 def Profile(request):
     return render(request, 'ProfilePage/profile.html', {})
+
+def BookRegistration(request):
+    return render(request, 'BookRegistrationPage/book-registration.html', {})

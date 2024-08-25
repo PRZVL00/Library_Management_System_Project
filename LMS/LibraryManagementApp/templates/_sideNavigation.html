@@ -56,6 +56,12 @@
                     <span>Book Collection</span>
                     </a>
                 </li>
+                <li class="sidebar-item {% if request.path == '/book-registration/' %}active{% endif %}">
+                    <a href={% url "book-registration" %} class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Book Registration</span>
+                    </a>
+                </li>
 
                 <li class="sidebar-title">Book Transaction</li>
                 <li class="sidebar-item {% if request.path == '/borrow-return/' %}active{% endif %}">
