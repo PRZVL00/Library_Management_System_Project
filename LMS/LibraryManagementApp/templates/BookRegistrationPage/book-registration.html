@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    {% include "_CSSreferences.html" %}
+</head>
+
+<body class='d-flex flex-column vh-100'>
+    <script src={% static 'assets/static/js/initTheme.js' %}></script>
+
+    <div id="app">
+        {% include "_sideNavigation.html" %}
+        <div id="main">
+            <!--Header-->
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+            <div class="page-heading row">
+                <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+                    <h3>Book Registration</h3>
+                </div>
+                <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-end align-items-center">
+                    <!-- Icon with notification dot -->
+                    <div class="position-relative me-3">
+                        <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
+                        <span
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            3
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!--Main Page-->
+            <div class="page-content">
+                <!--Start Your Page Here-->
+                <div class="container">
+                    <form>
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bookTitle" class="form-label">Title of the Book</label>
+                                    <input type="text" class="form-control" id="bookTitle"
+                                        placeholder="Enter book title">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="publisher" class="form-label">Publisher</label>
+                                    <input type="text" class="form-control" id="publisher"
+                                        placeholder="Enter publisher">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="year" class="form-label">Year</label>
+                                    <input type="number" class="form-control" id="year" placeholder="Enter year">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="author" class="form-label">Author(s)</label>
+                                    <div id="authorContainer">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control" name="author[]"
+                                                placeholder="Enter author name">
+                                            <button class="btn btn-primary" type="button" id="addAuthorBtn">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status">
+                                        <option selected>Available</option>
+                                        <option>Not Available</option>
+                                        <option>Under Maintenance</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="fileUpload" class="form-label">Digital Copy</label>
+                                    <input class="form-control" type="file" id="fileUpload">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="imageUpload" class="form-label">Upload Image</label>
+                                    <input class="form-control" type="file" id="imageUpload" accept="image/*">
+                                </div>
+                            </div>
+
+                            <!-- Right Column (Preview Pane) -->
+                            <div class="col-md-6">
+                                <div id="imagePreview"
+                                    style="width: 100%; height: 100%; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; overflow: hidden;">
+                                    <img src={% static 'assets/static/images/No-Image-Placeholder.svg.png' %}
+                                        alt="Image Preview" id="previewImage"
+                                        style="max-width: 100%; max-height: 100%;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary Row -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="summary" class="form-label">Summary</label>
+                                    <textarea class="form-control" id="summary" rows="5"
+                                        placeholder="Enter summary"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% include "_footer.html" %}
+        </div>
+    </div>
+    {% include "_JSreferences.html" %}
+</body>
+
+</html>
+
+<script>
+    $(document).ready(function () {
+        // Image Upload Preview
+        $('#imageUpload').on('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#previewImage').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            } else {
+                // Reset to the placeholder image if no file is selected
+                $('#previewImage').attr('src', 'path/to/placeholder-image.jpg');
+            }
+        });
+
+        // Add additional author input fields
+        $('#addAuthorBtn').on('click', function () {
+            const newAuthorField = `
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" name="author[]" placeholder="Enter author name">
+                <button class="btn btn-outline-secondary remove-author-btn" type="button">-</button>
+            </div>
+        `;
+            $('#authorContainer').append(newAuthorField);
+
+            // Remove author input field
+            $('#authorContainer').on('click', '.remove-author-btn', function () {
+                $(this).closest('.input-group').remove();
+            });
+        });
+    });
+
+</script>
