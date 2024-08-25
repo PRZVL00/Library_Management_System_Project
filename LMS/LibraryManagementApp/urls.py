@@ -12,4 +12,5 @@ urlpatterns = [
     path('profile/', views.Profile, name="profile"),
     path('book-registration/', views.BookRegistration, name="book-registration"),
 
+
 ]
