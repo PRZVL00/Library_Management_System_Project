@@ -78,6 +78,12 @@
                     <span>Account Management</span>
                     </a>
                 </li>
+                <li class="sidebar-item {% if request.path == '/Profile/' %} active {% endif %}">
+                    <a href={% url "profile" %} class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Profile</span>
+                    </a>
+                </li>
 
                 <li class="sidebar-title">Log</li>
                 <li class="sidebar-item {% if request.path == '/logbook/' %}active{% endif %}">

@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    {% include "_CSSreferences.html" %}
+</head>
+
+<body class='d-flex flex-column vh-100'>
+    <script src={% static 'assets/static/js/initTheme.js' %}></script>
+
+    <div id="app">
+        {% include "_sideNavigation.html" %}
+        <div id="main">
+            <!--Header-->
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+            <div class="page-heading row">
+                <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+                    <h3>Profile</h3>
+                </div>
+                <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-end align-items-center">
+                    <!-- Icon with notification dot -->
+                    <div class="position-relative me-3">
+                        <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
+                        <span
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            3
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!--Main Page-->
+            <div class="page-content">
+                <div class="row align-items-center">
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-3">
+                        <div class="row justify-content-center text-center">
+                            <div class="col-auto">
+                                <img src="{% static 'assets/static/images/faces/2.jpg' %}" class="rounded-circle mb-3"
+                                    alt="User Profile Picture" style="width: 150px; height: 150px;">
+                                <span class="badge bg-success text-truncate d-block mx-auto mb-3" style="max-width: 100px;">Active</span>
+                            </div>
+                            <form action="POST" id="account-edit-form" class="col-12">
+                                <!--First Name Field-->
+                                <div class="input-group input-group-sm mb-3">
+                                    <input type="text" class="form-control" placeholder="First Name"
+                                        aria-label="Example text with button addon" aria-describedby="button-addon1"
+                                        id="fname-input">
+                                    <button class="btn btn-primary" type="button" id="button-addon1"><span
+                                            class="bi bi-pen"></span></button>
+                                </div>
+                    
+                                <!--Last Name Field-->
+                                <div class="input-group input-group-sm mb-3">
+                                    <input type="text" class="form-control" placeholder="Last Name"
+                                        aria-label="Example text with button addon" aria-describedby="button-addon1"
+                                        id="lname-input">
+                                    <button class="btn btn-primary" type="button" id="button-addon1"><span
+                                            class="bi bi-pen"></span></button>
+                                </div>
+                    
+                                <!--Student ID # Field-->
+                                <div class="input-group input-group-sm mb-3">
+                                    <input type="text" class="form-control" placeholder="Student ID #"
+                                        aria-label="Example text with button addon" aria-describedby="button-addon1"
+                                        id="studentID-input">
+                                    <button class="btn btn-primary" type="button" id="button-addon1"><span
+                                            class="bi bi-pen"></span></button>
+                                </div>
+                    
+                                <!--Contact Number Field-->
+                                <div class="input-group input-group-sm mb-3">
+                                    <input type="text" class="form-control" placeholder="Contact Number"
+                                        aria-label="Example text with button addon" aria-describedby="button-addon1"
+                                        id="cnum-input">
+                                    <button class="btn btn-primary" type="button" id="button-addon1"><span
+                                            class="bi bi-pen"></span></button>
+                                </div>
+                    
+                                <!--Email Field-->
+                                <div class="input-group input-group-sm mb-3">
+                                    <input type="email" class="form-control" placeholder="Email"
+                                        aria-label="Example text with button addon" aria-describedby="button-addon1"
+                                        id="email-input">
+                                    <button class="btn btn-primary" type="button" id="button-addon1" disabled><span
+                                            class="bi bi-pen"></span></button>
+                                </div>
+                            </form>
+                            <button class="btn btn-sm btn-outline-primary w-100">Change Password</button>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-12 col-md-12 col-lg-9 col-xl-9">
+                        <div class="card">
+                            <div class="card-content">
+                                {% include "BorrowReturnPage/_reserved-books.html" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>            
+        </div>
+        {% include "_footer.html" %}
+    </div>
+    </div>
+    {% include "_JSreferences.html" %}
+</body>
+
+</html>

@@ -21,3 +21,6 @@ def Bag(request):
 
 def Logbook(request):
     return render(request, 'LogbookPage/logbook.html', {})
+
+def Profile(request):
+    return render(request, 'ProfilePage/profile.html', {})
