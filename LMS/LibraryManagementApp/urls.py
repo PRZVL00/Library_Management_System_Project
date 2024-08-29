@@ -11,6 +11,7 @@ urlpatterns = [
     path('logbook/', views.Logbook, name="logbook"),
     path('profile/', views.Profile, name="profile"),
     path('book-registration/', views.BookRegistration, name="book-registration"),
+    path('book-management/', views.BookManagement, name="book-management"),
 
 
 ]
