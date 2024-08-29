@@ -27,3 +27,6 @@ def Profile(request):
 
 def BookRegistration(request):
     return render(request, 'BookRegistrationPage/book-registration.html', {})
+
+def BookManagement(request):
+    return render(request, 'BookManagementPage/book-management.html', {})

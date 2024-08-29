@@ -1,44 +1,16 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Library Management System</title>
-    {% include "_CSSreferences.html" %}
-</head>
-
-<body class='d-flex flex-column vh-100'>
-    <script src={% static 'assets/static/js/initTheme.js' %}></script>
-
-    <div id="app">
-        {% include "_sideNavigation.html" %}
-        <div id="main">
-            <!--Header-->
-            <header class="mb-3">
-                <a href="#" class="burger-btn d-block d-xl-none">
-                    <i class="bi bi-justify fs-3"></i>
-                </a>
-            </header>
-            <div class="page-heading row">
-                <div class="col-10">
-                    <h3>Book Registration</h3>
-                </div>
-                <div class="col-2 d-flex justify-content-end align-items-center">
-                    <!-- Icon with notification dot -->
-                    <div class="position-relative me-3">
-                        <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
-                        <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
-                            <span class="visually-hidden">unread messages</span>
-                        </span>
-                    </div>
-                </div>
+<div class="modal fade" id="book-edit-modal" tabindex="-1" role="dialog" aria-labelledby="book-info" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-centered modal-dialog-scrollable"
+        role="document">
+        <div class="modal-content">
+            <div class="modal-header my--3">
+                <h5 class="modal-title" id="book-edit">Book Edit
+                </h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <i data-feather="x"></i>
+                </button>
             </div>
-            <!--Main Page-->
-            <div class="page-content mb-3">
+            <div class="modal-body">
                 <div class="container">
                     <form>
                         <div class="row">
@@ -117,76 +89,16 @@
 
                 </div>
             </div>
-            {% include "_footer.html" %}
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">
+                    <i class="bx bx-x d-block d-sm-none"></i>
+                    <span class="d-none d-sm-block">Close</span>
+                </button>
+                <button type="button" class="btn btn-primary ms-1" data-bs-dismiss="modal">
+                    <i class="bx bx-check d-block d-sm-none"></i>
+                    <span class="d-none d-sm-block">Save</span>
+                </button>
+            </div>
         </div>
     </div>
-    {% include "_JSreferences.html" %}
-</body>
-
-</html>
-
-<script>
-    $(document).ready(function () {
-        // Register FilePond plugins
-        FilePond.registerPlugin(
-            FilePondPluginImagePreview,
-            FilePondPluginImageCrop,
-            FilePondPluginImageExifOrientation,
-            FilePondPluginImageFilter,
-            FilePondPluginImageResize,
-            FilePondPluginFileValidateSize,
-            FilePondPluginFileValidateType
-        );
-
-        // Initialize FilePond
-        const pond = FilePond.create(document.querySelector(".image-resize-filepond"), {
-            credits: null,
-            allowImagePreview: true,
-            allowImageFilter: false,
-            allowImageExifOrientation: false,
-            allowImageCrop: false,
-            allowImageResize: true,
-            imageResizeTargetWidth: 200,
-            imageResizeTargetHeight: 200,
-            imageResizeMode: "cover",
-            imageResizeUpscale: true,
-            acceptedFileTypes: ["image/png", "image/jpg", "image/jpeg"],
-            fileValidateTypeDetectType: (source, type) =>
-                new Promise((resolve, reject) => {
-                    // Do custom type detection here and return with promise
-                    resolve(type);
-                }),
-            storeAsFile: true
-        });
-
-        // Add additional author input fields
-        $('#addAuthorBtn').on('click', function () {
-            const newAuthorField = `
-                <div class="input-group col-6 mb-2">
-                    <input type="text" class="form-control" name="author[]" placeholder="Enter author name">
-                    <button class="btn btn-outline-secondary remove-author-btn" type="button">-</button>
-                </div>
-            `;
-            $('#authorContainer').append(newAuthorField);
-
-            // Remove author input field
-            $('#authorContainer').on('click', '.remove-author-btn', function () {
-                $(this).closest('.input-group').remove();
-            });
-        });
-
-        // Clear button functionality
-        $('#clearBtn').click(function () {
-            // Clear all text inputs
-            $('input[type="text"], input[type="number"], input[type="file"]').val('');
-
-            // Clear all textareas
-            $('textarea').val('');
-
-            // Reset all select elements
-            $('select').prop('selectedIndex', 0);
-
-            pond.removeFiles(); // Clears all uploaded and pending files
-        });
-    });
-</script>
+</div>

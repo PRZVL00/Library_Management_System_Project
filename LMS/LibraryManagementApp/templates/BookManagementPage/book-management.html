@@ -1,0 +1,207 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    {% include "_CSSreferences.html" %}
+</head>
+
+<body class='d-flex flex-column vh-100'>
+    <script src={% static 'assets/static/js/initTheme.js' %}></script>
+
+    <div id="app">
+        {% include "_sideNavigation.html" %}
+        <div id="main">
+            <!--Header-->
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+            <div class="page-heading row">
+                <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+                    <h3>Book Management</h3>
+                </div>
+                <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-end align-items-center">
+                    <!-- Icon with notification dot -->
+                    <div class="position-relative me-3">
+                        <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
+                        <span
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            3
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!--Main Page-->
+            <div class="page-content">
+                <!--Start Your Page Here-->
+                <div class="table-responsive">
+                    <!-- Modal for edit profile will be used here but with some changes -->
+                    <!-- Buttons for each input field will be disabled and also the input fields -->
+                    <!-- Reset Password will be remove and save buttons and cancel will be replaced as close -->
+                    <table class="table table-striped" id="bookManagememt">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Title</th>
+                                <th class="text-start">Publisher</th>
+                                <th class="text-start">Year</th>
+                                <th class="text-start">Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-start">Book Title 1</td>
+                                <td class="text-start">Publisher 1</td>
+                                <td class="text-start">2023</td>
+                                <td class="text-start"><span class="badge bg-success">Available</span></td>
+                                <td class="text-center">
+                                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#book-info-modal">
+                                        <i class="bi bi-info-circle"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#book-edit-modal">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="text-start">Book Title 2</td>
+                                <td class="text-start">Publisher 2</td>
+                                <td class="text-start">2022</td>
+                                <td class="text-start"><span class="badge bg-danger">Unavailable</span></td>
+                                <td class="text-center">
+                                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#book-info-modal">
+                                        <i class="bi bi-info-circle"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#book-edit-modal">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td class="text-start">Book Title 3</td>
+                                <td class="text-start">Publisher 3</td>
+                                <td class="text-start">2021</td>
+                                <td class="text-start"><span class="badge bg-secondary">Maintenance</span></td>
+                                <td class="text-center">
+                                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#book-info-modal">
+                                        <i class="bi bi-info-circle"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#book-edit-modal">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            {% include "BookCollectionPage/_more-info-books.html" %}
+            {% include "BookManagementPage/_edit-books.html" %}
+            {% include "_footer.html" %}
+        </div>
+    </div>
+    {% include "_JSreferences.html" %}
+</body>
+
+</html>
+
+
+<script>
+    $(document).ready(function () {
+        $('#bookManagememt').DataTable({
+            dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
+                'rt' +
+                '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
+            buttons: ['copy', 'excel', 'pdf'],
+            responsive: false,
+            scrollX: true
+        });
+
+        // Register FilePond plugins
+        FilePond.registerPlugin(
+            FilePondPluginImagePreview,
+            FilePondPluginImageCrop,
+            FilePondPluginImageExifOrientation,
+            FilePondPluginImageFilter,
+            FilePondPluginImageResize,
+            FilePondPluginFileValidateSize,
+            FilePondPluginFileValidateType
+        );
+
+        // Initialize FilePond
+        const pond = FilePond.create(document.querySelector(".image-resize-filepond"), {
+            credits: null,
+            allowImagePreview: true,
+            allowImageFilter: false,
+            allowImageExifOrientation: false,
+            allowImageCrop: false,
+            allowImageResize: true,
+            imageResizeTargetWidth: 200,
+            imageResizeTargetHeight: 200,
+            imageResizeMode: "cover",
+            imageResizeUpscale: true,
+            acceptedFileTypes: ["image/png", "image/jpg", "image/jpeg"],
+            fileValidateTypeDetectType: (source, type) =>
+                new Promise((resolve, reject) => {
+                    // Do custom type detection here and return with promise
+                    resolve(type);
+                }),
+            storeAsFile: true
+        });
+
+        // Add additional author input fields
+        $('#addAuthorBtn').on('click', function () {
+            const newAuthorField = `
+                <div class="input-group col-6 mb-2">
+                    <input type="text" class="form-control" name="author[]" placeholder="Enter author name">
+                    <button class="btn btn-outline-secondary remove-author-btn" type="button">-</button>
+                </div>
+            `;
+            $('#authorContainer').append(newAuthorField);
+
+            // Remove author input field
+            $('#authorContainer').on('click', '.remove-author-btn', function () {
+                $(this).closest('.input-group').remove();
+            });
+        });
+
+        // Clear button functionality
+        $('#clearBtn').click(function () {
+            // Clear all text inputs
+            $('input[type="text"], input[type="number"], input[type="file"]').val('');
+
+            // Clear all textareas
+            $('textarea').val('');
+
+            // Reset all select elements
+            $('select').prop('selectedIndex', 0);
+
+            pond.removeFiles(); // Clears all uploaded and pending files
+        });
+    });
+</script>
