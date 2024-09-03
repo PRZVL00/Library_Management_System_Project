@@ -12,6 +12,7 @@ urlpatterns = [
     path('profile/', views.Profile, name="profile"),
     path('book-registration/', views.BookRegistration, name="book-registration"),
     path('book-management/', views.BookManagement, name="book-management"),
+    path('transaction-history/', views.TransactionHistory, name="transaction-history"),
 
 
 ]
