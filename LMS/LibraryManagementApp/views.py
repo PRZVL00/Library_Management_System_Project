@@ -30,3 +30,6 @@ def BookRegistration(request):
 
 def BookManagement(request):
     return render(request, 'BookManagementPage/book-management.html', {})
+
+def TransactionHistory(request):
+    return render(request, 'TransactionHistoryPage/transaction-history.html', {})

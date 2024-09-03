@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    {% include "_CSSreferences.html" %}
+</head>
+
+<body class='d-flex flex-column vh-100'>
+    <script src={% static 'assets/static/js/initTheme.js' %}></script>
+
+    <div id="app">
+        {% include "_sideNavigation.html" %}
+        <div id="main">
+            <!--Header-->
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+            <div class="page-heading row">
+                <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+                    <h3>Transaction History</h3>
+                </div>
+                <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-end align-items-center">
+                    <!-- Icon with notification dot -->
+                    <div class="position-relative me-3">
+                        <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
+                        <span
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            3
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!--Main Page-->
+            <div class="page-content">
+                <!--Start Your Page Here-->
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="per-transaction-tab" data-bs-toggle="tab" href="#per-transaction"
+                            role="tab" aria-controls="per-transaction" aria-selected="true">Per Transaction</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="per-book-tab" data-bs-toggle="tab" href="#per-book" role="tab"
+                            aria-controls="per-book" aria-selected="false">Per-Book</a>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="per-transaction" role="tabpanel"
+                        aria-labelledby="per-transaction-tab">
+                        {% include "TransactionHistoryPage/_per-transaction.html" %}
+                    </div>
+                    <div class="tab-pane fade" id="per-book" role="tabpanel" aria-labelledby="per-book-tab">
+                        {% include "TransactionHistoryPage/_per-book.html" %}
+                    </div>
+                </div>
+            </div>
+            {% include "_footer.html" %}
+        </div>
+    </div>
+    {% include "_JSreferences.html" %}
+</body>
+
+</html>
+
+
+<script>
+    let table1;
+    let table2;
+    $(document).ready(function () {
+        // Initialize the first table on page load
+        table1 = $('#logs').DataTable({
+            dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
+                'rt' +
+                '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
+            buttons: ['copy', 'excel', 'pdf'],
+            scrollX: true
+        });
+
+        $("#logs").css("overflow-x", "auto");
+
+        table1.columns.adjust().draw();
+
+        let table2Initialized = false; // Flag to check if table2 has been initialized
+
+        // Event listener for tab switch
+        $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (event) {
+            let target = $(event.target).attr("href"); // Get the target tab
+
+            if (target === '#per-book' && !table2Initialized) {
+                // Initialize the second table when the second tab is shown for the first time
+                table2 = $('#logs2').DataTable({
+                    dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
+                        'rt' +
+                        '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
+                    buttons: ['copy', 'excel', 'pdf'],
+                    scrollX: true
+                });
+
+                $("#logs2").css("overflow-x", "auto");
+
+                table2.columns.adjust().draw();
+                table2Initialized = true; // Mark as initialized
+            } else if (target === '#per-book' && table2Initialized) {
+                // Adjust columns if already initialized
+                table2.columns.adjust().draw();
+            }
+        });
+    });
+
+</script>

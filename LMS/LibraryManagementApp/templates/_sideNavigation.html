@@ -82,6 +82,12 @@
                     <span>Bag</span>
                     </a>
                 </li>
+                <li class="sidebar-item {% if request.path == '/transaction-history/' %}active{% endif %}">
+                    <a href={% url "transaction-history" %} class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Transaction History</span>
+                    </a>
+                </li>
 
                 <li class="sidebar-title">Account</li>
                 <li class="sidebar-item {% if request.path == '/account-management/' %}active{% endif %}">
