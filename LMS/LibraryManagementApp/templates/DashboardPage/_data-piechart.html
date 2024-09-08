@@ -1,0 +1,63 @@
+{% load static %}
+<div class="col-md-4 mb-4">
+    <div class="card h-100">
+        <div class="card-header">
+            <h5>Book Category</h5>
+        </div>
+        <div class="card-body d-flex justify-content-center align-items-center" style="height: 300px;">
+            <div id="pie">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-8 mb-4">
+    <div class="card h-100">
+        <div class="card-header">
+            <h5>People Present in the Library</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <!-- Modal for edit profile will be used here but with some changes -->
+                <!-- Buttons for each input field will be disabled and also the input fields -->
+                <!-- Reset Password will be remove and save buttons and cancel will be replaced as close -->
+                <table class="table table-striped w-100 nowrap" id="logs">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Name</th>
+                            <th class="text-start">ID</th>
+                            <th class="text-start">Username</th>
+                            <th class="text-start">Time In</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-start"><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Sheik Bautista</a></td>
+                            <td class="text-start">78954</td>
+                            <td class="text-start">@PRZVL</td>
+                            <td class="text-start">01:15</td>
+                        </tr>
+                        <tr>
+                            <td class="text-start"><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Sheik Bautista</a></td>
+                            <td class="text-start">78954</td>
+                            <td class="text-start">@PRZVL</td>
+                            <td class="text-start">01:15</td>
+                        </tr>
+                        <tr>
+                            <td class="text-start"><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Sheik Bautista</a></td>
+                            <td class="text-start">78954</td>
+                            <td class="text-start">@PRZVL</td>
+                            <td class="text-start">01:15</td>
+                        </tr>
+                        <tr>
+                            <td class="text-start"><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Sheik Bautista</a></td>
+                            <td class="text-start">78954</td>
+                            <td class="text-start">@PRZVL</td>
+                            <td class="text-start">01:15</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
