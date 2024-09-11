@@ -1,0 +1,212 @@
+{% load static %}
+<div class="table-responsive mt-3">
+    <!-- Modal for edit profile will be used here but with some changes -->
+    <!-- Buttons for each input field will be disabled and also the input fields -->
+    <!-- Reset Password will be remove and save buttons and cancel will be replaced as close -->
+    <table class="table table-striped w-100 nowrap" id="book-table">
+        <thead>
+            <tr>
+                <th class="text-center">Book name</th>
+                <th class="text-center">Year</th>
+                <th class="text-center">ISBN Code</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="text-start">The Great Gatsby</td>
+                <td class="text-center">1925</td>
+                <td class="text-center">978-0743273565</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            <tr>
+                <td class="text-start">To Kill a Mockingbird</td>
+                <td class="text-center">1960</td>
+                <td class="text-center">978-0061120084</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">1984</td>
+                <td class="text-center">1949</td>
+                <td class="text-center">978-0451524935</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">Pride and Prejudice</td>
+                <td class="text-center">1813</td>
+                <td class="text-center">978-1503290563</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">The Catcher in the Rye</td>
+                <td class="text-center">1951</td>
+                <td class="text-center">978-0316769488</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">The Hobbit</td>
+                <td class="text-center">1937</td>
+                <td class="text-center">978-0547928227</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">Fahrenheit 451</td>
+                <td class="text-center">1953</td>
+                <td class="text-center">978-1451673319</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">Moby-Dick</td>
+                <td class="text-center">1851</td>
+                <td class="text-center">978-1503280786</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">Jane Eyre</td>
+                <td class="text-center">1847</td>
+                <td class="text-center">978-1503278196</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">War and Peace</td>
+                <td class="text-center">1869</td>
+                <td class="text-center">978-1420958610</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">The Odyssey</td>
+                <td class="text-center">-800</td>
+                <td class="text-center">978-0140268867</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">Crime and Punishment</td>
+                <td class="text-center">1866</td>
+                <td class="text-center">978-0486415871</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">The Brothers Karamazov</td>
+                <td class="text-center">1880</td>
+                <td class="text-center">978-0374528379</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">Wuthering Heights</td>
+                <td class="text-center">1847</td>
+                <td class="text-center">978-0141439556</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-start">Anna Karenina</td>
+                <td class="text-center">1877</td>
+                <td class="text-center">978-0140449174</td>
+                <td class="text-center">
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#book-info-modal">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-backpack"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

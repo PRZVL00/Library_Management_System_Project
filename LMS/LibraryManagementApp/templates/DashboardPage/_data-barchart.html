@@ -1,8 +1,15 @@
 {% load static %}
 <div class="col-md-8 mb-4">
     <div class="card">
-        <div class="card-header">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
             <h5>Borrow/Return</h5>
+            <div id="barchart-toolbar" style="display: flex;">
+                <div class="btn-group" role="group" aria-label="Timeframe selection">
+                    <button type="button" class="btn btn-outline-primary active" id="daily">Daily</button>
+                    <button type="button" class="btn btn-outline-primary" id="weekly">Weekly</button>
+                    <button type="button" class="btn btn-outline-primary" id="monthly">Monthly</button>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             <div id="bar"></div>
@@ -19,15 +26,15 @@
                 <ul class="list-group" style="height: 113px; max-height: 113px; overflow-y: auto;">
                     <li class="list-group-item d-flex justify-content-between align-items-center mb-1">
                         <div> <a href="#">Sheik Bautista</a></div>
-                        <a href="#"><span class="badge bg-danger">3</span></a>
+                        <a href="#"><span class="badge bg-warning">3</span></a>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center mb-1">
                         <div> <a href="#">Sheik Bautista</a></div>
-                        <a href="#"><span class="badge bg-danger">3</span></a>
+                        <a href="#"><span class="badge bg-warning">3</span></a>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-center mb-1">
                         <div> <a href="#">Sheik Bautista</a></div>
-                        <a href="#"><span class="badge bg-danger">3</span></a>
+                        <a href="#"><span class="badge bg-warning">3</span></a>
                     </li>
                 </ul>
             </div>
@@ -40,8 +47,16 @@
             </div>
             <div class="card-body">
                 <ul class="list-group" style="height: 113px; max-height: 113px; overflow-y: auto;">
-                    <li class="list-group-item text-center" style="font-style: italic; opacity: 0.6;">
+                    <!-- <li class="list-group-item text-center" style="font-style: italic; opacity: 0.6;">
                         No data available
+                    </li> -->
+                    <li class="list-group-item d-flex justify-content-between align-items-center mb-1">
+                        <div> <a href="#">Sheik Bautista</a></div>
+                        <a href="#"><span class="badge bg-info"><i>New User</i></span></a>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center mb-1">
+                        <div> <a href="#">Sheik Bautista</a></div>
+                        <a href="#"><span class="badge bg-danger"><i>Ban</i></span></a>
                     </li>
                 </ul>
             </div>
