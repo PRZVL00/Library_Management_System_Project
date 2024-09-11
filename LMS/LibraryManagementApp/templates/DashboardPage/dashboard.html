@@ -71,6 +71,18 @@
         const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-secondary').trim();
         const successColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-success').trim();
 
+        // Add click event listener to the buttons in the button group
+        $('#barchart-toolbar .btn').on('click', function () {
+            // Remove the 'active' class from all buttons
+            $('#barchart-toolbar .btn').removeClass('active');
+
+            // Add the 'active' class to the clicked button
+            $(this).addClass('active');
+
+            // Log the name of the clicked button
+            console.log($(this).text());
+        });
+
         // Bar Chart Options
         var barOptions = {
             series: [
@@ -128,12 +140,12 @@
 
         // Pie Chart
         var options = {
-            series: [44, 55, 13, 43, 22],
+            series: [44, 35, 23, 15, 6],
             chart: {
                 width: 400,
                 type: 'pie',
             },
-            labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
+            labels: ['Mathematics', 'Mystery', 'Science', 'Thesis', 'Others'],
             legend: {
                 position: 'bottom' // Set the legend position to bottom
             },
@@ -153,10 +165,22 @@
         var chart = new ApexCharts(document.querySelector("#pie"), options);
         chart.render();
 
+        // Add click event listener to the buttons in the button group
+        $('#linechart-toolbar .btn').on('click', function () {
+            // Remove the 'active' class from all buttons
+            $('#linechart-toolbar .btn').removeClass('active');
+
+            // Add the 'active' class to the clicked button
+            $(this).addClass('active');
+
+            // Log the name of the clicked button
+            console.log($(this).text());
+        });
+
         // Line Chart Options
         var options = {
           series: [{
-            name: "Desktops",
+            name: "Users: ",
             data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
         }],
           chart: {
