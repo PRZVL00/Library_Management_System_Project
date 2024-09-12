@@ -4,6 +4,9 @@ from django.shortcuts import render
 def Login(request):
     return render(request, 'LogInPage/login.html', {})
 
+def Registration(request):
+    return render(request, 'RegistrationPage/registration.html', {})
+
 def Dashboard(request):
     return render(request, 'DashboardPage/dashboard.html', {})
 
