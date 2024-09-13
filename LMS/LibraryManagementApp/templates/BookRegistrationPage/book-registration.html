@@ -9,6 +9,8 @@
     {% include "_CSSreferences.html" %}
 </head>
 
+
+
 <body class='d-flex flex-column vh-100'>
     <script src={% static 'assets/static/js/initTheme.js' %}></script>
 
@@ -49,12 +51,39 @@
                                     placeholder="Upload Image">
                             </div>
 
+                            <div class="col-md-12 mb-3">
+                                <label for="ISBN" class="form-label">ISBN</label>
+                                <input type="text" class="form-control" id="ISBN"
+                                    placeholder="Enter Manually or Scan Barcode">
+                            </div>
+                            
+                        
                             <!-- Title - Full Row -->
-                            <div class="col-12 mb-3">
+                            <div class="col-md-9 mb-3">
                                 <label for="bookTitle" class="form-label">Title of the Book</label>
                                 <input type="text" class="form-control" id="bookTitle"
                                     placeholder="Enter the title of the book">
                             </div>
+
+                            <!-- Cathegory -->
+                            <div class="col-md-3 mb-3">
+                                <label for="Category" class="form-label">Category</label>
+                                <input type="text" class="form-control" id="Category"
+                                    placeholder="Mathematics">
+                            </div>
+
+                            <div class="col-md-5 mb-3">
+                                <label for="language" class="form-label">Language</label>
+                                <input type="text" class="form-control" id="language"
+                                    placeholder="English">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="NumberofPages" class="form-label">Number of Pages</label>
+                                <input type="number" class="form-control" id="NumberofPages"
+                                    placeholder="298" required>
+                            </div>
+
 
                             <!-- Publisher (3/4) and Year (1/4) -->
                             <div class="col-md-9 mb-3">
@@ -62,10 +91,12 @@
                                 <input type="text" class="form-control" id="publisher"
                                     placeholder="Enter the publisher">
                             </div>
+
                             <div class="col-md-3 mb-3">
                                 <label for="year" class="form-label">Year</label>
                                 <input type="number" class="form-control" id="year" placeholder="Enter the year">
                             </div>
+
 
                             <!-- Author(s) - Full Row with Dynamic Adjustment -->
                             <div class="col-12 mb-3">
@@ -85,7 +116,7 @@
                                 <input type="text" class="form-control" id="location" placeholder="Enter location">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="status" class="form-label">Status</label>
+                                <label for="status" class="form-label">Status/Book Condition</label>
                                 <select class="form-select" id="status">
                                     <option selected>Status</option>
                                     <option>Available</option>
@@ -107,6 +138,13 @@
                                 <textarea class="form-control" id="summary" placeholder="Enter a summary"
                                     rows="5"></textarea>
                             </div>
+
+                            <div class="col-md-12 mb-3">
+                                <label for="Tags" class="form-label">Enter Tags</label>
+                                <input type="text" class="form-control" id="Tags"
+                                    placeholder="Other Tags">
+                            </div>
+                            
 
                             <div class="col-12 mb-3 text-end">
                                 <button type="button" class="btn btn-primary me-2" id="saveBtn">Save</button>
@@ -188,5 +226,7 @@
 
             pond.removeFiles(); // Clears all uploaded and pending files
         });
+
+
     });
 </script>
