@@ -3,6 +3,10 @@ from . import views
 
 urlpatterns = [
     path('', views.Login, name="login"),
+    path('Forgotpassword/', views.Forgotpassword, name="Forgotpassword"),
+    path('ResetPassAuth/', views.ResetPassAuth, name="ResetPassAuth"),
+    path('ResetPassword/', views.ResetPassword, name="ResetPassword"),
+    path('ResetPassSucc/', views.ResetPassSucc, name="ResetPassSucc"),
     path('registration/', views.Registration, name="registration"),
     path('dashboard/', views.Dashboard, name="dashboard"),
     path('book-collection/', views.BookCollection, name="book-collection"),
@@ -14,6 +18,4 @@ urlpatterns = [
     path('book-registration/', views.BookRegistration, name="book-registration"),
     path('book-management/', views.BookManagement, name="book-management"),
     path('transaction-history/', views.TransactionHistory, name="transaction-history"),
-
-
 ]

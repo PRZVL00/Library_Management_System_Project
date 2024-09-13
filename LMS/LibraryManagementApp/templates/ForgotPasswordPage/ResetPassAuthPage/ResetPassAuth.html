@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Library Management System</title>
+      {% include "_CSSreferences.html" %}
+   </head>
+   <body>
+      <div id="auth">
+         <div class="row h-100">
+            <div class="col-lg-5 col-12">
+               <div id="auth-left">
+                  <div class="auth-logo">
+                     <a href="#"><img src={% static "assets/compiled/svg/logo.svg" %} alt="Logo"></a>
+                  </div>
+                  <h1 class="auth-title">Verify Email.</h1>
+                  <p>Please provide the code we've sent to your email</p>
+                  <form action="">
+                     <div class="form-group position-relative has-icon-left mb-4">
+                        <input type="text" class="form-control form-control-l" placeholder="">
+                        <div class="form-control-icon">
+                        </div>
+                     </div>
+                     <button class="btn btn-primary btn-block btn-l shadow-lg mt-5" id='login' type='button'>Verify</button>
+                  </form>
+               </div>
+            </div>
+            <div class="col-lg-7 d-none d-lg-block">S
+               <div id="auth-right">
+               </div>
+            </div>
+         </div>
+      </div>
+      {% include "_JSreferences.html" %}
+   </body>
+</html>
+
+<script>
+   $(document).ready(function() {
+      $('#login').click(function(){
+         console.log('Hello');
+         window.location.href = "{% url 'ResetPassword' %}";
+      });
+   });
+</script>
