@@ -7,6 +7,17 @@ from django.shortcuts import render
 def Login(request):
     return render(request, 'LogInPage/login.html', {})
 
+def Forgotpassword(request):
+    return render(request, 'ForgotpasswordPage/ForgotpasswordPage.html', {})
+
+def ResetPassAuth(request):
+    return render(request, 'ForgotpasswordPage/ResetPassAuthPage/ResetPassAuth.html', {})
+
+def ResetPassword(request):
+    return render(request, 'ForgotpasswordPage/ResetPassAuthPage/ResetPasswordPage/ResetPassword.html', {})
+
+def ResetPassSucc(request):
+    return render(request, 'ForgotpasswordPage/ResetPassAuthPage/ResetPasswordPage/ResetPassSuccPage/ResetPassSucc.html', {})
 
 # Registration Page Functions
 def Registration(request):

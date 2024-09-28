@@ -71,14 +71,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'LibraryManagementSystem.wsgi.application'
 
+AUTH_USER_MODEL = 'LibraryManagementApp.CustomUser'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'lmsdb',      # The name of the database you created in phpMyAdmin
+        'USER': 'LMS_Admin',          # The MySQL username you created
+        'PASSWORD': '0000',  # The password for your MySQL user
+        'HOST': 'localhost',       # Since you're using XAMPP, it's localhost
+        'PORT': '3306',            # Default MySQL port
     }
 }
 

@@ -5,6 +5,10 @@ from . import views
 
 urlpatterns = [
     path('', views.Login, name="login"),
+    path('Forgotpassword/', views.Forgotpassword, name="Forgotpassword"),
+    path('ResetPassAuth/', views.ResetPassAuth, name="ResetPassAuth"),
+    path('ResetPassword/', views.ResetPassword, name="ResetPassword"),
+    path('ResetPassSucc/', views.ResetPassSucc, name="ResetPassSucc"),
     path('registration/', views.Registration, name="registration"),
     path('register-user/', views.RegisterUser, name="register-user"),
     path('dashboard/', views.Dashboard, name="dashboard"),
@@ -18,5 +22,5 @@ urlpatterns = [
     path('book-management/', views.BookManagement, name="book-management"),
     path('transaction-history/', views.TransactionHistory, name="transaction-history"),
 
-
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
