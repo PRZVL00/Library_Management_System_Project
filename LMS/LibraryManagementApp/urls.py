@@ -5,6 +5,7 @@ from . import views
 
 urlpatterns = [
     path('', views.Login, name="login"),
+    path('verify-login/', views.VerifyLogin, name="verify-login"),
     path('Forgotpassword/', views.Forgotpassword, name="Forgotpassword"),
     path('ResetPassAuth/', views.ResetPassAuth, name="ResetPassAuth"),
     path('ResetPassword/', views.ResetPassword, name="ResetPassword"),
