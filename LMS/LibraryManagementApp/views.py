@@ -139,6 +139,75 @@ def BookRegistration(request):
     return render(request, 'BookRegistrationPage/book-registration.html', {})
 
 @login_required(login_url='login')
+def RegisterBook(request):
+    if request.method == 'POST':
+        book_title = request.POST.get('bookTitle')
+        publisher = request.POST.get('publisher')
+        year = request.POST.get('year')
+        isbn = request.POST.get('isbn')  # Ensure to include the ISBN field
+        authors = request.POST.getlist('author[]')  # Handles multiple authors
+        location = request.POST.get('location')
+        status_id = request.POST.get('status')  # Get the status ID directly
+        duration = request.POST.get('duration')
+        late_fee = request.POST.get('fine')
+        summary = request.POST.get('summary')
+        categories = request.POST.getlist('categories')  # Handles multiple categories
+        
+        # Handle file uploads
+        book_pic = request.FILES.get('bookPic')
+        soft_copy = request.FILES.get('softcopy')
+        
+        try:
+            # Create and save the book instance
+            book = Book(
+                title=book_title,
+                publisher=publisher,
+                year=year,
+                isbn=isbn,
+                status_id=status_id,  # Use status_id to set ForeignKey
+                late_fee=late_fee,
+                duration=duration,
+                location=location,
+                qr_value='',  # Generate or calculate the QR value as needed
+                qr_image='',  # Handle QR image generation/upload separately
+                image=book_pic,
+                soft_copy=soft_copy,
+                summary=summary
+            )
+            book.save()
+
+            # Save authors
+            for author_name in authors:
+                if author_name:  # Ensure the author name is not empty
+                    # Create and save the author relationship
+                    book_author = BookAuthor(author=author_name, book=book)  # Use the Book instance
+                    book_author.save()  # Save each author related to the book
+
+            # Save categories
+            for category_id in categories:
+                if category_id:  # Ensure the category ID is not empty
+                    # Create and save the book-category relationship
+                    category = DimCategory.objects.get(category_id=category_id)
+                    book_category = BookCategory(book=book, category=category)  # Use the Book instance
+                    book_category.save()  # Save each category related to the book
+
+            # Return a JSON response indicating success
+            return JsonResponse({'isSuccess': 'true'})
+
+        except DimCategory.DoesNotExist:
+            return JsonResponse({'isSuccess': 'false', 'message': 'Category does not exist.'})
+
+        except ValidationError as e:
+            return JsonResponse({'isSuccess': 'false', 'message': 'Validation error: ' + str(e)})
+
+        except Exception as e:
+            return JsonResponse({'isSuccess': 'false', 'message': 'An error occurred: ' + str(e)})
+
+    # If not POST, redirect or return an error
+    return JsonResponse({'isSuccess': 'false', 'message': 'Invalid request method.'})
+
+
+@login_required(login_url='login')
 def BookManagement(request):
     return render(request, 'BookManagementPage/book-management.html', {})
 

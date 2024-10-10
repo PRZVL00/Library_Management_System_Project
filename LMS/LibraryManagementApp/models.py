@@ -62,6 +62,15 @@ class BookCategory(models.Model):
 
     def __str__(self):
         return f'{self.book.title} - {self.category.category_name}'
+    
+class BookAuthor(models.Model):
+    book_author_id = models.AutoField(primary_key=True)
+    author = models.CharField(max_length=255)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.book.title} - {self.author}'
 
 
 class TransactionMaster(models.Model):
