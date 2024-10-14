@@ -123,7 +123,7 @@
                             <div class="row mb-3">
                                 <label for="categories" class="form-label">Categories</label>
                                 <div class="col-md-12 d-flex align-items-center">
-                                    <button class="btn btn-primary" type="button" id="addAuthorBtn">+</button>
+                                    <button class="btn btn-primary" type="button" id="addAuthorBtn" data-bs-toggle="modal" data-bs-target="#add-category-modal">+</button>
                                     <div class="ms-2 w-100">
                                         <select class="choices form-select" multiple="multiple" required id="categories"
                                             name="categories">
@@ -161,6 +161,7 @@
                 </div>
             </div>
             {% include "_footer.html" %}
+            {% include "BookRegistrationPage/_add-category.html" %}
         </div>
     </div>
     {% include "_JSreferences.html" %}
@@ -199,21 +200,7 @@
             storeAsFile: true
         });
 
-        $('#addAuthorBtn').on('click', function () {
-            const newAuthorField = `
-                <div class="input-group col-6 mb-2">
-                    <button class="btn btn-outline-secondary remove-author-btn" type="button">-</button>
-                    <input type="text" class="form-control" name="author[]" placeholder="Enter author name">
-                </div>
-            `;
-            $('#authorContainer').append(newAuthorField);
-
-            $('#authorContainer').on('click', '.remove-author-btn', function () {
-                $(this).closest('.input-group').remove();
-            });
-        });
-
-        
+      
 
         // Initialize Choices.js for the categories select element
         const categoriesChoice = new Choices('#categories', {
@@ -231,6 +218,58 @@
             pond.removeFiles();
             categoriesChoice.removeActiveItems(); 
         });
+
+        $('#clearBtn_modal').click(function () {
+            $('input[type="text"], input[type="number"], input[type="file"]').val('');
+            $('textarea').val('');
+            $('select').prop('selectedIndex', 0);
+            pond.removeFiles();
+            categoriesChoice.removeActiveItems(); 
+        });
+
+        $('#addcategoryForm').on('submit', function (e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+    
+            $.ajax({
+                url: "{% url 'add-category' %}",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.isSuccess == 'true') {
+                        Swal.fire({
+                            title: "Category added.",
+                        }).then((result) => {
+                            if (result.isConfirmed || result.isDismissed) {
+                                $('#add-category-modal').modal('toggle'); 
+                            }
+                        });
+
+                        $('#addcategoryForm').find('input[name="category"]').val('');
+                    } else {
+                        Toastify({
+                            text: response.message,
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "#dc3545",
+                            },
+                            stopOnFocus: true,
+                        }).showToast();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        })
 
         $('#bookregistrationForm').submit(function (e) {
             e.preventDefault();

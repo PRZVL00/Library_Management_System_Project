@@ -1,0 +1,40 @@
+{% load static %}
+<div
+    class="modal fade"
+    id="add-category-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="add-category"
+    aria-hidden="true">
+    <div
+        class="modal-dialog modal-dialog-centered modal-dialog-centered modal-dialog-scrollable"
+        role="document">
+        <div class="modal-content">
+            <form id="addcategoryForm" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="add-category">Add Category</h5>
+                    <button
+                        type="button"
+                        class="close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-12 mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="category" placeholder="Enter category name"
+                            name="category" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="clearBtn_modal">Clear</button>
+                    <button type="submit" class="btn btn-primary me-2" id="saveBtn">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

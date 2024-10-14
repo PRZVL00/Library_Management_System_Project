@@ -206,6 +206,25 @@ def RegisterBook(request):
     # If not POST, redirect or return an error
     return JsonResponse({'isSuccess': 'false', 'message': 'Invalid request method.'})
 
+@login_required(login_url='login')
+def AddCategory(request):
+    if request.method == 'POST':
+        add_category = request.POST.get('category')
+
+        if DimCategory.objects.filter(category_name=add_category):
+            return JsonResponse({'isSuccess': 'false', 'message': 
+                                 'The category name already exists. Please choose a different name.'})
+        
+        try:
+            new_category = DimCategory.objects.create(category_name=add_category)
+
+            return JsonResponse({'isSuccess': 'true', 'message': 
+                                 'New category name added successfully.'})
+        
+        except ValidationError as e:
+            return JsonResponse({'isSuccess': 'false', 'message': 'Validation error: ' + str(e)})
+
+    return JsonResponse({'isSuccess': 'false', 'message': 'Invalid request method.'})
 
 @login_required(login_url='login')
 def BookManagement(request):

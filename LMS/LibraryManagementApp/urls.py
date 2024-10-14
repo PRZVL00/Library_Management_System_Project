@@ -20,6 +20,7 @@ urlpatterns = [
     path('logbook/', views.Logbook, name="logbook"),
     path('profile/', views.Profile, name="profile"),
     path('book-registration/', views.BookRegistration, name="book-registration"),
+    path('add-category/', views.AddCategory, name="add-category"),
     path('register-book', views.RegisterBook, name="register-book"),
     path('book-management/', views.BookManagement, name="book-management"),
     path('transaction-history/', views.TransactionHistory, name="transaction-history"),
