@@ -123,7 +123,8 @@
                             <div class="row mb-3">
                                 <label for="categories" class="form-label">Categories</label>
                                 <div class="col-md-12 d-flex align-items-center">
-                                    <button class="btn btn-primary" type="button" id="addAuthorBtn">+</button>
+                                    <button class="btn btn-primary" type="button" id="addAuthorBtn"
+                                        data-bs-toggle="modal" data-bs-target="#add-category-modal">+</button>
                                     <div class="ms-2 w-100">
                                         <select class="choices form-select" multiple="multiple" required id="categories"
                                             name="categories">
@@ -160,6 +161,7 @@
 
                 </div>
             </div>
+            {% include "BookRegistrationPage/_add-category.html" %}
             {% include "_footer.html" %}
         </div>
     </div>
@@ -213,15 +215,15 @@
             });
         });
 
-        
+
 
         // Initialize Choices.js for the categories select element
         const categoriesChoice = new Choices('#categories', {
-            removeItemButton: true, 
-            delimiter: ',', 
-            maxItemCount: -1, 
-            searchEnabled: true, 
-            editItems: true, 
+            removeItemButton: true,
+            delimiter: ',',
+            maxItemCount: -1,
+            searchEnabled: true,
+            editItems: true,
         });
 
         $('#clearBtn').click(function () {
@@ -229,7 +231,7 @@
             $('textarea').val('');
             $('select').prop('selectedIndex', 0);
             pond.removeFiles();
-            categoriesChoice.removeActiveItems(); 
+            categoriesChoice.removeActiveItems();
         });
 
         $('#bookregistrationForm').submit(function (e) {
@@ -238,13 +240,13 @@
             var formData = new FormData(this);
 
             $.ajax({
-                url: "{% url 'register-book' %}", 
+                url: "{% url 'register-book' %}",
                 type: 'POST',
                 data: formData,
                 contentType: false,
                 processData: false,
                 headers: {
-                    'X-CSRFToken': '{{ csrf_token }}' 
+                    'X-CSRFToken': '{{ csrf_token }}'
                 },
                 success: function (response) {
                     if (response.isSuccess == 'true') {
@@ -279,5 +281,53 @@
             });
         });
 
+        //submitting the new category
+        $('#newCategoryForm').submit(function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: "{% url 'add-category' %}",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.isSuccess == 'true') {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                        }).then((result) => {
+                            if (result.isConfirmed || result.isDismissed) {
+                                $('#newCategoryForm').find('input[type="text"]').val('');
+                                $('#add-category-modal').modal('toggle');;
+                            }
+                        });
+
+
+                    } else {
+                        Toastify({
+                            text: response.message,
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "#dc3545",
+                            },
+                            stopOnFocus: true,
+                        }).showToast();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
     });
-</script>   
+</script>
