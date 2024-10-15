@@ -218,9 +218,7 @@ def AddCategory(request):
                     category_name=category_name)
                 newCategory.save()
 
-                return JsonResponse({'isSuccess': 'true', 'message': 'Category added successfuly.'})
-
-            
+                return JsonResponse({'isSuccess': 'true', 'message': 'Category added successfuly.'})            
             else:
                  return JsonResponse({'isSuccess': 'false', 'message': 'Category already exists.'})
 
@@ -232,6 +230,12 @@ def AddCategory(request):
 
     # If not POST, redirect or return an error
     return JsonResponse({'isSuccess': 'false', 'message': 'Invalid request method.'})
+
+@login_required(login_url='login')
+def GetCategories(request):
+    if request.method == 'GET':
+        categoryList = list(DimCategory.objects.values())
+        return JsonResponse({'categories': categoryList})
 
 
 @login_required(login_url='login')

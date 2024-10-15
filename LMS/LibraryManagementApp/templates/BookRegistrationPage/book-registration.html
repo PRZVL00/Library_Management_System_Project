@@ -128,16 +128,6 @@
                                     <div class="ms-2 w-100">
                                         <select class="choices form-select" multiple="multiple" required id="categories"
                                             name="categories">
-                                            <optgroup label="Figures">
-                                                <option value="1">Romboid</option>
-                                                <option value="2">Triangle</option>
-                                                <option value="3">Polygon</option>
-                                            </optgroup>
-                                            <optgroup label="Colors">
-                                                <option value="4">Red</option>
-                                                <option value="5">Green</option>
-                                                <option value="6">Purple</option>
-                                            </optgroup>
                                         </select>
                                     </div>
                                 </div>
@@ -225,6 +215,14 @@
             searchEnabled: true,
             editItems: true,
         });
+
+        // Listen to the 'showDropdown' event
+        categoriesChoice.passedElement.element.addEventListener('showDropdown', function () {
+            console.log('Dropdown is opened');
+            GetCategory();
+        });
+
+        GetCategory();
 
         $('#clearBtn').click(function () {
             $('input[type="text"], input[type="number"], input[type="file"]').val('');
@@ -329,5 +327,40 @@
             });
         });
 
+
+
+
+        function GetCategory() {
+            $.ajax({
+                url: "{% url 'get-categories' %}",
+                type: 'GET',
+                success: function (response) {
+                    const categories = response.categories;
+
+                    // Clear existing Choices.js options
+                    categoriesChoice.clearChoices();
+
+                    // Add new options to Choices.js
+                    categoriesChoice.setChoices(
+                        categories.map(category => ({
+                            value: category.category_id,
+                            label: category.category_name,
+                            selected: false,
+                            disabled: false,
+                        })),
+                        'value',
+                        'label',
+                        false
+                    );
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        }
+
+
     });
+
+
 </script>
