@@ -1,3 +1,9 @@
+import os
+import qrcode
+from django.core.files import File
+from django.core.files.base import ContentFile
+from io import BytesIO
+from django.conf import settings
 from django.http import JsonResponse
 from .models import *  # Import your custom user model
 from django.core.files.storage import default_storage
@@ -6,6 +12,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+
 
 
 # Create your views here.
@@ -94,6 +101,20 @@ def RegisterUser(request):
             user_profile.set_password(password)
             user_profile.save()
 
+            user_profile.qr_value = f"QR-{user_profile.id}-{last_name}-{email}"
+            user_profile.save()
+
+            # Generate QR code
+            qr_img = qrcode.make(user_profile.qr_value)
+
+            # Save the QR code to a BytesIO object
+            qr_buffer = BytesIO()
+            qr_img.save(qr_buffer, format='PNG')
+            qr_buffer.seek(0)
+
+            # Save the QR code to the user's qr_image field
+            user_profile.qr_image.save(f'qr_{user_profile.id}.png', ContentFile(qr_buffer.read()), save=True)
+
             # Send JSON response for AJAX success
             return JsonResponse({'isSuccess': 'true', 'message': 'User registered successfully!'})
 
@@ -175,6 +196,20 @@ def RegisterBook(request):
                 summary=summary
             )
             book.save()
+
+            book.qr_value = f"QR-{book.book_id}-{book_title}-{year}-{isbn}"
+            book.save()
+
+            # Generate QR code
+            qr_img = qrcode.make(book.qr_value)
+
+            # Save the QR code to a BytesIO object
+            qr_buffer = BytesIO()
+            qr_img.save(qr_buffer, format='PNG')
+            qr_buffer.seek(0)
+
+            # Save the QR code to the user's qr_image field
+            book.qr_image.save(f'qr_{book.book_id}.png', ContentFile(qr_buffer.read()), save=True)
 
             # Save authors
             for author_name in authors:
