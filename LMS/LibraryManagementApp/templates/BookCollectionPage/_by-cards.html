@@ -1,0 +1,31 @@
+{% load static %}
+<section id="books">
+    <div class='row'> <!--Row Start-->
+        {% for book in page_obj %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 col-xxl-3"> <!-- Column Start -->
+            <div class="card">
+                <div class="card-content">
+                    <div style="display: flex; justify-content: center;">
+                        <img class="card-img-top img-fluid mt-3"
+                            src="{{ book.image.url }}" alt="Card image cap"
+                            style="width: auto; height: 150px; object-fit: contain;">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title text-center">{{ book.title }}</h5>
+                        <p class="card-subtitle text-center">{{ book.year }}</p>
+                        <p class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left"
+                            title="ISBN">{{ book.isbn }}</p>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1" data-bs-toggle="modal"
+                            data-bs-target="#book-info-modal">More Info</button>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1">Add to Shelf</button>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- Column End -->
+        {% endfor %}
+    </div> <!--Row End-->
+</section>
+
+<div id="pagination" class="d-flex justify-content-center my-3">
+    <!-- Pagination buttons will be dynamically added here -->
+</div>

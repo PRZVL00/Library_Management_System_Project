@@ -1,8 +1,15 @@
 {% load static %}
 <div class="col-md-12 mb-4">
     <div class="card">
-        <div class="card-header">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
             <h5>Library Usage</h5>
+            <div id="linechart-toolbar" style="display: flex;">
+                <div class="btn-group" role="group" aria-label="Timeframe selection">
+                    <button type="button" class="btn btn-outline-primary active" id="daily">Daily</button>
+                    <button type="button" class="btn btn-outline-primary" id="weekly">Weekly</button>
+                    <button type="button" class="btn btn-outline-primary" id="monthly">Monthly</button>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             <div id="line"></div>
