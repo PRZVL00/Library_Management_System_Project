@@ -15,15 +15,17 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-7 col-sm-7 col-md-7 col-lg-7 col-xl-7">
-                        <h5>Year: 20XX</h5>
-                        <h5>ISBN: 20XX</h5>
+                        <h5 id="book-year">Year: 20XX</h5>
+                        <h5 id="book-isbn">ISBN: 20XX</h5>
+                        <h5 id="book-location">Location: Rack 3</h5>
+                        <h5 id="book-late-fee">Late fee: ₱50</h5>
                         <figure>
                             <figcaption>
                                 <b>
                                     Author/s
                                 </b>
                             </figcaption>
-                            <ul>
+                            <ul id="book-authors">
                                 <li>FirstName LastName</li>
                                 <li>FirstName LastName</li>
                                 <li>FirstName LastName</li>
@@ -31,15 +33,21 @@
                         </figure>
                     </div>
                     <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5">
-                        <img class="card-img-top img-fluid" src={% static 'assets/static/images/BookSample.png' %} alt="Card image cap" style="width: auto; height: auto; object-fit: contain;">
+                        <img
+                            id="book-image"
+                            class="card-img-top img-fluid"
+                            src="{% static 'assets/static/images/BookSample.png' %}"
+                            alt="Book Image"
+                            style="width: auto; height: auto; object-fit: contain;" />
                     </div>
                 </div>
-                
+            
                 <h5>Summary</h5>
-                <p>
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. Harum natus rerum officia labore possimus doloribus eum voluptatum quae vitae corrupti incidunt suscipit accusantium dolores nihil quam sunt tempore, illum minima.
+                <p id="book-summary">
+                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. Harum natus rerum officia labore possimus doloribus eum
+                    voluptatum quae vitae corrupti incidunt suscipit accusantium dolores nihil quam sunt tempore, illum minima.
                 </p>
-            </div>
+            </div>  
             <div class="modal-footer">
                 <button type="button" class="btn btn-light-secondary"
                     data-bs-dismiss="modal">
