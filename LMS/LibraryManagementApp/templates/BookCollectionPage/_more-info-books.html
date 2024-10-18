@@ -1,15 +1,23 @@
 {% load static %}
-<div class="modal fade" id="book-info-modal" tabindex="-1" role="dialog"
-    aria-labelledby="book-info" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-centered modal-dialog-scrollable"
+<div
+    class="modal fade"
+    id="book-info-modal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="book-info"
+    aria-hidden="true">
+    <div
+        class="modal-dialog modal-dialog-centered modal-dialog-centered modal-dialog-scrollable"
         role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="book-info">Book Name
-                </h5>
-                <button type="button" class="close" data-bs-dismiss="modal"
+                <h5 class="modal-title" id="book-info">Book Name</h5>
+                <button
+                    type="button"
+                    class="close"
+                    data-bs-dismiss="modal"
                     aria-label="Close">
-                <i data-feather="x"></i>
+                    <i data-feather="x"></i>
                 </button>
             </div>
             <div class="modal-body">
@@ -19,11 +27,10 @@
                         <h5 id="book-isbn">ISBN: 20XX</h5>
                         <h5 id="book-location">Location: Rack 3</h5>
                         <h5 id="book-late-fee">Late fee: ₱50</h5>
+                      
                         <figure>
                             <figcaption>
-                                <b>
-                                    Author/s
-                                </b>
+                                <b> Author/s </b>
                             </figcaption>
                             <ul id="book-authors">
                                 <li>FirstName LastName</li>
@@ -46,17 +53,23 @@
                 <p id="book-summary">
                     Lorem, ipsum dolor sit amet consectetur adipisicing elit. Harum natus rerum officia labore possimus doloribus eum
                     voluptatum quae vitae corrupti incidunt suscipit accusantium dolores nihil quam sunt tempore, illum minima.
+
                 </p>
             </div>  
             <div class="modal-footer">
-                <button type="button" class="btn btn-light-secondary"
+                <button
+                    type="button"
+                    class="btn btn-light-secondary"
                     data-bs-dismiss="modal">
-                <i class="bx bx-x d-block d-sm-none"></i>
-                <span class="d-none d-sm-block">Close</span>
+                    <i class="bx bx-x d-block d-sm-none"></i>
+                    <span class="d-none d-sm-block">Close</span>
                 </button>
-                <button type="button" class="btn btn-primary ms-1" data-bs-dismiss="modal">
-                <i class="bx bx-check d-block d-sm-none"></i>
-                <span class="d-none d-sm-block">Add to Shelf</span>
+                <button
+                    type="button"
+                    class="btn btn-primary ms-1"
+                    data-bs-dismiss="modal">
+                    <i class="bx bx-check d-block d-sm-none"></i>
+                    <span class="d-none d-sm-block">Add to Shelf</span>
                 </button>
             </div>
         </div>
