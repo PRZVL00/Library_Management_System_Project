@@ -14,6 +14,7 @@ urlpatterns = [
     path('register-user/', views.RegisterUser, name="register-user"),
     path('dashboard/', views.Dashboard, name="dashboard"),
     path('book-collection/', views.BookCollection, name="book-collection"),
+    path('load-books/', views.LoadBooks, name='load-books'),
     path('borrow-return/', views.BorrowReturn, name="borrow-return"),
     path('account-management/', views.AccountManagement, name="account-management"),
     path('bag/', views.Bag, name="bag"),
@@ -24,6 +25,8 @@ urlpatterns = [
     path('add-category', views.AddCategory, name="add-category"),
     path('get-categories', views.GetCategories, name="get-categories"),
     path('book-management/', views.BookManagement, name="book-management"),
+    path('get-books', views.GetBooks, name="get-books"),
+    path('get-book-info/', views.GetBookInfo, name='get-book-info'),
     path('transaction-history/', views.TransactionHistory, name="transaction-history"),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

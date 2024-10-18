@@ -1,3 +1,4 @@
+from django.shortcuts import render
 import os
 import qrcode
 from django.core.files import File
@@ -12,8 +13,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-
-
+from django.core.paginator import Paginator
+from django.template.loader import render_to_string
 
 # Create your views here.
 def Login(request):
@@ -134,6 +135,20 @@ def Dashboard(request):
 @login_required(login_url='login')
 def BookCollection(request):
     return render(request, 'BookCollectionPage/book-collection.html', {})
+  
+@login_required(login_url='login')
+def LoadBooks(request):
+    # Get all books, or filter based on user input if needed
+    books = Book.objects.all()
+    
+    # Pagination
+    page_number = request.GET.get('page', 1)  # Get page number from request
+    paginator = Paginator(books, 12)  # Show 12 books per page
+    page_obj = paginator.get_page(page_number)  # Get the page object
+    
+    # Render only the book cards HTML
+    html = render_to_string('BookCollectionPage/_by-cards.html', {'page_obj': page_obj})
+    return JsonResponse({'html': html, 'has_next': page_obj.has_next()})
 
 @login_required(login_url='login')
 def BorrowReturn(request):
@@ -158,6 +173,10 @@ def Profile(request):
 @login_required(login_url='login')
 def BookRegistration(request):
     return render(request, 'BookRegistrationPage/book-registration.html', {})
+
+@login_required(login_url='login')
+def BookManagement(request):
+    return render(request, 'BookManagementPage/book-management.html', {})
 
 @login_required(login_url='login')
 def RegisterBook(request):
@@ -248,7 +267,6 @@ def AddCategory(request):
 
         try:
             if not DimCategory.objects.filter(category_name = category_name).exists():
-            # Create and save the book instance
                 newCategory = DimCategory(
                     category_name=category_name)
                 newCategory.save()
@@ -276,6 +294,38 @@ def GetCategories(request):
 @login_required(login_url='login')
 def BookManagement(request):
     return render(request, 'BookManagementPage/book-management.html', {})
+
+@login_required(login_url='login')
+def GetBooks(request):
+    if request.method == 'GET':
+        bookList = list(Book.objects.select_related('status').values(
+            'book_id',
+            'title', 
+            'publisher', 
+            'year', 
+            'status__status_name'  # Fetching status name directly
+        ))
+        return JsonResponse({'books': bookList})
+
+def GetBookInfo(request):
+    book_id = request.GET.get('id')
+    try:
+        book = Book.objects.get(book_id=book_id)
+        # Fetch authors related to the book
+        authors = BookAuthor.objects.filter(book=book).values_list('author', flat=True)
+        data = {
+            'title': book.title,
+            'year': book.year,
+            'isbn': book.isbn,
+            'location': book.location,
+            'late_fee': book.late_fee,
+            'authors': list(authors),
+            'image_url': book.image.url, 
+            'summary': book.summary
+        }
+        return JsonResponse(data)
+    except Book.DoesNotExist:
+        return JsonResponse({'error': 'Book not found'}, status=404)
 
 @login_required(login_url='login')
 def TransactionHistory(request):
