@@ -1,3 +1,4 @@
+<!-- Book List-->
 {% load static %}
 <section id="books">
     <div class='row'> <!--Row Start-->
@@ -15,8 +16,8 @@
                         <p class="card-subtitle text-center">{{ book.year }}</p>
                         <p class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left"
                             title="ISBN">{{ book.isbn }}</p>
-                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1" data-bs-toggle="modal"
-                            data-bs-target="#book-info-modal">More Info</button>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1"
+                            data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
                         <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1">Add to Shelf</button>
                     </div>
                 </div>
@@ -26,6 +27,6 @@
     </div> <!--Row End-->
 </section>
 
-<div id="pagination" class="d-flex justify-content-center my-3">
+<div id="pagination" class="d-flex justify-content-center my-3 space">
     <!-- Pagination buttons will be dynamically added here -->
 </div>

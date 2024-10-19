@@ -52,7 +52,10 @@
                 </ul>
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active" id="by-cards" role="tabpanel" aria-labelledby="by-cards-tab">
-                        {% include "BookCollectionPage/_by-cards.html" %}
+                        <div>
+                            {% include "BookCollectionPage/_filters.html" %}
+                            {% include "BookCollectionPage/_by-cards.html" %}
+                        </div>
                     </div>
                     <div class="tab-pane fade" id="by-table" role="tabpanel" aria-labelledby="by-table-tab">
                         {% include "BookCollectionPage/_by-table.html" %}
@@ -93,5 +96,46 @@
                 tableInitialized = true;
             }
         });
+
+        function loadBooks(pageNumber) {
+            $.ajax({
+                url: "{% url 'load-books' %}",
+                data: {
+                    page: pageNumber
+                },
+                dataType: 'json',
+                success: function(data) {
+                    // Update the book cards with the new HTML
+                    $('#books').html(data.html);
+                    // Update pagination controls
+                    updatePagination(pageNumber, data.has_next);
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error: " + status + error);
+                }
+            });
+        }
+
+        // Initial load of books
+        loadBooks(1);  // Load the first page of books
+
+        // Function to update pagination controls
+        function updatePagination(currentPage, hasNext) {
+            const pagination = $('#pagination');  // Assuming you have a pagination container
+            pagination.empty();  // Clear current pagination
+            pagination.append(`<button class="btn btn-primary" id="prev" ${currentPage <= 1 ? 'disabled' : ''}>Previous</button>`);
+            pagination.append(`<button class="btn btn-primary" id="next" ${hasNext ? '' : 'disabled'}>Next</button>`);
+
+            // Previous button event
+            $('#prev').off('click').on('click', function() {
+                loadBooks(currentPage - 1);
+            });
+
+            // Next button event
+            $('#next').off('click').on('click', function() {
+                loadBooks(currentPage + 1);
+            });
+        }
+
     });    
 </script>
