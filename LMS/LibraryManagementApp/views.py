@@ -303,7 +303,10 @@ def GetBooks(request):
             'title', 
             'publisher', 
             'year', 
-            'status__status_name'  # Fetching status name directly
+            'status__status_name',
+            'isbn',
+            'location',
+            'late_fee'
         ))
         return JsonResponse({'books': bookList})
 
