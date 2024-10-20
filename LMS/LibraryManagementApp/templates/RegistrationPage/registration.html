@@ -1,0 +1,187 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Library Management System</title>
+   {% include "_CSSreferences.html" %}
+</head>
+
+<body>
+   <div id="auth">
+      <div class="row h-100">
+         <div class="col-lg-5 col-12">
+            <div id="auth-left" class="pb-1">
+               <div class="auth-logo mb-3">
+                  <a href="#"><img src={% static "assets/compiled/svg/logo.svg" %} alt="Logo"></a>
+               </div>
+               <h1>Sign Up</h1>
+               <form id="registrationForm" method="POST" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div class="position-relative has-icon-left mb-1">
+                     <label for="imageUpload" class="form-label">Upload Profile Image</label>
+                     <input type="file" class="image-resize-filepond form-control" id="imageUpload"
+                        name="profilePicture" placeholder="Upload Profile Image" accept="image/*" required>
+                  </div>
+                  <div class="form-group position-relative has-icon-left mb-1">
+                     <input type="text" class="form-control form-control-l" placeholder="First Name" name="firstName"
+                        required>
+                     <div class="form-control-icon">
+                        <i class="bi bi-person"></i>
+                     </div>
+                  </div>
+                  <div class="form-group position-relative has-icon-left mb-1">
+                     <input type="text" class="form-control form-control-l" placeholder="Last Name" name="lastName"
+                        required>
+                     <div class="form-control-icon">
+                        <i class="bi bi-person"></i>
+                     </div>
+                  </div>
+                  <div class="form-group position-relative has-icon-left mb-1">
+                     <input type="text" class="form-control form-control-l" placeholder="Student Number"
+                        name="studentNumber" required>
+                     <div class="form-control-icon">
+                        <i class="bi bi-person"></i>
+                     </div>
+                  </div>
+                  <div class="form-group position-relative has-icon-left mb-1">
+                     <input type="text" class="form-control form-control-l" placeholder="Email" name="email" required>
+                     <div class="form-control-icon">
+                        <i class="bi bi-envelope"></i>
+                     </div>
+                  </div>
+                  <div class="form-group position-relative has-icon-left mb-1">
+                     <input type="text" class="form-control form-control-l" placeholder="Phone Number"
+                        name="phoneNumber" required>
+                     <div class="form-control-icon">
+                        <i class="bi bi-telephone"></i>
+                     </div>
+                  </div>
+                  <div class="form-group position-relative has-icon-left mb-1">
+                     <input type="password" class="form-control form-control-l" placeholder="Password" name="password"
+                     min="8"
+                     pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" 
+                     title="Password must be at least 8 characters long, include one uppercase letter, one lowercase letter, and one number." 
+                     required>
+                     <div class="form-control-icon">
+                        <i class="bi bi-shield-lock"></i>
+                     </div>
+                  </div>
+                  <div class="form-group position-relative has-icon-left mb-1">
+                     <input type="password" class="form-control form-control-l" placeholder="Confirm Password"
+                        name="confirmPassword" required>
+                     <div class="form-control-icon">
+                        <i class="bi bi-shield-lock"></i>
+                     </div>
+                  </div>
+                  <button class="btn btn-primary btn-block btn-l shadow-lg mt-3" id='signup' type='submit'>Sign
+                     Up</button>
+               </form>
+               <div class="text-center mt-1 text-lg fs-6">
+                  <p class="text-gray-600">Already have an account? <a href={% url "login" %} class="font-bold">Log
+                        In</a>.
+                  </p>
+               </div>
+            </div>
+         </div>
+         <div class="col-lg-7 d-none d-lg-block">
+            <div id="auth-right">
+            </div>
+         </div>
+      </div>
+   </div>
+   {% include "_JSreferences.html" %}
+</body>
+
+</html>
+
+<script>
+   $(document).ready(function () {
+      const Swal2 = Swal.mixin({
+         customClass: {
+            input: 'form-control'
+         }
+      })
+
+      FilePond.registerPlugin(
+         FilePondPluginImagePreview,
+         FilePondPluginImageCrop,
+         FilePondPluginImageExifOrientation,
+         FilePondPluginImageFilter,
+         FilePondPluginImageResize,
+         FilePondPluginFileValidateSize,
+         FilePondPluginFileValidateType
+      );
+
+      // Initialize FilePond
+      const pond = FilePond.create(document.querySelector(".image-resize-filepond"), {
+         credits: null,
+         allowImagePreview: true,
+         allowImageFilter: false,
+         allowImageExifOrientation: false,
+         allowImageCrop: false,
+         allowImageResize: true,
+         imageResizeTargetWidth: 200,
+         imageResizeTargetHeight: 200,
+         imageResizeMode: "cover",
+         imageResizeUpscale: true,
+         acceptedFileTypes: ["image/png", "image/jpg", "image/jpeg"],
+         fileValidateTypeDetectType: (source, type) =>
+            new Promise((resolve, reject) => {
+               // Do custom type detection here and return with promise
+               resolve(type);
+            }),
+         storeAsFile: true
+      });
+
+      $('#registrationForm').submit(function (e) {
+         e.preventDefault();
+
+         var formData = new FormData(this);
+
+         $.ajax({
+            url: "{% url 'register-user' %}",  // URL defined in urls.py
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            headers: {
+               'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token
+            },
+            success: function (response) {
+               if (response.isSuccess == 'true') {
+                  Swal.fire({
+                     icon: "success",
+                     title: "Success",
+                  }).then((result) => {
+                     if (result.isConfirmed || result.isDismissed) {
+                        window.location.href = "{% url 'login' %}";
+                     }
+                  });
+
+                  $('#registrationForm').find('input[type="text"], input[type="password"], input[type="file"]').val('');
+                  pond.removeFiles();
+               } else {
+                  Toastify({
+                     text: response.message,
+                     duration: 3000,
+                     close: true,
+                     gravity: "top",
+                     position: "right",
+                     style: {
+                        background: "#dc3545", // Bootstrap's danger color
+                     },
+                     stopOnFocus: true,
+                  }).showToast();
+               }
+
+            },
+            error: function (xhr, status, error) {
+               alert("An error occurred: " + error);  // Notify error
+            }
+         });
+      });
+   });
+</script>

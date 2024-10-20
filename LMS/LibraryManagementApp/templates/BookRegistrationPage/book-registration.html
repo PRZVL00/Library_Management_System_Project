@@ -40,31 +40,38 @@
             <!--Main Page-->
             <div class="page-content mb-3">
                 <div class="container">
-                    <form>
+                    <form id="bookregistrationForm" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
                         <div class="row">
                             <!-- Image Upload - Full Row -->
                             <div class="col-12 mb-3">
                                 <label for="imageUpload" class="form-label">Upload Image</label>
                                 <input type="file" class="image-resize-filepond form-control" id="imageUpload"
-                                    placeholder="Upload Image">
+                                    placeholder="Upload Image" name="bookPic" required>
                             </div>
 
                             <!-- Title - Full Row -->
-                            <div class="col-12 mb-3">
+                            <div class="col-8 mb-3">
                                 <label for="bookTitle" class="form-label">Title of the Book</label>
                                 <input type="text" class="form-control" id="bookTitle"
-                                    placeholder="Enter the title of the book">
+                                    placeholder="Enter the title of the book" name="bookTitle" required>
+                            </div>
+                            <div class="col-4 mb-3">
+                                <label for="isbn" class="form-label">ISBN</label>
+                                <input type="text" class="form-control" id="isbn"
+                                    placeholder="Enter the isbn of the book" name="isbn" required>
                             </div>
 
                             <!-- Publisher (3/4) and Year (1/4) -->
                             <div class="col-md-9 mb-3">
                                 <label for="publisher" class="form-label">Publisher</label>
-                                <input type="text" class="form-control" id="publisher"
-                                    placeholder="Enter the publisher">
+                                <input type="text" class="form-control" id="publisher" placeholder="Enter the publisher"
+                                    name="publisher" required>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label for="year" class="form-label">Year</label>
-                                <input type="number" class="form-control" id="year" placeholder="Enter the year">
+                                <input type="number" class="form-control" id="year" placeholder="Enter the year"
+                                    name="year" required>
                             </div>
 
                             <!-- Author(s) - Full Row with Dynamic Adjustment -->
@@ -72,44 +79,71 @@
                                 <label class="form-label">Author(s)</label>
                                 <div id="authorContainer" class="row">
                                     <div class="input-group col-12 mb-2">
-                                        <input type="text" class="form-control" name="author[]"
-                                            placeholder="Enter author name">
                                         <button class="btn btn-primary" type="button" id="addAuthorBtn">+</button>
+                                        <input type="text" class="form-control" name="author[]"
+                                            placeholder="Enter author name" required>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Location (1/2) and Status (1/2) -->
-                            <div class="col-md-6 mb-3">
+                            <!-- Location (1/4), Status (1/4), Borrowing Duration (1/4), Fine (1/4) -->
+                            <div class="col-md-3 mb-3">
                                 <label for="location" class="form-label">Location</label>
-                                <input type="text" class="form-control" id="location" placeholder="Enter location">
+                                <input type="text" class="form-control" id="location" placeholder="Enter location"
+                                    name="location">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label for="status" class="form-label">Status</label>
-                                <select class="form-select" id="status">
+                                <select class="form-select" id="status" required name="status">
                                     <option selected>Status</option>
-                                    <option>Available</option>
-                                    <option>Not Available</option>
-                                    <option>Under Maintenance</option>
+                                    <option value="1">Available</option>
+                                    <option value="2">Not Available</option>
+                                    <option value="3">Under Maintenance</option>
                                 </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="borrowingDuration" class="form-label">Borrowing Duration (Days)</label>
+                                <input type="number" class="form-control" id="borrowingDuration"
+                                    placeholder="Enter duration in days" name="duration">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="fine" class="form-label">Fine per Late Day</label>
+                                <input type="number" step="0.01" class="form-control" id="fine"
+                                    placeholder="Enter fine amount" required name="fine">
                             </div>
 
                             <!-- File Upload for Digital Copy - Full Row -->
                             <div class="col-12 mb-3">
                                 <label for="fileUpload" class="form-label">Digital Copy</label>
                                 <input class="form-control" type="file" id="fileUpload"
-                                    placeholder="Upload digital copy">
+                                    placeholder="Upload digital copy" required name="softcopy">
                             </div>
+
+                            <!-- Categories and Add New Category Button -->
+                            <div class="row mb-3">
+                                <label for="categories" class="form-label">Categories</label>
+                                <div class="col-md-12 d-flex align-items-center">
+                                    <button class="btn btn-primary" type="button" id="addAuthorBtn"
+                                        data-bs-toggle="modal" data-bs-target="#add-category-modal">+</button>
+                                    <div class="ms-2 w-100">
+                                        <select class="choices form-select" multiple="multiple" required id="categories"
+                                            name="categories">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+
 
                             <!-- Summary - Full Row -->
                             <div class="col-12 mb-3">
                                 <label for="summary" class="form-label">Summary</label>
-                                <textarea class="form-control" id="summary" placeholder="Enter a summary"
-                                    rows="5"></textarea>
+                                <textarea class="form-control" id="summary" placeholder="Enter a summary" rows="5"
+                                    required name="summary"></textarea>
                             </div>
 
                             <div class="col-12 mb-3 text-end">
-                                <button type="button" class="btn btn-primary me-2" id="saveBtn">Save</button>
+                                <button type="submit" class="btn btn-primary me-2" id="saveBtn">Save</button>
                                 <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
                             </div>
                         </div>
@@ -117,6 +151,7 @@
 
                 </div>
             </div>
+            {% include "BookRegistrationPage/_add-category.html" %}
             {% include "_footer.html" %}
         </div>
     </div>
@@ -127,7 +162,6 @@
 
 <script>
     $(document).ready(function () {
-        // Register FilePond plugins
         FilePond.registerPlugin(
             FilePondPluginImagePreview,
             FilePondPluginImageCrop,
@@ -138,7 +172,6 @@
             FilePondPluginFileValidateType
         );
 
-        // Initialize FilePond
         const pond = FilePond.create(document.querySelector(".image-resize-filepond"), {
             credits: null,
             allowImagePreview: true,
@@ -153,40 +186,181 @@
             acceptedFileTypes: ["image/png", "image/jpg", "image/jpeg"],
             fileValidateTypeDetectType: (source, type) =>
                 new Promise((resolve, reject) => {
-                    // Do custom type detection here and return with promise
                     resolve(type);
                 }),
             storeAsFile: true
         });
 
-        // Add additional author input fields
         $('#addAuthorBtn').on('click', function () {
             const newAuthorField = `
                 <div class="input-group col-6 mb-2">
-                    <input type="text" class="form-control" name="author[]" placeholder="Enter author name">
                     <button class="btn btn-outline-secondary remove-author-btn" type="button">-</button>
+                    <input type="text" class="form-control" name="author[]" placeholder="Enter author name">
                 </div>
             `;
             $('#authorContainer').append(newAuthorField);
 
-            // Remove author input field
             $('#authorContainer').on('click', '.remove-author-btn', function () {
                 $(this).closest('.input-group').remove();
             });
         });
 
-        // Clear button functionality
-        $('#clearBtn').click(function () {
-            // Clear all text inputs
-            $('input[type="text"], input[type="number"], input[type="file"]').val('');
 
-            // Clear all textareas
-            $('textarea').val('');
 
-            // Reset all select elements
-            $('select').prop('selectedIndex', 0);
-
-            pond.removeFiles(); // Clears all uploaded and pending files
+        // Initialize Choices.js for the categories select element
+        const categoriesChoice = new Choices('#categories', {
+            removeItemButton: true,
+            delimiter: ',',
+            maxItemCount: -1,
+            searchEnabled: true,
+            editItems: true,
         });
+
+        // Listen to the 'showDropdown' event
+        categoriesChoice.passedElement.element.addEventListener('showDropdown', function () {
+            console.log('Dropdown is opened');
+            GetCategory();
+        });
+
+        GetCategory();
+
+        $('#clearBtn').click(function () {
+            $('input[type="text"], input[type="number"], input[type="file"]').val('');
+            $('textarea').val('');
+            $('select').prop('selectedIndex', 0);
+            pond.removeFiles();
+            categoriesChoice.removeActiveItems();
+        });
+
+        $('#bookregistrationForm').submit(function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: "{% url 'register-book' %}",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.isSuccess == 'true') {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                        })
+
+                        $('#bookregistrationForm').find('input[type="text"], input[type="number"], input[type="file"]').val('');
+                        $('#bookregistrationForm').find('textarea').val('');
+                        $('#bookregistrationForm').find('select').prop('selectedIndex', 0);
+                        categoriesChoice.removeActiveItems();
+                        pond.removeFiles();
+
+                    } else {
+                        Toastify({
+                            text: response.message,
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "#dc3545",
+                            },
+                            stopOnFocus: true,
+                        }).showToast();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
+        //submitting the new category
+        $('#newCategoryForm').submit(function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: "{% url 'add-category' %}",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.isSuccess == 'true') {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                        }).then((result) => {
+                            if (result.isConfirmed || result.isDismissed) {
+                                $('#newCategoryForm').find('input[type="text"]').val('');
+                                $('#add-category-modal').modal('toggle');;
+                            }
+                        });
+
+
+                    } else {
+                        Toastify({
+                            text: response.message,
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "#dc3545",
+                            },
+                            stopOnFocus: true,
+                        }).showToast();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
+
+
+
+        function GetCategory() {
+            $.ajax({
+                url: "{% url 'get-categories' %}",
+                type: 'GET',
+                success: function (response) {
+                    const categories = response.categories;
+
+                    // Clear existing Choices.js options
+                    categoriesChoice.clearChoices();
+
+                    // Add new options to Choices.js
+                    categoriesChoice.setChoices(
+                        categories.map(category => ({
+                            value: category.category_id,
+                            label: category.category_name,
+                            selected: false,
+                            disabled: false,
+                        })),
+                        'value',
+                        'label',
+                        false
+                    );
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        }
+
+
     });
+
+
 </script>
