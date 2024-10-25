@@ -27,6 +27,8 @@ urlpatterns = [
     path('book-management/', views.BookManagement, name="book-management"),
     path('get-books', views.GetBooks, name="get-books"),
     path('get-book-info/', views.GetBookInfo, name='get-book-info'),
+    path('update-book', views.UpdateBook, name="update-book"),
+    path('remove-book', views.RemoveBook, name="remove-book"),
     path('transaction-history/', views.TransactionHistory, name="transaction-history"),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

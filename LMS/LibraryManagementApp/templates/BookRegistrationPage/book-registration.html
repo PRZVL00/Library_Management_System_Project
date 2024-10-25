@@ -205,8 +205,6 @@
             });
         });
 
-
-
         // Initialize Choices.js for the categories select element
         const categoriesChoice = new Choices('#categories', {
             removeItemButton: true,
@@ -216,13 +214,15 @@
             editItems: true,
         });
 
-        // Listen to the 'showDropdown' event
+        // Keep track of existing categories
+        let existingCategories = new Set();
+
+        // Listen to the 'showDropdown' event, fetch data only if necessary
         categoriesChoice.passedElement.element.addEventListener('showDropdown', function () {
             console.log('Dropdown is opened');
+            console.log('No existing categories');
             GetCategory();
         });
-
-        GetCategory();
 
         $('#clearBtn').click(function () {
             $('input[type="text"], input[type="number"], input[type="file"]').val('');
@@ -328,8 +328,6 @@
         });
 
 
-
-
         function GetCategory() {
             $.ajax({
                 url: "{% url 'get-categories' %}",
@@ -337,28 +335,31 @@
                 success: function (response) {
                     const categories = response.categories;
 
-                    // Clear existing Choices.js options
-                    categoriesChoice.clearChoices();
+                    // Clear Choices.js options only if this is the first load
+                    if (existingCategories.size === 0) {
+                        categoriesChoice.clearChoices();
+                    }
 
-                    // Add new options to Choices.js
-                    categoriesChoice.setChoices(
-                        categories.map(category => ({
-                            value: category.category_id,
-                            label: category.category_name,
-                            selected: false,
-                            disabled: false,
-                        })),
-                        'value',
-                        'label',
-                        false
-                    );
+                    // Add new categories to Choices.js only if they don't already exist
+                    categories.forEach(category => {
+                        if (!existingCategories.has(category.category_id)) {
+                            existingCategories.add(category.category_id);
+                            categoriesChoice.setChoices([
+                                {
+                                    value: category.category_id,
+                                    label: category.category_name,
+                                    selected: false,
+                                    disabled: false,
+                                }
+                            ], 'value', 'label', false);
+                        }
+                    });
                 },
                 error: function (xhr, status, error) {
                     alert("An error occurred: " + error);
                 }
             });
         }
-
 
     });
 
