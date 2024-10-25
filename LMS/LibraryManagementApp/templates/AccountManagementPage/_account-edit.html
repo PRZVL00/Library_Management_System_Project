@@ -17,35 +17,34 @@
                         <div class="row">
                             <!-- Profile Picture-->
                             <input type="number" id="accountID" name="accountID" hidden>
-                            <div class="mb-3">
+                            <div class="mb-4 text-center">
                                 <label for="imageUpload" class="form-label">Edit Image</label>
                                 <input type="file" class="image-resize-filepond form-control" id="imageUpload"
                                     placeholder="Upload Image" name="accountPic" required>
+                                <span class="badge bg-success">Active</span>
                             </div>
 
-                            <!-- First Name -->
-                            <div class="mb-3">
+                            <!-- First Name and Last Name -->
+                            <div class="col-md-6 mb-3">
                                 <label for="firstName" class="form-label">First Name</label>
                                 <input type="text" class="form-control" id="firstName"
                                     placeholder="Enter first name" name="firstName" required>
                             </div>
 
-                            <!-- Last Name -->
-                            <div class="mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="lastName" class="form-label">Last Name</label>
                                 <input type="text" class="form-control" id="lastName"
                                     placeholder="Enter first name" name="lastName" required>
                             </div>
 
-                            <!-- Student ID -->
-                            <div class="mb-3">
+                            <!-- Student ID and Contact Number -->
+                            <div class="col-md-6 mb-3">
                                 <label for="studentID" class="form-label">Student ID</label>
                                 <input type="text" class="form-control" id="studentID"
                                     placeholder="Enter first name" name="studentID" required>
                             </div>
 
-                            <!-- Contact Number -->
-                            <div class="mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="contactNumber" class="form-label">Contact Number</label>
                                 <input type="number" class="form-control" id="contactNumber" placeholder="Enter the contact number"
                                     name="contactNumber" required>
