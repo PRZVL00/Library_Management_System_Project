@@ -40,53 +40,25 @@
             <div class="page-content">
                 <!--Start Your Page Here-->
                 <div class="table-responsive">
-                    <table class="table table-striped" id="table1">
+                    <!-- Modal for edit profile will be used here but with some changes -->
+                    <!-- Buttons for each input field will be disabled and also the input fields -->
+                    <!-- Reset Password will be remove and save buttons and cancel will be replaced as close -->
+                    <table class="table table-striped" id="accountManagement">
                         <thead>
                             <tr>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Student ID #</th>
-                                <th>Contact Number</th>
-                                <th>Email</th>
-                                <th>Status</th>
+                                <th class="text-start">First Name</th>
+                                <th class="text-start">Last Name</th>
+                                <th class="text-start">Student ID #</th>
+                                <th class="text-start">Contact #</th>
+                                <th class="text-start">Email</th>
+                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Dana Ellysa</td>
-                                <td>Camero</td>
-                                <td>TUPC-19-0399</td>
-                                <td>0949-444-8765</td>
-                                <td>ellysak@gmail.com</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal"
-                                        data-bs-target="#account-edit-modal">Active</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Timothy</td>
-                                <td>Bautista</td>
-                                <td>TUPC-19-0598</td>
-                                <td>0949-444-8765</td>
-                                <td>timothy@gmail.com</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary w-100" data-bs-toggle="modal"
-                                        data-bs-target="#account-edit-modal">Inactive</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Vincent Jake</td>
-                                <td>Montaril</td>
-                                <td>TUPC-19-0998</td>
-                                <td>0949-444-8765</td>
-                                <td>Vincent@gmail.com</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-danger w-100" data-bs-toggle="modal"
-                                        data-bs-target="#account-edit-modal">Ban</button>
-                                </td>
-                            </tr>
+
                         </tbody>
                     </table>
+
                 </div>
             </div>
             {% include "AccountManagementPage/_account-edit.html" %}
@@ -100,18 +72,38 @@
 
 <script>
     $(document).ready(function () {
-        $("#table1").DataTable({
+        $('#accountManagement').DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
                 'rt' +
                 '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
             buttons: ['copy', 'excel', 'pdf'],
             responsive: false,
-            scrollX: true
-        });
+            scrollX: true,
+            ajax: {
+                url: "{% url 'get-accounts' %}",
+                type: 'GET',
+                dataSrc: 'accounts'
+            },
+            columns: [
+                { data: 'first_name' },
+                { data: 'last_name' },
+                { data: 'id_number', className: 'text-start' },
+                { data: 'cellphone_number', className: 'text-start' },
+                { data: 'email' },
+                {
+                    data: 'book_id',
+                    render: function (data, type, row) {
+                        return `<button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#account-edit-modal" data-id="${data}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" data-id="${data}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>`;
+                    }, className: 'text-center'
+                }
+            ]
 
-        $('#save-button').click(function () {
-            console.log("Form saved");
-            // $('#account-edit-form').submit();
         });
     });
 

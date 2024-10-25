@@ -337,6 +337,20 @@ def GetBookInfo(request):
         return JsonResponse(data)
     except Book.DoesNotExist:
         return JsonResponse({'error': 'Book not found'}, status=404)
+    
+@login_required(login_url='login')
+def GetAccounts(request):
+    if request.method == 'GET':
+        accountList = list(CustomUser.objects.select_related('status').values(
+            
+            'first_name',
+            'last_name', 
+            'id_number', 
+            'cellphone_number', 
+            'email',
+            'is_active'
+        ))
+        return JsonResponse({'accounts': accountList})
 
 @login_required(login_url='login')
 def UpdateBook(request):
