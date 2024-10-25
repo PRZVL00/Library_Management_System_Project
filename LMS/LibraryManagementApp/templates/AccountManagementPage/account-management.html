@@ -10,7 +10,8 @@
 </head>
 
 <body class='d-flex flex-column vh-100'>
-    <script src={% static "assets/static/js/initTheme.js" %}></script>
+    <script src={% static 'assets/static/js/initTheme.js' %}></script>
+
     <div id="app">
         {% include "_sideNavigation.html" %}
         <div id="main">
@@ -48,7 +49,7 @@
                             <tr>
                                 <th class="text-start">First Name</th>
                                 <th class="text-start">Last Name</th>
-                                <th class="text-start">Student ID #</th>
+                                <th class="text-start">Student ID#</th>
                                 <th class="text-start">Contact #</th>
                                 <th class="text-start">Email</th>
                                 <th class="text-center">Action</th>
@@ -70,7 +71,12 @@
 
 </html>
 
+
 <script>
+
+    let categoriesFetched = false;
+    let selectedCategories;
+
     $(document).ready(function () {
         $('#accountManagement').DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
@@ -91,20 +97,163 @@
                 { data: 'cellphone_number', className: 'text-start' },
                 { data: 'email' },
                 {
-                    data: 'book_id',
+                    data: 'id',
                     render: function (data, type, row) {
                         return `<button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#account-edit-modal" data-id="${data}">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm" data-id="${data}">
-                                        <i class="bi bi-trash"></i>
-                                    </button>`;
+                                            data-bs-target="#account-edit-modal" data-id="${data}" id="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" data-id="${data}" id='removeBook'>
+                                            <i class="bi bi-trash"></i>
+                                        </button>`;
                     }, className: 'text-center'
                 }
             ]
 
         });
-    });
 
+        $.ajax({
+            url: "{% url 'get-accounts' %}",
+            type: 'GET',
+            success: function (response) {
+                const accounts = response.accounts;
+            },
+            error: function (xhr, status, error) {
+                alert("An error occurred: " + error);
+            }
+        });
+
+        // Register FilePond plugins
+        FilePond.registerPlugin(
+            FilePondPluginImagePreview,
+            FilePondPluginImageCrop,
+            FilePondPluginImageExifOrientation,
+            FilePondPluginImageFilter,
+            FilePondPluginImageResize,
+            FilePondPluginFileValidateSize,
+            FilePondPluginFileValidateType
+        );
+
+        // Initialize FilePond
+        const pond = FilePond.create(document.querySelector(".image-resize-filepond"), {
+            credits: null,
+            allowImagePreview: true,
+            allowImageFilter: false,
+            allowImageExifOrientation: false,
+            allowImageCrop: false,
+            allowImageResize: true,
+            imageResizeTargetWidth: 200,
+            imageResizeTargetHeight: 200,
+            imageResizeMode: "cover",
+            imageResizeUpscale: true,
+            acceptedFileTypes: ["image/png", "image/jpg", "image/jpeg"],
+            fileValidateTypeDetectType: (source, type) =>
+                new Promise((resolve, reject) => {
+                    // Do custom type detection here and return with promise
+                    resolve(type);
+                }),
+            storeAsFile: true
+        });
+
+        // Clear button functionality
+        $('#clearBtn').click(function () {
+            // Clear all text inputs
+            $('input[type="text"], input[type="number"], input[type="file"]').val('');
+
+            // Clear all textareas
+            $('textarea').val('');
+
+            // Reset all select elements
+            $('select').prop('selectedIndex', 0);
+
+            pond.removeFiles(); // Clears all uploaded and pending files
+        });
+
+        $(document).on('click', '#Edit', function () {
+            var dataId = $(this).data('id');
+
+            // First AJAX request to get the book details
+            $.ajax({
+                url: '/get-account-info/',  // Adjust this URL if needed
+                type: 'GET',
+                data: {
+                    'id': dataId
+                },
+                success: function (response) {
+                    pond.addFile(response.image_url).then(file => {
+                        console.log('File has been loaded', file);
+                    }).catch(error => {
+                        console.error('Error loading file:', error);
+                    });
+
+                    $('#accountID').val(response.account_id)
+                    $('#firstName').val(response.first_name);
+                    $('#lastName').val(response.last_name);
+                    $('#studentID').val(response.id_number);
+                    $('#contactNumber').val(response.cellphone_number);
+                    $('#email').val(response.email);
+
+                    // Open the modal after the form is populated
+                    $('#book-edit-modal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching book info:', error);
+                }
+            });
+        });
+
+        $('#submitBTN').click(function () {
+            $('#accountEditForm').submit();
+        });
+
+        $('#accountEditForm').submit(function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: "{% url 'update-account' %}",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.isSuccess == 'true') {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Account updated successfully",
+                        })
+
+                        $('#accountEditForm').find('input[type="text"], input[type="number"], input[type="file"]').val('');
+                        $('#accountEditForm').find('textarea').val('');
+                        $('#accountEditForm').find('select').prop('selectedIndex', 0);
+                        categoriesChoice.removeActiveItems();
+                        pond.removeFiles();
+
+                    } else {
+                        Toastify({
+                            text: response.message,
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "#dc3545",
+                            },
+                            stopOnFocus: true,
+                        }).showToast();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
+        
+
+    });
 </script>
