@@ -139,7 +139,7 @@ def BookCollection(request):
 @login_required(login_url='login')
 def LoadBooks(request):
     # Get all books, or filter based on user input if needed
-    books = Book.objects.all()
+    books = Book.objects.exclude(status__in=[3, 4])
     
     # Pagination
     page_number = request.GET.get('page', 1)  # Get page number from request
