@@ -73,6 +73,10 @@
 
 
 <script>
+
+    let categoriesFetched = false;
+    let selectedCategories;
+
     $(document).ready(function () {
         $('#bookManagememt').DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
@@ -95,16 +99,16 @@
                     data: 'book_id',
                     render: function (data, type, row) {
                         return `<button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
-                                        <i class="bi bi-info-circle"></i>
-                                    </button>
-                                    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#book-edit-modal" data-id="${data}">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm" data-id="${data}">
-                                        <i class="bi bi-trash"></i>
-                                    </button>`;
+                                            data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
+                                            <i class="bi bi-info-circle"></i>
+                                        </button>
+                                        <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#book-edit-modal" data-id="${data}" id="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm" data-id="${data}" id='removeBook'>
+                                            <i class="bi bi-trash"></i>
+                                        </button>`;
                     }, className: 'text-center'
                 }
             ]
@@ -157,17 +161,35 @@
         // Add additional author input fields
         $('#addAuthorBtn').on('click', function () {
             const newAuthorField = `
-                <div class="input-group col-6 mb-2">
-                    <input type="text" class="form-control" name="author[]" placeholder="Enter author name">
-                    <button class="btn btn-outline-secondary remove-author-btn" type="button">-</button>
-                </div>
-            `;
+                    <div class="input-group col-6 mb-2">
+                        <input type="text" class="form-control" name="author[]" placeholder="Enter author name">
+                        <button class="btn btn-outline-secondary remove-author-btn" type="button">-</button>
+                    </div>
+                `;
             $('#authorContainer').append(newAuthorField);
 
             // Remove author input field
             $('#authorContainer').on('click', '.remove-author-btn', function () {
                 $(this).closest('.input-group').remove();
             });
+        });
+
+        // Initialize Choices.js for the categories select element
+        const categoriesChoice = new Choices('#categories', {
+            removeItemButton: true,
+            delimiter: ',',
+            maxItemCount: -1,
+            searchEnabled: true,
+            editItems: true,
+        });
+
+        categoriesChoice.passedElement.element.addEventListener('showDropdown', function () {
+            console.log('Dropdown is opened');
+            // This event won't trigger category population again since `setChoices()` is already handled in the Edit button click
+            if (!categoriesFetched) {
+                GetCategory();  // Only fetches categories if not done yet
+                categoriesFetched = true;
+            }
         });
 
         // Clear button functionality
@@ -224,5 +246,223 @@
             });
         });
 
+
+        $(document).on('click', '#Edit', function () {
+            var dataId = $(this).data('id');
+
+            // First AJAX request to get the book details
+            $.ajax({
+                url: '/get-book-info/',  // Adjust this URL if needed
+                type: 'GET',
+                data: {
+                    'id': dataId
+                },
+                success: function (response) {
+                    pond.addFile(response.image_url).then(file => {
+                        console.log('File has been loaded', file);
+                    }).catch(error => {
+                        console.error('Error loading file:', error);
+                    });
+
+                    $('#bookID').val(response.book_id)
+                    $('#bookTitle').val(response.title);
+                    $('#isbn').val(response.isbn);
+                    $('#publisher').val(response.publisher);
+                    $('#year').val(response.year);
+
+                    // Populate authors dynamically
+                    $('#authorContainer').empty();
+                    $.each(response.authors, function (index, author) {
+                        var authorInput = `<div class="input-group col-12 mb-2">
+                                                <button class="btn btn-primary" type="button" id="addAuthorBtn">+</button>
+                                                <input type="text" class="form-control" name="author[]" value="${author}" required>
+                                            </div>`;
+                        $('#authorContainer').append(authorInput);
+                    });
+
+                    $('#location').val(response.location);
+                    $('#status').val(response.status);
+                    $('#borrowingDuration').val(response.duration);
+                    $('#fine').val(response.late_fee);
+
+                    selectedCategories = response.categories;
+
+                    categoriesChoice.clearStore();  // Clears previous categories to avoid duplicates
+
+                    // Fetch all available categories and set the choices
+                    $.ajax({
+                        url: "{% url 'get-categories' %}",  // Adjust the URL if needed
+                        type: 'GET',
+                        success: function (response) {
+                            const categories = response.categories;
+
+                            // Populate the Choices dropdown with all categories
+                            categoriesChoice.setChoices(
+                                categories.map(category => ({
+                                    value: category.category_id,
+                                    label: category.category_name,
+                                    selected: selectedCategories.includes(category.category_id),
+                                    disabled: false
+                                })),
+                                'value',
+                                'label',
+                                false
+                            );
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error fetching categories:', error);
+                        }
+                    });
+                    
+
+                    $('#summary').val(response.summary);
+
+                    // Check if there's an existing soft copy and display the link
+                    if (response.soft_copy) {
+                        $('#currentFile').html(
+                            `<a href="${response.soft_copy}" target="_blank">View current digital copy</a>`
+                        );
+                    } else {
+                        $('#currentFile').empty();  // If no file exists, clear any previous content
+                    }
+
+                    // Open the modal after the form is populated
+                    $('#book-edit-modal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching book info:', error);
+                }
+            });
+        });
+
+        $('#submitBTN').click(function () {
+            $('#bookEditForm').submit();
+        });
+
+        $('#bookEditForm').submit(function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: "{% url 'update-book' %}",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.isSuccess == 'true') {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Book updated successfully",
+                        })
+
+                        $('#bookEditForm').find('input[type="text"], input[type="number"], input[type="file"]').val('');
+                        $('#bookEditForm').find('textarea').val('');
+                        $('#bookEditForm').find('select').prop('selectedIndex', 0);
+                        categoriesChoice.removeActiveItems();
+                        pond.removeFiles();
+
+                    } else {
+                        Toastify({
+                            text: response.message,
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "#dc3545",
+                            },
+                            stopOnFocus: true,
+                        }).showToast();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
+        $(document).on('click', '#removeBook', function () {
+            const bookId = $(this).data('id'); // Get the book ID from the button
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to remove this book?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with AJAX call to delete the book
+                    $.ajax({
+                        url: "{% url 'remove-book' %}",  // Replace with your actual URL for removing the book
+                        type: 'POST',
+                        data: {
+                            'book_id': bookId,
+                            'csrfmiddlewaretoken': '{{ csrf_token }}' // Include CSRF token
+                        },
+                        success: function (response) {
+                            if (response.isSuccess) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    'The book has been removed.',
+                                    'success'
+                                );
+                                // Refresh the DataTable or remove the row from the table
+                                $('#bookManagememt').DataTable().ajax.reload(); // Reload the DataTable
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    response.message,
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            Swal.fire(
+                                'Error!',
+                                'An error occurred while deleting the book.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+
+        function GetCategory() {
+            $.ajax({
+                url: "{% url 'get-categories' %}",
+                type: 'GET',
+                success: function (response) {
+                    const categories = response.categories;  // Full list of categories
+
+                    categoriesChoice.removeActiveItems();
+                    categoriesChoice.clearChoices();
+
+                    // Populate the Choices dropdown with all categories
+                    categoriesChoice.setChoices(
+                        categories.map(category => ({
+                            value: category.category_id,
+                            label: category.category_name,
+                            selected: selectedCategories.includes(category.category_id),  // Mark as selected if the category is in the selectedCategories list
+                            disabled: false
+                        })),
+                        'value',
+                        'label',
+                        false
+                    );
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        }
     });
 </script>
