@@ -84,15 +84,40 @@
         $('#by-table-tab').on('shown.bs.tab', function () {
             // Check if the DataTable has already been initialized
             if (!tableInitialized) {
-                $('#book-table').DataTable({
+                $('#bookTable').DataTable({
                     dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
                         'rt' +
                         '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
                     buttons: ['copy', 'excel', 'pdf'],
                     responsive: false,
-                    scrollX: true
+                    scrollX: true,
+                    ajax: {
+                        url: "{% url 'get-books' %}",
+                        type: 'GET',
+                        dataSrc: 'books'
+                    },
+                    columns: [
+                        { data: 'title' },
+                        { data: 'year', className: 'text-start' },
+                        { data: 'isbn', className: 'text-start' },
+                        { data: 'location' },
+                        { data: 'late_fee', className: 'text-start' },
+                        {
+                            data: 'book_id',
+                            render: function (data, type, row) {
+                                return `<button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
+                                                <i class="bi bi-info-circle"></i>
+                                            </button>
+                                            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                                                data-bs-target="#book-edit-modal" data-id="${data}">
+                                                <i class="bi bi-backpack"></i>
+                                            </button>`;
+                            }, className: 'text-center'
+                        }
+                    ]
+        
                 });
-                // Mark the DataTable as initialized
                 tableInitialized = true;
             }
         });
@@ -136,6 +161,75 @@
                 loadBooks(currentPage + 1);
             });
         }
+
+        function GetCategory() {
+            $.ajax({
+                url: "{% url 'get-categories' %}",
+                type: 'GET',
+                success: function (response) {
+                    const categories = response.categories;
+
+                    // Clear existing Choices.js options
+                    categoriesChoice.clearChoices();
+
+                    // Add new options to Choices.js
+                    categoriesChoice.setChoices(
+                        categories.map(category => ({
+                            value: category.category_id,
+                            label: category.category_name,
+                            selected: false,
+                            disabled: false,
+                        })),
+                        'value',
+                        'label',
+                        false
+                    );
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        }
+
+        $(document).on('click', '#MoreInfo', function () {
+            var dataId = $(this).data('id'); // Get the data-id from the button
+
+            // Make an AJAX request to fetch the book details
+            $.ajax({
+                url: '/get-book-info/', // Replace with your actual URL for fetching book details
+                type: 'GET',
+                data: {
+                    'id': dataId
+                },
+                success: function (response) {
+                    // Populate the modal fields with data from the response
+                    $('#book-info').text(response.title);
+                    $('#book-year').text('Year: ' + response.year);
+                    $('#book-isbn').text('ISBN: ' + response.isbn);
+                    $('#book-location').text('Location: ' + response.location);
+                    $('#book-late-fee').text('Late fee: ₱' + response.late_fee);
+
+                    // Update authors list
+                    var authorsHtml = '';
+                    response.authors.forEach(function (author) {
+                        authorsHtml += `<li>${author}</li>`;
+                    });
+                    $('#book-authors').html(authorsHtml);
+
+                    // Update book image
+                    $('#book-image').attr('src', response.image_url);
+
+                    // Update summary
+                    $('#book-summary').text(response.summary);
+
+                    // Show the modal
+                    $('#book-info-modal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        });
 
     });    
 </script>

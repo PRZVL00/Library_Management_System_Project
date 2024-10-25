@@ -303,7 +303,10 @@ def GetBooks(request):
             'title', 
             'publisher', 
             'year', 
-            'status__status_name'  # Fetching status name directly
+            'status__status_name',
+            'isbn',
+            'location',
+            'late_fee'
         ))
         return JsonResponse({'books': bookList})
 
@@ -311,18 +314,26 @@ def GetBookInfo(request):
     book_id = request.GET.get('id')
     try:
         book = Book.objects.get(book_id=book_id)
-        # Fetch authors related to the book
         authors = BookAuthor.objects.filter(book=book).values_list('author', flat=True)
+        categories = BookCategory.objects.filter(book=book).values_list('category_id', flat=True)
+
         data = {
-            'title': book.title,
-            'year': book.year,
-            'isbn': book.isbn,
-            'location': book.location,
-            'late_fee': book.late_fee,
-            'authors': list(authors),
+            'book_id': book.book_id,
             'image_url': book.image.url, 
+            'title': book.title,
+            'isbn': book.isbn,
+            'publisher': book.publisher,
+            'year': book.year,
+            'authors': list(authors),
+            'location': book.location,
+            'status': book.status_id,
+            'duration': book.duration,
+            'late_fee': book.late_fee,
+            'categories': list(categories),  # Now just returning the category IDs
+            'soft_copy': book.soft_copy.url,
             'summary': book.summary
         }
+
         return JsonResponse(data)
     except Book.DoesNotExist:
         return JsonResponse({'error': 'Book not found'}, status=404)
@@ -340,6 +351,70 @@ def GetAccounts(request):
             'is_active'
         ))
         return JsonResponse({'accounts': accountList})
+
+@login_required(login_url='login')
+def UpdateBook(request):
+    if request.method == 'POST':
+        book_id = request.POST.get('bookID')  # Ensure you have the book ID in your form
+        book = Book.objects.get(book_id=book_id)
+
+        # Update the fields from the request
+        book.title = request.POST.get('bookTitle')
+        book.publisher = request.POST.get('publisher')
+        book.year = request.POST.get('year')
+        book.location = request.POST.get('location')
+        book.late_fee = request.POST.get('fine')
+        book.duration = request.POST.get('duration')
+        book.summary = request.POST.get('summary')
+
+        # Handle image upload if provided
+        if 'bookPic' in request.FILES:
+            book.image = request.FILES['bookPic']
+        if 'softcopy' in request.FILES:
+            book.soft_copy = request.FILES['softcopy']
+        
+        # Save the book
+        book.save()
+
+        # Clear existing authors and categories, if necessary
+        BookAuthor.objects.filter(book=book).delete()
+        BookCategory.objects.filter(book=book).delete()
+
+        # Update authors
+        authors = request.POST.getlist('author[]')
+        for author in authors:
+            BookAuthor.objects.create(book=book, author=author)
+            
+        # Update categories
+        categories = request.POST.getlist('categories')
+
+        print(categories)
+        for category_id in categories:
+            category = DimCategory.objects.get(category_id=category_id)
+            BookCategory.objects.create(book_id=book_id, category_id=category.category_id)
+
+        return JsonResponse({'isSuccess': 'true', 'message': 'Category added successfuly.'})            
+
+    return JsonResponse({'isSuccess': 'false', 'message': 'Book update unsuccessful. please try again.'})            
+
+@login_required(login_url='login')
+def RemoveBook(request):
+    if request.method == 'POST':
+        book_id = request.POST.get('book_id')
+
+        try:
+            book = Book.objects.get(book_id=book_id)
+            book.status_id = 4  # Assuming 4 is the ID for "deleted" status
+            book.save()
+
+            return JsonResponse({'isSuccess': True})
+
+        except Book.DoesNotExist:
+            return JsonResponse({'isSuccess': False, 'message': 'Book not found.'})
+        except Exception as e:
+            return JsonResponse({'isSuccess': False, 'message': str(e)})
+
+    return JsonResponse({'isSuccess': False, 'message': 'Invalid request method.'})
 
 @login_required(login_url='login')
 def TransactionHistory(request):

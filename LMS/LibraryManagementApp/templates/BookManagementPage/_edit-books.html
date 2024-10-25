@@ -12,31 +12,39 @@
             </div>
             <div class="modal-body">
                 <div class="container">
-                    <form>
+                    <form id="bookEditForm" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
                         <div class="row">
                             <!-- Image Upload - Full Row -->
+                            <input type="number" id="bookID" name="bookID" hidden>
                             <div class="col-12 mb-3">
                                 <label for="imageUpload" class="form-label">Upload Image</label>
                                 <input type="file" class="image-resize-filepond form-control" id="imageUpload"
-                                    placeholder="Upload Image">
+                                    placeholder="Upload Image" name="bookPic" required>
                             </div>
 
                             <!-- Title - Full Row -->
-                            <div class="col-12 mb-3">
+                            <div class="col-8 mb-3">
                                 <label for="bookTitle" class="form-label">Title of the Book</label>
                                 <input type="text" class="form-control" id="bookTitle"
-                                    placeholder="Enter the title of the book">
+                                    placeholder="Enter the title of the book" name="bookTitle" required>
+                            </div>
+                            <div class="col-4 mb-3">
+                                <label for="isbn" class="form-label">ISBN</label>
+                                <input type="text" class="form-control" id="isbn"
+                                    placeholder="Enter the isbn of the book" name="isbn" required disabled>
                             </div>
 
                             <!-- Publisher (3/4) and Year (1/4) -->
                             <div class="col-md-9 mb-3">
                                 <label for="publisher" class="form-label">Publisher</label>
-                                <input type="text" class="form-control" id="publisher"
-                                    placeholder="Enter the publisher">
+                                <input type="text" class="form-control" id="publisher" placeholder="Enter the publisher"
+                                    name="publisher" required>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label for="year" class="form-label">Year</label>
-                                <input type="number" class="form-control" id="year" placeholder="Enter the year">
+                                <input type="number" class="form-control" id="year" placeholder="Enter the year"
+                                    name="year" required>
                             </div>
 
                             <!-- Author(s) - Full Row with Dynamic Adjustment -->
@@ -44,45 +52,74 @@
                                 <label class="form-label">Author(s)</label>
                                 <div id="authorContainer" class="row">
                                     <div class="input-group col-12 mb-2">
-                                        <input type="text" class="form-control" name="author[]"
-                                            placeholder="Enter author name">
                                         <button class="btn btn-primary" type="button" id="addAuthorBtn">+</button>
+                                        <input type="text" class="form-control" name="author[]"
+                                            placeholder="Enter author name" required>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Location (1/2) and Status (1/2) -->
-                            <div class="col-md-6 mb-3">
+                            <!-- Location (1/4), Status (1/4), Borrowing Duration (1/4), Fine (1/4) -->
+                            <div class="col-md-3 mb-3">
                                 <label for="location" class="form-label">Location</label>
-                                <input type="text" class="form-control" id="location" placeholder="Enter location">
+                                <input type="text" class="form-control" id="location" placeholder="Enter location"
+                                    name="location">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label for="status" class="form-label">Status</label>
-                                <select class="form-select" id="status">
+                                <select class="form-select" id="status" required name="status">
                                     <option selected>Status</option>
-                                    <option>Available</option>
-                                    <option>Not Available</option>
-                                    <option>Under Maintenance</option>
+                                    <option value="1">Available</option>
+                                    <option value="2">Not Available</option>
+                                    <option value="3">Under Maintenance</option>
                                 </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="borrowingDuration" class="form-label">Borrowing Duration (Days)</label>
+                                <input type="number" class="form-control" id="borrowingDuration"
+                                    placeholder="Enter duration in days" name="duration">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="fine" class="form-label">Fine per Late Day</label>
+                                <input type="number" step="0.01" class="form-control" id="fine"
+                                    placeholder="Enter fine amount" required name="fine">
                             </div>
 
                             <!-- File Upload for Digital Copy - Full Row -->
                             <div class="col-12 mb-3">
                                 <label for="fileUpload" class="form-label">Digital Copy</label>
-                                <input class="form-control" type="file" id="fileUpload"
-                                    placeholder="Upload digital copy">
+
+                                <!-- Check if the book already has a soft copy -->
+                                <input class="form-control" type="file" id="fileUpload" name="softcopy">
+
+                                <!-- Display a link to the current digital copy -->
+                                <div id="currentFile" class="mt-2">
+                                    <!-- This will be populated by JavaScript with the current file link -->
+                                </div>
                             </div>
+
+
+                            <!-- Categories and Add New Category Button -->
+                            <div class="row mb-3">
+                                <label for="categories" class="form-label">Categories</label>
+                                <div class="col-md-12 d-flex align-items-center">
+                                    <button class="btn btn-primary" type="button" id="addAuthorBtn"
+                                        data-bs-toggle="modal" data-bs-target="#add-category-modal" disabled>+</button>
+                                    <div class="ms-2 w-100">
+                                        <select class="choices form-select W-100" multiple="multiple" required
+                                            id="categories" name="categories">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+
 
                             <!-- Summary - Full Row -->
                             <div class="col-12 mb-3">
                                 <label for="summary" class="form-label">Summary</label>
-                                <textarea class="form-control" id="summary" placeholder="Enter a summary"
-                                    rows="5"></textarea>
-                            </div>
-
-                            <div class="col-12 mb-3 text-end">
-                                <button type="button" class="btn btn-primary me-2" id="saveBtn">Save</button>
-                                <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
+                                <textarea class="form-control" id="summary" placeholder="Enter a summary" rows="5"
+                                    required name="summary"></textarea>
                             </div>
                         </div>
                     </form>
@@ -94,7 +131,7 @@
                     <i class="bx bx-x d-block d-sm-none"></i>
                     <span class="d-none d-sm-block">Close</span>
                 </button>
-                <button type="button" class="btn btn-primary ms-1" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-primary ms-1" data-bs-dismiss="modal" id="submitBTN">
                     <i class="bx bx-check d-block d-sm-none"></i>
                     <span class="d-none d-sm-block">Save</span>
                 </button>
