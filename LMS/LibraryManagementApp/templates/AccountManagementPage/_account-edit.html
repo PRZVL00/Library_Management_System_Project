@@ -1,6 +1,6 @@
 {% load static %}
 <div class="modal fade" id="account-edit-modal" tabindex="-1" role="dialog" aria-labelledby="account-info" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-centered modal-dialog-scrollable"
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
         role="document">
         <div class="modal-content">
             <div class="modal-header my--3">
@@ -15,46 +15,65 @@
                     <form id="accountEditForm" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="row">
-                            <!-- Profile Picture-->
-                            <input type="number" id="accountID" name="accountID" hidden>
-                            <div class="mb-4 text-center">
-                                <label for="imageUpload" class="form-label">Edit Image</label>
-                                <input type="file" class="image-resize-filepond form-control" id="imageUpload"
-                                    placeholder="Upload Image" name="accountPic" required>
-                                <span class="badge bg-success">Active</span>
-                            </div>
+                            <div class="col-7 col-sm-7 col-md-7 col-lg-7 col-xl-7">
+                                <input type="number" id="accountID" name="accountID" hidden>
+                                
+                                <!-- First Name -->
+                                <div class="mb-3">
+                                    <label for="firstName" class="form-label mb-1">First Name:</label>
+                                    <input type="text" class="form-control" id="firstName"
+                                        placeholder="Enter first name" name="firstName" required>
+                                </div>
 
-                            <!-- First Name and Last Name -->
-                            <div class="col-md-6 mb-3">
-                                <label for="firstName" class="form-label">First Name</label>
-                                <input type="text" class="form-control" id="firstName"
-                                    placeholder="Enter first name" name="firstName" required>
-                            </div>
+                                <!-- Last Name -->
+                                <div class="mb-3">
+                                    <label for="lastName" class="form-label mb-1">Last Name:</label>
+                                    <input type="text" class="form-control" id="lastName"
+                                        placeholder="Enter first name" name="lastName" required>
+                                </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="lastName" class="form-label">Last Name</label>
-                                <input type="text" class="form-control" id="lastName"
-                                    placeholder="Enter first name" name="lastName" required>
-                            </div>
+                                <!-- Student ID -->
+                                <div class="mb-3">
+                                    <label for="studentID" class="form-label mb-1">Student ID:</label>
+                                    <input type="text" class="form-control" id="studentID"
+                                        placeholder="Enter first name" name="studentID" required>
+                                </div>
 
-                            <!-- Student ID and Contact Number -->
-                            <div class="col-md-6 mb-3">
-                                <label for="studentID" class="form-label">Student ID</label>
-                                <input type="text" class="form-control" id="studentID"
-                                    placeholder="Enter first name" name="studentID" required>
-                            </div>
+                                <!-- Contact Number -->
+                                <div class="mb-3">
+                                    <label for="contactNumber" class="form-label mb-1">Contact Number:</label>
+                                    <input type="number" class="form-control" id="contactNumber" placeholder="Enter the contact number"
+                                        name="contactNumber" required>
+                                </div>
+                                
+                                <!-- Email -->
+                                <div class="mb-3">
+                                    <label for="email" class="form-label mb-1">Email:</label>
+                                    <input type="text" class="form-control" id="email"
+                                        placeholder="Enter first name" name="email" required>
+                                </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label for="contactNumber" class="form-label">Contact Number</label>
-                                <input type="number" class="form-control" id="contactNumber" placeholder="Enter the contact number"
-                                    name="contactNumber" required>
+                                <!-- Status -->
+                                <div class="mb-3">
+                                    <label for="inputGroupSelect01" class="form-label mb-1">Role:</label>
+                                    <select class="form-select" id="inputGroupSelect01">
+                                        <option selected>Choose...</option>
+                                        <option value="1">Admin</option>
+                                        <option value="2">Student</option>
+                                    </select>
+                                </div>
+
+                                <!-- Password Reset -->
+                                <button type="button" class="btn btn-sm btn-outline-danger w-100" id="resetBTN">Reset Password</button>
+
+
                             </div>
                             
-                            <!-- Email -->
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="text" class="form-control" id="email"
-                                    placeholder="Enter first name" name="email" required>
+                            <!-- Profile Picture-->
+                            <div  class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5 d-flex flex-column align-items-center text-center">
+                                <input type="file" class="image-resize-filepond form-control" style="width: 150px; height: 200px;" id="imageUpload"
+                                    name="accountPic"  required>
+                                <span class="badge bg-success">Active</span>
                             </div>
                         </div>
                     </form>
