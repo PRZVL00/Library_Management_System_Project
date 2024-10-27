@@ -289,6 +289,12 @@ def GetCategories(request):
     if request.method == 'GET':
         categoryList = list(DimCategory.objects.values())
         return JsonResponse({'categories': categoryList})
+    
+@login_required(login_url='login')
+def GetStatus(request):
+    if request.method == 'GET':
+        statusList = list(DimStatus.objects.values())
+        return JsonResponse({'status': statusList})
 
 
 @login_required(login_url='login')
@@ -315,6 +321,7 @@ def GetBookInfo(request):
     try:
         book = Book.objects.get(book_id=book_id)
         authors = BookAuthor.objects.filter(book=book).values_list('author', flat=True)
+        status = DimStatus.objects.filter(book=book).values_list('status_id', flat=True)
         categories = BookCategory.objects.filter(book=book).values_list('category_id', flat=True)
 
         data = {
@@ -326,7 +333,7 @@ def GetBookInfo(request):
             'year': book.year,
             'authors': list(authors),
             'location': book.location,
-            'status': book.status_id,
+            'status': list(status),
             'duration': book.duration,
             'late_fee': book.late_fee,
             'categories': list(categories),  # Now just returning the category IDs
@@ -338,19 +345,6 @@ def GetBookInfo(request):
     except Book.DoesNotExist:
         return JsonResponse({'error': 'Book not found'}, status=404)
     
-@login_required(login_url='login')
-def GetAccounts(request):
-    if request.method == 'GET':
-        accountList = list(CustomUser.objects.select_related('status').values(
-            'id',
-            'first_name',
-            'last_name', 
-            'id_number', 
-            'cellphone_number', 
-            'email',
-            'is_active'
-        ))
-        return JsonResponse({'accounts': accountList})
 
 @login_required(login_url='login')
 def UpdateBook(request):
@@ -364,6 +358,7 @@ def UpdateBook(request):
         book.year = request.POST.get('year')
         book.location = request.POST.get('location')
         book.late_fee = request.POST.get('fine')
+        book.status_id = request.POST.get('status')
         book.duration = request.POST.get('duration')
         book.summary = request.POST.get('summary')
 
@@ -415,6 +410,20 @@ def RemoveBook(request):
             return JsonResponse({'isSuccess': False, 'message': str(e)})
 
     return JsonResponse({'isSuccess': False, 'message': 'Invalid request method.'})
+
+@login_required(login_url='login')
+def GetAccounts(request):
+    if request.method == 'GET':
+        accountList = list(CustomUser.objects.select_related('status').values(
+            'id',
+            'first_name',
+            'last_name', 
+            'id_number', 
+            'cellphone_number', 
+            'email',
+            'is_active'
+        ))
+        return JsonResponse({'accounts': accountList})
 
 def GetAccountInfo(request):
     account_id = request.GET.get('id')

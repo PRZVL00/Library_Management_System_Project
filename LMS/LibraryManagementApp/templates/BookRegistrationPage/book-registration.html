@@ -94,11 +94,7 @@
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label for="status" class="form-label">Status</label>
-                                <select class="form-select" id="status" required name="status">
-                                    <option selected>Status</option>
-                                    <option value="1">Available</option>
-                                    <option value="2">Not Available</option>
-                                    <option value="3">Under Maintenance</option>
+                                <select class="form-select" required id="status" name="status">
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
@@ -224,12 +220,26 @@
             GetCategory();
         });
 
+        const statusChoice = new Choices('#status', {
+
+        });
+
+        let existingStatus = new Set();
+
+        statusChoice.passedElement.element.addEventListener('showDropdown', function () {
+            console.log('Dropdown is opened');
+            console.log('No existing categories');
+            GetStatus();
+        });
+
+
         $('#clearBtn').click(function () {
             $('input[type="text"], input[type="number"], input[type="file"]').val('');
             $('textarea').val('');
             $('select').prop('selectedIndex', 0);
             pond.removeFiles();
             categoriesChoice.removeActiveItems();
+            statusChoice.removeActiveItems();
         });
 
         $('#bookregistrationForm').submit(function (e) {
@@ -257,6 +267,7 @@
                         $('#bookregistrationForm').find('textarea').val('');
                         $('#bookregistrationForm').find('select').prop('selectedIndex', 0);
                         categoriesChoice.removeActiveItems();
+                        statusChoice.removeActiveItems();
                         pond.removeFiles();
 
                     } else {
@@ -348,6 +359,37 @@
                                 {
                                     value: category.category_id,
                                     label: category.category_name,
+                                    selected: false,
+                                    disabled: false,
+                                }
+                            ], 'value', 'label', false);
+                        }
+                    });
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        }
+
+        function GetStatus() {
+            $.ajax({
+                url: "{% url 'get-status' %}",
+                type: 'GET',
+                success: function (response) {
+                    const status = response.status;
+
+                    if (existingStatus.size === 0) {
+                        statusChoice.clearChoices();
+                    }
+
+                    status.forEach(status => {
+                        if (!existingStatus.has(status.status_id)) {
+                            existingStatus.add(status.status_id);
+                            statusChoice.setChoices([
+                                {
+                                    value: status.status_id,
+                                    label: status.status_name,
                                     selected: false,
                                     disabled: false,
                                 }

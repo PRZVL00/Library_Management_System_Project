@@ -24,6 +24,7 @@ urlpatterns = [
     path('register-book', views.RegisterBook, name="register-book"),
     path('add-category', views.AddCategory, name="add-category"),
     path('get-categories', views.GetCategories, name="get-categories"),
+    path('get-status', views.GetStatus, name="get-status"),
     path('book-management/', views.BookManagement, name="book-management"),
     path('get-books', views.GetBooks, name="get-books"),
     path('get-book-info/', views.GetBookInfo, name='get-book-info'),

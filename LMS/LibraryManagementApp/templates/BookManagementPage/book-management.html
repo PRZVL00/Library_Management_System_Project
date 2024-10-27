@@ -77,6 +77,8 @@
     let categoriesFetched = false;
     let selectedCategories;
 
+    let selectedStatus;
+
     $(document).ready(function () {
         $('#bookManagememt').DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
@@ -192,6 +194,11 @@
             }
         });
 
+        // Initialize Choices.js for the status select element
+        const statusChoice = new Choices('#status', {
+            
+        });
+
         // Clear button functionality
         $('#clearBtn').click(function () {
             // Clear all text inputs
@@ -281,7 +288,38 @@
                     });
 
                     $('#location').val(response.location);
-                    $('#status').val(response.status);
+
+                    
+                    selectedStatus = response.status;
+
+                    // Fetch all available status and set the choices
+                    $.ajax({
+                        url: "{% url 'get-status' %}",  // Adjust the URL if needed
+                        type: 'GET',
+                        success: function (response) {
+                            const status = response.status;
+
+                            statusChoice.removeActiveItems();
+                            statusChoice.clearChoices();
+
+                            // Populate the Choices dropdown with all status
+                            statusChoice.setChoices(
+                                status.map(status => ({
+                                    value: status.status_id,
+                                    label: status.status_name,
+                                    selected: selectedStatus.includes(status.status_id),
+                                    disabled: false
+                                })),
+                                'value',
+                                'label',
+                                false
+                            );
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error fetching status:', error);
+                        }
+                    });
+
                     $('#borrowingDuration').val(response.duration);
                     $('#fine').val(response.late_fee);
 
@@ -364,6 +402,7 @@
                         $('#bookEditForm').find('textarea').val('');
                         $('#bookEditForm').find('select').prop('selectedIndex', 0);
                         categoriesChoice.removeActiveItems();
+                        statusChoice.removeActiveItems();
                         pond.removeFiles();
 
                     } else {
