@@ -47,7 +47,7 @@
                             <div class="col-12 mb-3">
                                 <label for="imageUpload" class="form-label">Upload Image</label>
                                 <input type="file" class="image-resize-filepond form-control" id="imageUpload"
-                                    placeholder="Upload Image" name="bookPic" required>
+                                    placeholder="Upload Image" name="bookPic">
                             </div>
 
                             <!-- Title - Full Row -->
@@ -58,8 +58,14 @@
                             </div>
                             <div class="col-4 mb-3">
                                 <label for="isbn" class="form-label">ISBN</label>
-                                <input type="text" class="form-control" id="isbn"
-                                    placeholder="Enter the isbn of the book" name="isbn" required>
+                                <div id="isbnContainer" class="row">
+                                    <div class="input-group col-12 mb-2">
+                                        <button class="btn btn-primary" type="button" id="generate-isbn"><span
+                                                class="bi bi-shuffle"></span></button>
+                                        <input type="text" class="form-control" id="isbn"
+                                            placeholder="Enter the isbn of the book" name="isbn" required>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Publisher (3/4) and Year (1/4) -->
@@ -94,25 +100,30 @@
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label for="status" class="form-label">Status</label>
-                                <select class="form-select" required id="status" name="status">
+                                <select class="form-select" id="status" required name="status">
+                                    <option disabled selected hidden value="0">Status</option>
+                                    <option value="1">Available</option>
+                                    <option value="2">Under Maintenance</option>
                                 </select>
                             </div>
+
                             <div class="col-md-3 mb-3">
                                 <label for="borrowingDuration" class="form-label">Borrowing Duration (Days)</label>
                                 <input type="number" class="form-control" id="borrowingDuration"
-                                    placeholder="Enter duration in days" name="duration">
+                                    placeholder="Enter duration in days" name="duration" min="0">
                             </div>
+
                             <div class="col-md-3 mb-3">
                                 <label for="fine" class="form-label">Fine per Late Day</label>
                                 <input type="number" step="0.01" class="form-control" id="fine"
-                                    placeholder="Enter fine amount" required name="fine">
+                                    placeholder="Enter fine amount" name="fine" min="0">
                             </div>
 
                             <!-- File Upload for Digital Copy - Full Row -->
                             <div class="col-12 mb-3">
                                 <label for="fileUpload" class="form-label">Digital Copy</label>
                                 <input class="form-control" type="file" id="fileUpload"
-                                    placeholder="Upload digital copy" required name="softcopy">
+                                    placeholder="Upload digital copy" name="softcopy">
                             </div>
 
                             <!-- Categories and Add New Category Button -->
@@ -187,6 +198,62 @@
             storeAsFile: true
         });
 
+        $('#generate-isbn').click(function () {
+            let isbn = '';
+            for (let i = 0; i < 13; i++) {
+                let num = Math.floor(Math.random() * 10); // Random number from 0 to 9
+                if (num % 2 !== 0) { // Odd numbers
+                    switch (num) {
+                        case 1: isbn += 'A'; break;
+                        case 3: isbn += 'B'; break;
+                        case 5: isbn += 'C'; break;
+                        case 7: isbn += 'D'; break;
+                        case 9: isbn += 'E'; break;
+                        default: break; // This will never happen
+                    }
+                } else {
+                    isbn += num; // Even numbers
+                }
+            }
+            $('#isbn').val(isbn);
+        });
+
+        $('#isbn').blur(function () {
+            const isbn = $('#isbn').val();
+
+            if (isbn.length == 0 || isbn == null) {
+                return;
+            }
+
+            // AJAX request
+            $.ajax({
+                url: '{% url "check-ISBN" %}', // URL of the Django view
+                type: 'POST',
+                data: {
+                    'isbn': isbn,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}', // Django CSRF token
+                },
+                success: function (response) {
+                    // Handle response here
+                    if (response.isExist == 'true') {
+                        Swal.fire({
+                            icon: "info",
+                            title: "ISBN",
+                            text: response.message,
+                            showCancelButton: true,
+                        }).then((result) => {
+                            if (result.isDismissed) {
+                                $('#isbn').val('')
+                            }
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('AJAX error:', error);
+                }
+            });
+        });
+
         $('#addAuthorBtn').on('click', function () {
             const newAuthorField = `
                 <div class="input-group col-6 mb-2">
@@ -199,6 +266,35 @@
             $('#authorContainer').on('click', '.remove-author-btn', function () {
                 $(this).closest('.input-group').remove();
             });
+        });
+
+        // Restrict input for borrowingDuration and fine fields
+        $('#borrowingDuration, #fine').on('input', function () {
+            if ($(this).val() < 0) {
+                $(this).val(0);
+            }
+        });
+
+        // Prevent negative numbers from being typed
+        $('#borrowingDuration, #fine').on('keydown', function (e) {
+            // Allow backspace, delete, tab, escape, and enter
+            if ($.inArray(e.keyCode, [46, 8, 9, 27, 13]) !== -1 ||
+                // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                (e.keyCode === 65 && e.ctrlKey === true) ||
+                (e.keyCode === 67 && e.ctrlKey === true) ||
+                (e.keyCode === 86 && e.ctrlKey === true) ||
+                (e.keyCode === 88 && e.ctrlKey === true) ||
+                // Allow home, end, left, right, down, up
+                (e.keyCode >= 35 && e.keyCode <= 40)) {
+                // Do nothing
+                return;
+            }
+
+            // Ensure that it is a number and prevent negative or invalid characters
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) &&
+                (e.keyCode < 96 || e.keyCode > 105)) {
+                e.preventDefault();
+            }
         });
 
         // Initialize Choices.js for the categories select element
