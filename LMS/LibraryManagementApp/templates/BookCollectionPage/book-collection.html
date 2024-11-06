@@ -94,6 +94,9 @@
                     ajax: {
                         url: "{% url 'get-books' %}",
                         type: 'GET',
+                        data: function (d) {
+                            d.caller = "Others";  // Add this line to pass the caller parameter
+                        },
                         dataSrc: 'books'
                     },
                     columns: [
@@ -103,7 +106,7 @@
                         { data: 'location' },
                         { data: 'late_fee', className: 'text-start' },
                         {
-                            data: 'book_id',
+                            data: 'book_master_id',
                             render: function (data, type, row) {
                                 const infoButton = `<button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
                                 data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
@@ -228,6 +231,7 @@
                     if (response.image_url) {
                         $('#book-image').attr('src', response.image_url);
                     } else {
+
                         $('#book-image').attr('src', "{% static 'assets/static/images/No-Image-Placeholder.svg.png' %}");
                     }
 

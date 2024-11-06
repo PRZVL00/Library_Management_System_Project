@@ -25,6 +25,7 @@ from datetime import timedelta
 
 
 
+
 # Create your views here.
 def Login(request):
     return render(request, 'LogInPage/login.html', {})
@@ -66,11 +67,11 @@ def ResetPassSucc(request):
     return render(request, 'ForgotpasswordPage/ResetPassAuthPage/ResetPasswordPage/ResetPassSuccPage/ResetPassSucc.html', {})
 
 # Registration Page Functions
-@login_required(login_url='login')
+# @login_required(login_url='login')
 def Registration(request):
     return render(request, 'RegistrationPage/registration.html', {})
 
-@login_required(login_url='login')
+# @login_required(login_url='login')
 def RegisterUser(request):
     if request.method == 'POST':
         profile_picture = request.FILES.get('profilePicture')
@@ -157,15 +158,17 @@ def LoadBooks(request):
         is_archived=False  # Filter out archived books
     )
 
+
     current_datetime = datetime.now()
     print("Current datetime (no timezone):", current_datetime)
     
     # Pagination
     page_number = request.GET.get('page', 1)
     paginator = Paginator(bookmasters, 12)
+
     page_obj = paginator.get_page(page_number)
     
-    # Render only the book cards HTML
+    # Render only the bookmaster cards HTML
     html = render_to_string('BookCollectionPage/_by-cards.html', {'page_obj': page_obj})
     return JsonResponse({'html': html, 'has_next': page_obj.has_next()})
 
@@ -239,36 +242,76 @@ def RegisterBook(request):
         publisher = request.POST.get('publisher')
         year = request.POST.get('year')
         isbn = request.POST.get('isbn')  # Ensure to include the ISBN field
-        authors = request.POST.getlist('author[]')  # Handles multiple authors
+        authors = [author for author in request.POST.getlist('author[]') if author]  # Filters out empty or null authors
         location = request.POST.get('location')
         status_id = request.POST.get('status')  # Get the status ID directly
-        duration = request.POST.get('duration')
-        late_fee = request.POST.get('fine')
+        duration = (lambda x: -1 if not x else x)(request.POST.get('duration'))
+        late_fee = (lambda x: -1 if not x else x)(request.POST.get('fine'))
         summary = request.POST.get('summary')
         categories = request.POST.getlist('categories')  # Handles multiple categories
         
         # Handle file uploads
         book_pic = request.FILES.get('bookPic')
         soft_copy = request.FILES.get('softcopy')
+
+        print("Book Title:", book_title)
+        print("Publisher:", publisher)
+        print("Year:", year)
+        print("ISBN:", isbn)
+        print("Authors:", authors)
+        print("Location:", location)
+        print("Status ID:", status_id)
+        print("Duration:", duration)
+        print("Late Fee:", late_fee)
+        print("Summary:", summary)
+        print("Categories:", categories)
+        print("Book Picture:", book_pic)
+        print("Soft Copy:", soft_copy)
+
         
         try:
-            # Create and save the book instance
-            book = Book(
-                title=book_title,
-                publisher=publisher,
-                year=year,
-                isbn=isbn,
-                status_id=status_id,  # Use status_id to set ForeignKey
-                late_fee=late_fee,
-                duration=duration,
-                location=location,
-                qr_value='',  # Generate or calculate the QR value as needed
-                qr_image='',  # Handle QR image generation/upload separately
-                image=book_pic,
-                soft_copy=soft_copy,
-                summary=summary
-            )
-            book.save()
+            # Check if the ISBN already exists
+            existing_book = BookMaster.objects.filter(Q(isbn=isbn) & Q(is_archived = True)).first()
+
+            book_master_reference = None
+
+            if existing_book:
+                # If ISBN exists, create a new Book instance referencing it
+                book = Book(
+                    book_master=existing_book,
+                    status_id=status_id,
+                    qr_value='',  
+                    qr_image=''
+                )
+                book.save()
+
+                book_master_reference = existing_book
+
+            else:
+                # If ISBN doesn't exist, create a new BookMaster and Book instance
+                book_master = BookMaster(
+                    title=book_title,
+                    publisher=publisher,
+                    year=year,
+                    isbn=isbn,
+                    late_fee=late_fee,
+                    location=location,
+                    duration=duration,
+                    image=book_pic,
+                    summary=summary,
+                    soft_copy=soft_copy
+                )
+                book_master.save()
+
+                book = Book(
+                    book_master=book_master,
+                    status_id=status_id,
+                    qr_value='',  
+                    qr_image=''
+                )
+                book.save()
+
+                book_master_reference = book_master
 
             book.qr_value = f"QR-{book.book_id}-{book_title}-{year}-{isbn}"
             book.save()
@@ -284,11 +327,13 @@ def RegisterBook(request):
             # Save the QR code to the user's qr_image field
             book.qr_image.save(f'qr_{book.book_id}.png', ContentFile(qr_buffer.read()), save=True)
 
+            print('QR Code saved')
+
             # Save authors
             for author_name in authors:
                 if author_name:  # Ensure the author name is not empty
                     # Create and save the author relationship
-                    book_author = BookAuthor(author=author_name, book=book)  # Use the Book instance
+                    book_author = BookAuthor(author=author_name, book_master=book_master_reference)  # Use the Book instance
                     book_author.save()  # Save each author related to the book
 
             # Save categories
@@ -296,7 +341,7 @@ def RegisterBook(request):
                 if category_id:  # Ensure the category ID is not empty
                     # Create and save the book-category relationship
                     category = DimCategory.objects.get(category_id=category_id)
-                    book_category = BookCategory(book=book, category=category)  # Use the Book instance
+                    book_category = BookCategory(book_master=book_master_reference, category=category)  # Use the Book instance
                     book_category.save()  # Save each category related to the book
 
             # Return a JSON response indicating success
@@ -313,6 +358,21 @@ def RegisterBook(request):
 
     # If not POST, redirect or return an error
     return JsonResponse({'isSuccess': 'false', 'message': 'Invalid request method.'})
+
+@login_required(login_url='login')
+def CheckISBN(request):
+    if request.method == 'POST':
+        isbn = request.POST.get('isbn')
+
+        try:
+            if BookMaster.objects.filter(isbn = isbn).exists():
+                return JsonResponse({'isExist': 'true', 'message': 'This isbn is already exist. Do you wish to add another copy?'})
+            else:
+                return JsonResponse({'isExist': 'false'})
+
+        except:
+            pass
+
 
 @login_required(login_url='login')
 def AddCategory(request):
@@ -343,11 +403,21 @@ def GetCategories(request):
     if request.method == 'GET':
         categoryList = list(DimCategory.objects.values())
         return JsonResponse({'categories': categoryList})
+    
+@login_required(login_url='login')
+def GetStatus(request):
+    if request.method == 'GET':
+        statusList = list(DimStatus.objects.values())
+        return JsonResponse({'status': statusList})
 
 
 @login_required(login_url='login')
 def BookManagement(request):
     return render(request, 'BookManagementPage/book-management.html', {})
+
+
+# NOTE: FIX THIS
+from django.db.models import Prefetch
 
 @login_required(login_url='login')
 def GetBooks(request):
@@ -364,6 +434,7 @@ def GetBooks(request):
                         output_field=BooleanField()
                     )
                 ).values(
+
                     'book_master_id',
                     'title',
                     'publisher',
@@ -373,6 +444,7 @@ def GetBooks(request):
                     'late_fee',
                     'has_available_books',
                 ).distinct()
+              
             )
         else:
             # Get only books with at least one related Book with status 1
@@ -386,6 +458,7 @@ def GetBooks(request):
                         output_field=BooleanField()
                     )
                 ).values(
+
                     'book_master_id',
                     'title',
                     'publisher',
@@ -395,6 +468,7 @@ def GetBooks(request):
                     'late_fee',
                     'has_available_books',
                 ).distinct()
+
             )
         
         formatted_books = [
@@ -407,6 +481,7 @@ def GetBooks(request):
                 'location': book['location'],
                 'late_fee': book['late_fee'],
                 'has_available_books': book['has_available_books'],
+
             }
             for book in bookList
         ]
@@ -440,33 +515,43 @@ def GetBookMasterBooks(request):
             return JsonResponse({'error': 'BookMaster or Books not found'}, status=404)
 
 def GetBookInfo(request):
-    book_id = request.GET.get('id')
+    book_master_id = request.GET.get('id')
     try:
-        book = Book.objects.get(book_id=book_id)
-        authors = BookAuthor.objects.filter(book=book).values_list('author', flat=True)
-        categories = BookCategory.objects.filter(book=book).values_list('category_id', flat=True)
+        # Check if a BookMaster with the given ID has an associated Book with status 1
+        book_master = BookMaster.objects.filter(
+            book_master_id=book_master_id
+        ).distinct().first()
+
+        if not book_master:
+            return JsonResponse({'error': 'Book not found or does not have a book with status 1'}, status=404)
+
+        authors = BookAuthor.objects.filter(book_master=book_master_id).values_list('author', flat=True)
+        categories = BookCategory.objects.filter(book_master=book_master_id).values_list('category_id', flat=True)
+
 
         data = {
-            'book_id': book.book_id,
-            'image_url': book.image.url, 
-            'title': book.title,
-            'isbn': book.isbn,
-            'publisher': book.publisher,
-            'year': book.year,
+            'book_master_id': book_master.book_master_id,
+            'image_url': book_master.image.url if book_master.image and hasattr(book_master.image, 'url') else None,
+            'title': book_master.title,
+            'isbn': book_master.isbn,
+            'publisher': book_master.publisher,
+            'year': book_master.year,
             'authors': list(authors),
-            'location': book.location,
-            'status': book.status_id,
-            'duration': book.duration,
-            'late_fee': book.late_fee,
+            'location': book_master.location,
+            'duration': book_master.duration,
+            'late_fee': book_master.late_fee,
+
             'categories': list(categories),  # Now just returning the category IDs
-            'soft_copy': book.soft_copy.url,
-            'summary': book.summary
+            'soft_copy': book_master.soft_copy.url if book_master.soft_copy and hasattr(book_master.soft_copy, 'url') else None,
+            'summary': book_master.summary
         }
 
         return JsonResponse(data)
-    except Book.DoesNotExist:
+    except BookMaster.DoesNotExist:
         return JsonResponse({'error': 'Book not found'}, status=404)
+
     
+
 @login_required(login_url='login')
 def GetAccounts(request):
     if request.method == 'GET':
@@ -481,38 +566,92 @@ def GetAccounts(request):
         ))
         return JsonResponse({'accounts': accountList})
 
+def UpdateStatus(request):
+    if request.method == 'POST':
+        book_id = request.POST.get('book_id')
+        status_id = request.POST.get('status')
+
+        try:
+            book_id = int(book_id)  # Attempt to parse to integer
+            print("Conversion successful:", book_id)
+            status_id = int(status_id)  # Attempt to parse to integer
+            print("Conversion successful:", status_id)
+        except (TypeError, ValueError):
+            print("Conversion failed: book_master_id is not a valid integer.")
+
+        try:
+            # Retrieve the Book instance and update the status
+            book = Book.objects.get(book_id=book_id)
+            book.status_id = status_id
+            book.save()
+
+            print("SUCCESSFUL")
+            return JsonResponse({'isSuccess': 'true', 'message': 'Book status updated successfully.'})            
+
+        except Book.DoesNotExist:
+            print("SUCCESSFUL2")
+
+            return JsonResponse({
+                'success': "false",
+                'message': "Book not found."
+            })
+        except DimStatus.DoesNotExist:
+            print("SUCCESSFUL3")
+            return JsonResponse({
+                'success': "false",
+                'message': "Status not found."
+            })
+        except Exception as e:
+            print("SUCCESSFUL4")
+            return JsonResponse({
+                'success': "false",
+                'message': f"An error occurred: {str(e)}"
+            })
+    return JsonResponse({
+        'success': "false",
+        'message': "Invalid request."
+    })
+
 @login_required(login_url='login')
 def UpdateBook(request):
     if request.method == 'POST':
-        book_id = request.POST.get('bookID')  # Ensure you have the book ID in your form
-        book = Book.objects.get(book_id=book_id)
+        book_master_id = request.POST.get('bookMasterID')  # Ensure you have the book ID in your form
+        print(type(book_master_id))
+
+        try:
+            book_master_id = int(book_master_id)  # Attempt to parse to integer
+            print("Conversion successful:", book_master_id)
+        except (TypeError, ValueError):
+            print("Conversion failed: book_master_id is not a valid integer.")
+
+        book_master = Book.objects.get(book_master_id=book_master_id)
 
         # Update the fields from the request
-        book.title = request.POST.get('bookTitle')
-        book.publisher = request.POST.get('publisher')
-        book.year = request.POST.get('year')
-        book.location = request.POST.get('location')
-        book.late_fee = request.POST.get('fine')
-        book.duration = request.POST.get('duration')
-        book.summary = request.POST.get('summary')
+        book_master.title = request.POST.get('bookTitle')
+        book_master.publisher = request.POST.get('publisher')
+        book_master.year = request.POST.get('year')
+        book_master.location = request.POST.get('location')
+        book_master.late_fee = request.POST.get('fine')
+        book_master.duration = request.POST.get('duration')
+        book_master.summary = request.POST.get('summary')
 
         # Handle image upload if provided
         if 'bookPic' in request.FILES:
-            book.image = request.FILES['bookPic']
+            book_master.image = request.FILES['bookPic']
         if 'softcopy' in request.FILES:
-            book.soft_copy = request.FILES['softcopy']
+            book_master.soft_copy = request.FILES['softcopy']
         
         # Save the book
-        book.save()
+        book_master.save()
 
         # Clear existing authors and categories, if necessary
-        BookAuthor.objects.filter(book=book).delete()
-        BookCategory.objects.filter(book=book).delete()
+        BookAuthor.objects.filter(book_master=book_master_id).delete()
+        BookCategory.objects.filter(book_master=book_master_id).delete()
 
         # Update authors
         authors = request.POST.getlist('author[]')
         for author in authors:
-            BookAuthor.objects.create(book=book, author=author)
+            BookAuthor.objects.create(book_master=book_master_id, author=author)
             
         # Update categories
         categories = request.POST.getlist('categories')
@@ -520,7 +659,7 @@ def UpdateBook(request):
         print(categories)
         for category_id in categories:
             category = DimCategory.objects.get(category_id=category_id)
-            BookCategory.objects.create(book_id=book_id, category_id=category.category_id)
+            BookCategory.objects.create(book_master=book_master_id, category_id=category.category_id)
 
         return JsonResponse({'isSuccess': 'true', 'message': 'Category added successfuly.'})            
 
@@ -529,11 +668,11 @@ def UpdateBook(request):
 @login_required(login_url='login')
 def RemoveBook(request):
     if request.method == 'POST':
-        book_id = request.POST.get('book_id')
+        book_master_id = request.POST.get('book_master_id')
 
         try:
-            book = Book.objects.get(book_id=book_id)
-            book.status_id = 4  # Assuming 4 is the ID for "deleted" status
+            book = BookMaster.objects.get(book_master_id=book_master_id)
+            book.is_archived = True
             book.save()
 
             return JsonResponse({'isSuccess': True})
@@ -563,6 +702,65 @@ def GetAccountInfo(request):
         return JsonResponse(data)
     except CustomUser.DoesNotExist:
         return JsonResponse({'error': 'Account not found'}, status=404)
+    
+
+@login_required(login_url='login')
+def UpdateAccount(request):
+    if request.method == 'POST':
+        account_id = request.POST.get('accountID')  # Ensure you have the book ID in your form
+        account = CustomUser.objects.get(id=account_id)
+
+        # Update the fields from the request
+        account.first_name = request.POST.get('firstName')
+        account.last_name = request.POST.get('lastName')
+        account.id_number = request.POST.get('studentID')
+        account.cellphone_number = request.POST.get('contactNumber')
+        account.email = request.POST.get('email')
+
+        # Handle image upload if provided
+        if 'accountPic' in request.FILES:
+            account.image = request.FILES['accountPic']
+        
+        # Save the account
+        account.save()
+
+        return JsonResponse({'isSuccess': 'true', 'message': 'Account update successfuly.'})            
+
+    return JsonResponse({'isSuccess': 'false', 'message': 'Account update unsuccessful. please try again.'})
+    
+
+@login_required(login_url='login')
+def GetAccounts(request):
+    if request.method == 'GET':
+        accountList = list(CustomUser.objects.select_related('status').values(
+            'id',
+            'first_name',
+            'last_name', 
+            'id_number', 
+            'cellphone_number', 
+            'email',
+            'is_active'
+        ))
+        return JsonResponse({'accounts': accountList})
+
+def GetAccountInfo(request):
+    account_id = request.GET.get('id')
+    try:
+        book = CustomUser.objects.get(id=account_id)
+        data = {
+            'account_id': book.id,
+            'first_name': book.first_name, 
+            'last_name': book.last_name,
+            'email': book.email,
+            'is_active': book.is_active,
+            'id_number': book.id_number,
+            'cellphone_number': book.cellphone_number,
+            'image_url': book.image.url,
+        }
+
+        return JsonResponse(data)
+    except Book.DoesNotExist:
+        return JsonResponse({'error': 'Book not found'}, status=404)
     
 
 @login_required(login_url='login')

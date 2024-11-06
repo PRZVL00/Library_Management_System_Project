@@ -16,7 +16,7 @@
                         {% csrf_token %}
                         <div class="row">
                             <!-- Image Upload - Full Row -->
-                            <input type="number" id="bookID" name="bookID" hidden>
+                            <input type="number" id="bookMasterID" name="bookMasterID" hidden>
                             <div class="col-12 mb-3">
                                 <label for="imageUpload" class="form-label">Upload Image</label>
                                 <input type="file" class="image-resize-filepond form-control" id="imageUpload"
@@ -60,26 +60,22 @@
                             </div>
 
                             <!-- Location (1/4), Status (1/4), Borrowing Duration (1/4), Fine (1/4) -->
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="location" class="form-label">Location</label>
                                 <input type="text" class="form-control" id="location" placeholder="Enter location"
                                     name="location">
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <!-- <div class="col-md-3 mb-3">
                                 <label for="status" class="form-label">Status</label>
-                                <select class="form-select" id="status" required name="status">
-                                    <option selected>Status</option>
-                                    <option value="1">Available</option>
-                                    <option value="2">Not Available</option>
-                                    <option value="3">Under Maintenance</option>
+                                <select class="form-select" required id="status" name="status">
                                 </select>
-                            </div>
-                            <div class="col-md-3 mb-3">
+                            </div> -->
+                            <div class="col-md-4 mb-3">
                                 <label for="borrowingDuration" class="form-label">Borrowing Duration (Days)</label>
                                 <input type="number" class="form-control" id="borrowingDuration"
                                     placeholder="Enter duration in days" name="duration">
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="fine" class="form-label">Fine per Late Day</label>
                                 <input type="number" step="0.01" class="form-control" id="fine"
                                     placeholder="Enter fine amount" required name="fine">

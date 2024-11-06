@@ -50,7 +50,6 @@
                                 <th class="text-start">Title</th>
                                 <th class="text-start">Publisher</th>
                                 <th class="text-start">Year</th>
-                                <th class="text-start">Status</th>
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>
@@ -63,6 +62,7 @@
             </div>
             {% include "BookCollectionPage/_more-info-books.html" %}
             {% include "BookManagementPage/_edit-books.html" %}
+            {% include "BookManagementPage/_edit.html" %}
             {% include "_footer.html" %}
         </div>
     </div>
@@ -76,6 +76,9 @@
 
     let categoriesFetched = false;
     let selectedCategories;
+    let BookMasterID;
+
+    let selectedStatus;
 
     $(document).ready(function () {
         $('#bookManagememt').DataTable({
@@ -88,42 +91,33 @@
             ajax: {
                 url: "{% url 'get-books' %}",
                 type: 'GET',
+                data: function (d) {
+                    d.caller = "Management";  // Add this line to pass the caller parameter
+                },
                 dataSrc: 'books'
             },
             columns: [
                 { data: 'title' },
                 { data: 'publisher' },
                 { data: 'year', className: 'text-start' },
-                { data: 'status__status_name' },
                 {
-                    data: 'book_id',
+                    data: 'book_master_id',
                     render: function (data, type, row) {
                         return `<button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
-                                            <i class="bi bi-info-circle"></i>
-                                        </button>
-                                        <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
-                                            data-bs-target="#book-edit-modal" data-id="${data}" id="Edit">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-outline-danger btn-sm" data-id="${data}" id='removeBook'>
-                                            <i class="bi bi-trash"></i>
-                                        </button>`;
-                    }, className: 'text-center'
+                                data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
+                                <i class="bi bi-info-circle"></i>
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#edit-modal" data-id="${data}" id="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" data-id="${data}" id='removeBook'>
+                                <i class="bi bi-trash"></i>
+                            </button>`;
+                    },
+                    className: 'text-center'
                 }
             ]
-
-        });
-
-        $.ajax({
-            url: "{% url 'get-books' %}",
-            type: 'GET',
-            success: function (response) {
-                const books = response.books;
-            },
-            error: function (xhr, status, error) {
-                alert("An error occurred: " + error);
-            }
         });
 
         // Register FilePond plugins
@@ -192,6 +186,11 @@
             }
         });
 
+        // Initialize Choices.js for the status select element
+        const statusChoice = new Choices('#status', {
+            
+        });
+
         // Clear button functionality
         $('#clearBtn').click(function () {
             // Clear all text inputs
@@ -232,7 +231,11 @@
                     $('#book-authors').html(authorsHtml);
 
                     // Update book image
-                    $('#book-image').attr('src', response.image_url);
+                    if (response.image_url) {
+                        $('#book-image').attr('src', response.image_url);
+                    } else {
+                        $('#book-image').attr('src', "{% static 'assets/static/images/No-Image-Placeholder.svg.png' %}");
+                    }
 
                     // Update summary
                     $('#book-summary').text(response.summary);
@@ -246,9 +249,57 @@
             });
         });
 
-
         $(document).on('click', '#Edit', function () {
-            var dataId = $(this).data('id');
+            BookMasterID = $(this).data('id');
+        });
+
+        $('#edit-modal').on('shown.bs.modal', function() {
+            InitializeDatatable();
+        });
+
+        $('#edit-modal').on('hidden.bs.modal', function () {
+            // Destroy the existing DataTable if it exists
+            if ($.fn.DataTable.isDataTable('#books')) {
+                $('#books').DataTable().destroy();
+            }
+
+        });
+
+        // jQuery event listener for select on change
+        $('#books').on('change', '.status-select', function () {
+            const selectedValue = $(this).val(); // Get the selected status ID
+            const bookId = $(this).data('id'); // Get the book_id from data-id attribute
+
+            $.ajax({
+                url: "{% url 'update-status' %}", // Django URL
+                type: "POST",
+                data: {
+                    'book_id': bookId,
+                    'status': selectedValue,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.isSuccess == 'true') {
+                        // Swal.fire({
+                        //     icon: "success",
+                        //     title: "Success",
+                        //     message: response.message,
+                        // })
+                        console.log(response.message);
+                    }
+                },
+
+                error: function () {
+                }
+            });
+        });
+
+
+
+
+
+        $(document).on('click', '#EditBook', function () {
+            let dataId = BookMasterID;
 
             // First AJAX request to get the book details
             $.ajax({
@@ -258,13 +309,17 @@
                     'id': dataId
                 },
                 success: function (response) {
-                    pond.addFile(response.image_url).then(file => {
-                        console.log('File has been loaded', file);
-                    }).catch(error => {
-                        console.error('Error loading file:', error);
-                    });
+                    if (response.image_url) {
+                        pond.addFile(response.image_url).then(file => {
+                            console.log('File has been loaded', file);
+                        }).catch(error => {
+                            console.error('Error loading file:', error);
+                        });
+                    } else {
+                        pond.removeFiles();  // Clear the file pond if no image is provided
+                    }
 
-                    $('#bookID').val(response.book_id)
+                    $('#bookMasterID').val(response.book_master_id)
                     $('#bookTitle').val(response.title);
                     $('#isbn').val(response.isbn);
                     $('#publisher').val(response.publisher);
@@ -281,7 +336,7 @@
                     });
 
                     $('#location').val(response.location);
-                    $('#status').val(response.status);
+
                     $('#borrowingDuration').val(response.duration);
                     $('#fine').val(response.late_fee);
 
@@ -313,7 +368,7 @@
                             console.error('Error fetching categories:', error);
                         }
                     });
-                    
+
 
                     $('#summary').val(response.summary);
 
@@ -364,6 +419,7 @@
                         $('#bookEditForm').find('textarea').val('');
                         $('#bookEditForm').find('select').prop('selectedIndex', 0);
                         categoriesChoice.removeActiveItems();
+                        statusChoice.removeActiveItems();
                         pond.removeFiles();
 
                     } else {
@@ -387,7 +443,7 @@
         });
 
         $(document).on('click', '#removeBook', function () {
-            const bookId = $(this).data('id'); // Get the book ID from the button
+            const book_master_id = $(this).data('id'); // Get the book ID from the button
 
             Swal.fire({
                 title: 'Are you sure?',
@@ -404,7 +460,7 @@
                         url: "{% url 'remove-book' %}",  // Replace with your actual URL for removing the book
                         type: 'POST',
                         data: {
-                            'book_id': bookId,
+                            'book_master_id': book_master_id,
                             'csrfmiddlewaretoken': '{{ csrf_token }}' // Include CSRF token
                         },
                         success: function (response) {
@@ -496,11 +552,12 @@
                     {
                         data: 'status',
                         render: function (data, type, row) {
-                            const selectedStatus1 = data === 1 ? 'selected' : '';
+]                            const selectedStatus1 = data === 1 ? 'selected' : '';
                             const selectedStatus2 = data === 2 ? 'selected' : '';
                             const selectedStatus3 = data === 3 ? 'selected' : '';
                             const selectedStatus4 = data === 4 ? 'selected' : '';
                             const isDisabled = (data === 3 || data === 4) ? 'disabled' : '';
+
 
 
                             return `<select class="form-select status-select" id="status-${row.book_id}" ${isDisabled} required name="status" data-id="${row.book_id}">
@@ -509,6 +566,7 @@
                                         <option value="2" ${selectedStatus2}>Under Maintenance</option>
                                         <option value="3" ${selectedStatus3}>Reserved</option>
                                         <option value="4" ${selectedStatus4}>Borrowed</option>
+
 
                                     </select>`;
 

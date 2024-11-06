@@ -1,0 +1,39 @@
+{% load static %}
+<div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="book-info" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-centered modal-dialog-scrollable"
+        role="document">
+        <div class="modal-content">
+            <div class="modal-header my--3">
+                <h5 class="modal-title" id="edit">Edit
+                </h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <table class="table table-striped" id="books">
+                        <thead>
+                            <tr>
+                                <th class="text-start">Book ID</th>
+                                <th class="text-start">Title</th>
+                                <th class="text-start">ISBN</th>
+                                <th class="text-start">Status</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary ms-1" data-bs-toggle="modal" data-bs-target="#book-edit-modal" id="EditBook">
+                    <i class="bx bx-check d-block d-sm-none"></i>
+                    <span class="d-none d-sm-block">Edit Book</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

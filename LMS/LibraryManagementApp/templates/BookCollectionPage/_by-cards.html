@@ -7,10 +7,15 @@
             <div class="card">
                 <div class="card-content">
                     <div style="display: flex; justify-content: center;">
+                        {% if book.image %}
+                        <img class="card-img-top img-fluid mt-3" src="{{ book.image.url }}" alt="Card image cap"
+                            style="width: auto; height: 150px; object-fit: contain;">
+                        {% else %}
                         <img class="card-img-top img-fluid mt-3"
-                            src="{{ book.image.url }}" alt="Card image cap"
+                            src="{% static 'assets/static/images/No-Image-Placeholder.svg.png' %}" alt="Card image cap"
                             style="width: auto; height: 150px; object-fit: contain;">
                         {% endif %}
+
                     </div>
                     <div class="card-body">
                         <h5 class="card-title text-center">{{ book.title }}</h5>
@@ -27,6 +32,7 @@
                                 {% if book.available_books == 0 %} disabled {% endif %}>
                             {% if book.available_books == 0 %} Out of Stock {% else %} Add to Bag {% endif %}
                         </button>
+
                     </div>
                 </div>
             </div>

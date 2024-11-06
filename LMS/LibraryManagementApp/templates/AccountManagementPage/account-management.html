@@ -73,6 +73,10 @@
 
 
 <script>
+
+    let categoriesFetched = false;
+    let selectedCategories;
+
     $(document).ready(function () {
         $('#accountManagement').DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
@@ -151,6 +155,21 @@
             storeAsFile: true
         });
 
+
+        // Clear button functionality
+        $('#clearBtn').click(function () {
+            // Clear all text inputs
+            $('input[type="text"], input[type="number"], input[type="file"]').val('');
+
+            // Clear all textareas
+            $('textarea').val('');
+
+            // Reset all select elements
+            $('select').prop('selectedIndex', 0);
+
+            pond.removeFiles(); // Clears all uploaded and pending files
+        });
+
         $(document).on('click', '#Edit', function () {
             var dataId = $(this).data('id');
 
@@ -210,6 +229,10 @@
                         })
 
                         $('#accountEditForm').find('input[type="text"], input[type="number"], input[type="file"]').val('');
+                        $('#accountEditForm').find('textarea').val('');
+                        $('#accountEditForm').find('select').prop('selectedIndex', 0);
+                        categoriesChoice.removeActiveItems();
+
                         pond.removeFiles();
 
                     } else {
