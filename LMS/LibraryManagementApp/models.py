@@ -71,6 +71,19 @@ class BookAuthor(models.Model):
 
     def __str__(self):
         return f'{self.book.title} - {self.author}'
+    
+class Reservation(models.Model):
+    reservation_id = models.AutoField(primary_key=True)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    date_reserved = models.DateTimeField()
+    expiration_date = models.DateTimeField()
+    is_processed = models.BooleanField(default=False)
+    is_canceled = models.BooleanField(default=False)
+    is_expired = models.BooleanField(default=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Transaction Detail {self.transaction_detail_id}'
 
 
 class TransactionMaster(models.Model):

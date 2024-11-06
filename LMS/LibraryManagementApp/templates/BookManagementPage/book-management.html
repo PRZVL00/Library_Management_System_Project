@@ -464,5 +464,68 @@
                 }
             });
         }
+
+        function InitializeDatatable() {
+            console.log(BookMasterID);
+
+            // Destroy the existing DataTable if it exists
+            if ($.fn.DataTable.isDataTable('#books')) {
+                $('#books').DataTable().destroy();
+            }
+
+            // Initialize DataTable
+            $('#books').DataTable({
+                dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
+                    'rt' +
+                    '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
+                buttons: ['copy', 'excel', 'pdf'],
+                responsive: false,
+                scrollX: true,
+                ajax: {
+                    url: "{% url 'get-bookmaster-books' %}",
+                    type: 'GET',
+                    data: function (d) {
+                        d.BookMasterID = BookMasterID;
+                    },
+                    dataSrc: 'books'
+                },
+                columns: [
+                    { data: 'book_qr_value' },
+                    { data: 'title' },
+                    { data: 'isbn', className: 'text-start' },
+                    {
+                        data: 'status',
+                        render: function (data, type, row) {
+                            const selectedStatus1 = data === 1 ? 'selected' : '';
+                            const selectedStatus2 = data === 2 ? 'selected' : '';
+                            const selectedStatus3 = data === 3 ? 'selected' : '';
+                            const selectedStatus4 = data === 4 ? 'selected' : '';
+                            const isDisabled = (data === 3 || data === 4) ? 'disabled' : '';
+
+
+                            return `<select class="form-select status-select" id="status-${row.book_id}" ${isDisabled} required name="status" data-id="${row.book_id}">
+                                        <option disabled hidden value="0">Status</option>
+                                        <option value="1" ${selectedStatus1}>Available</option>
+                                        <option value="2" ${selectedStatus2}>Under Maintenance</option>
+                                        <option value="3" ${selectedStatus3}>Reserved</option>
+                                        <option value="4" ${selectedStatus4}>Borrowed</option>
+
+                                    </select>`;
+
+                        },
+                        className: 'text-center'
+                    }
+
+                ]
+            });
+
+            // Force a redraw when the modal is shown
+            $('#edit-modal').on('shown.bs.modal', function () {
+                $('#books').DataTable().columns.adjust().draw();
+            });
+        }
+
+
+
     });
 </script>

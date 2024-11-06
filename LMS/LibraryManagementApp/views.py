@@ -15,6 +15,15 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.template.loader import render_to_string
+from datetime import datetime
+from django.db.models import Q, Exists, OuterRef
+from django.templatetags.static import static
+from django.db.models import Count
+from django.db.models import Count, Q, BooleanField, Case, When
+from django.utils import timezone
+from datetime import timedelta
+
+
 
 # Create your views here.
 def Login(request):
@@ -138,13 +147,23 @@ def BookCollection(request):
   
 @login_required(login_url='login')
 def LoadBooks(request):
-    # Get all books, or filter based on user input if needed
-    books = Book.objects.exclude(status__in=[3, 4])
+    # Annotate BookMaster objects with the count of associated books with status=1
+    bookmasters = BookMaster.objects.annotate(
+        available_books=Count(
+            'book', 
+            filter=Q(book__status=1)  # Adjust this if you need a specific status filter
+        )
+    ).filter(
+        is_archived=False  # Filter out archived books
+    )
+
+    current_datetime = datetime.now()
+    print("Current datetime (no timezone):", current_datetime)
     
     # Pagination
-    page_number = request.GET.get('page', 1)  # Get page number from request
-    paginator = Paginator(books, 12)  # Show 12 books per page
-    page_obj = paginator.get_page(page_number)  # Get the page object
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(bookmasters, 12)
+    page_obj = paginator.get_page(page_number)
     
     # Render only the book cards HTML
     html = render_to_string('BookCollectionPage/_by-cards.html', {'page_obj': page_obj})
@@ -161,6 +180,41 @@ def AccountManagement(request):
 @login_required(login_url='login')
 def Bag(request):
     return render(request, 'BagPage/bag.html', {})
+
+def ReserveBook(request):
+    if request.method == 'POST':
+        book_master_id = request.POST.get('book_master_id')
+
+        # Find the first available book for the given BookMaster ID with status=1 (available)
+        available_book = Book.objects.filter(
+            book_master_id=book_master_id,
+            status=1  # Assuming 1 means 'available'
+        ).first()
+        
+        if available_book:
+            reserved_status = DimStatus.objects.get(status_id=3)  
+            available_book.status = reserved_status
+            available_book.save()
+            
+            # Calculate reservation dates
+            date_reserved = datetime.now()
+            print(date_reserved)
+            expiration_date = date_reserved + timedelta(days=1)  
+            
+            # Create a Reservation record
+            reservation = Reservation.objects.create(
+                book=available_book,
+                date_reserved=date_reserved,
+                expiration_date=expiration_date
+            )
+            
+            return JsonResponse({'isSuccess': 'true', 'message': 'Book added to your bag successfully!'})
+
+        else:
+            # No available book found
+            return JsonResponse({'status': 'error', 'message': 'No available books found'}, status=404)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 @login_required(login_url='login')
 def Logbook(request):
@@ -298,17 +352,92 @@ def BookManagement(request):
 @login_required(login_url='login')
 def GetBooks(request):
     if request.method == 'GET':
-        bookList = list(Book.objects.select_related('status').values(
-            'book_id',
-            'title', 
-            'publisher', 
-            'year', 
-            'status__status_name',
-            'isbn',
-            'location',
-            'late_fee'
-        ))
-        return JsonResponse({'books': bookList})
+        caller = request.GET.get('caller', '')  # Get the caller parameter
+
+        # If the caller is 'Management', get all books regardless of status
+        if caller == 'Management':
+            bookList = list(
+                BookMaster.objects.filter(is_archived=False).annotate(
+                    has_available_books=Case(
+                        When(book__status=1, then=True),
+                        default=False,
+                        output_field=BooleanField()
+                    )
+                ).values(
+                    'book_master_id',
+                    'title',
+                    'publisher',
+                    'year',
+                    'isbn',
+                    'location',
+                    'late_fee',
+                    'has_available_books',
+                ).distinct()
+            )
+        else:
+            # Get only books with at least one related Book with status 1
+            bookList = list(
+                BookMaster.objects.filter(
+                    Q(is_archived=False)
+                ).annotate(
+                    has_available_books=Case(
+                        When(book__status=1, then=True),
+                        default=False,
+                        output_field=BooleanField()
+                    )
+                ).values(
+                    'book_master_id',
+                    'title',
+                    'publisher',
+                    'year',
+                    'isbn',
+                    'location',
+                    'late_fee',
+                    'has_available_books',
+                ).distinct()
+            )
+        
+        formatted_books = [
+            {
+                'book_master_id': book['book_master_id'],
+                'title': book['title'],
+                'publisher': book['publisher'],
+                'year': book['year'],
+                'isbn': book['isbn'],
+                'location': book['location'],
+                'late_fee': book['late_fee'],
+                'has_available_books': book['has_available_books'],
+            }
+            for book in bookList
+        ]
+
+        return JsonResponse({'books': formatted_books})
+    
+def GetBookMasterBooks(request):
+    if request.method == 'GET':
+        book_master_id = request.GET.get('BookMasterID')
+        print(book_master_id)
+        try:
+            # Filter books associated with the given book_master_id
+            books = Book.objects.filter(book_master=book_master_id)
+
+            # Prepare data list to hold each book's data
+            data = []
+
+            for book in books:
+                data.append({
+                    'book_id': book.book_id,
+                    'book_qr_value': book.qr_value,
+                    'title': book.book_master.title, 
+                    'isbn': book.book_master.isbn,
+                    'status' : book.status_id,
+                })
+
+            # Return the list of books with their details
+            return JsonResponse({'books': data}, status=200)
+
+        except Book.DoesNotExist:
+            return JsonResponse({'error': 'BookMaster or Books not found'}, status=404)
 
 def GetBookInfo(request):
     book_id = request.GET.get('id')
