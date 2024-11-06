@@ -7,17 +7,24 @@
             <div class="card">
                 <div class="card-content">
                     <div style="display: flex; justify-content: center;">
-                        <img class="card-img-top img-fluid mt-3"
-                            src="{{ book.image.url }}" alt="Card image cap"
+                        {% if book.image %}
+                        <img class="card-img-top img-fluid mt-3" src="{{ book.image.url }}" alt="Card image cap"
                             style="width: auto; height: 150px; object-fit: contain;">
+                        {% else %}
+                        <img class="card-img-top img-fluid mt-3"
+                            src="{% static 'assets/static/images/No-Image-Placeholder.svg.png' %}" alt="Card image cap"
+                            style="width: auto; height: 150px; object-fit: contain;">
+                        {% endif %}
+
                     </div>
                     <div class="card-body">
                         <h5 class="card-title text-center">{{ book.title }}</h5>
                         <p class="card-subtitle text-center">{{ book.year }}</p>
                         <p class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left"
                             title="ISBN">{{ book.isbn }}</p>
-                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1"
-                            data-bs-toggle="modal" data-bs-target="#book-info-modal" data-id={{book.book_id}} id="MoreInfo">More Info</button>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1" data-bs-toggle="modal"
+                            data-bs-target="#book-info-modal" data-id={{book.book_master_id}} id="MoreInfo">More
+                            Info</button>
                         <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1">Add to Shelf</button>
                     </div>
                 </div>
