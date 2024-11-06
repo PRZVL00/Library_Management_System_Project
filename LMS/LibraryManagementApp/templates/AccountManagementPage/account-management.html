@@ -155,6 +155,7 @@
             storeAsFile: true
         });
 
+
         // Clear button functionality
         $('#clearBtn').click(function () {
             // Clear all text inputs
@@ -231,6 +232,7 @@
                         $('#accountEditForm').find('textarea').val('');
                         $('#accountEditForm').find('select').prop('selectedIndex', 0);
                         categoriesChoice.removeActiveItems();
+
                         pond.removeFiles();
 
                     } else {

@@ -16,44 +16,46 @@
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-7 col-sm-7 col-md-7 col-lg-7 col-xl-7">
+
+                                <!-- Profile Picture-->
                                 <input type="number" id="accountID" name="accountID" hidden>
-                                
                                 <!-- First Name -->
-                                <div class="mb-3">
-                                    <label for="firstName" class="form-label mb-1">First Name:</label>
-                                    <input type="text" class="form-control" id="firstName"
+                                <div class="input-group input-group-sm mb-3" id="stylebox">
+                                    <label for="firstName" class="form-label">First Name:</label>
+                                    <input type="text" class="form-control ml-2" id="firstName"
                                         placeholder="Enter first name" name="firstName" required>
                                 </div>
 
-                                <!-- Last Name -->
-                                <div class="mb-3">
-                                    <label for="lastName" class="form-label mb-1">Last Name:</label>
+
+                                <div class="input-group input-group-sm mb-3" id="stylebox">
+                                    <label for="lastName" class="form-label">Last Name:</label>
                                     <input type="text" class="form-control" id="lastName"
                                         placeholder="Enter first name" name="lastName" required>
                                 </div>
 
                                 <!-- Student ID -->
-                                <div class="mb-3">
-                                    <label for="studentID" class="form-label mb-1">Student ID:</label>
+
+                                <div class="input-group input-group-sm mb-3" id="stylebox">
+                                    <label for="studentID" class="form-label">Student ID:</label>
                                     <input type="text" class="form-control" id="studentID"
                                         placeholder="Enter first name" name="studentID" required>
                                 </div>
 
                                 <!-- Contact Number -->
-                                <div class="mb-3">
-                                    <label for="contactNumber" class="form-label mb-1">Contact Number:</label>
+
+                                <div class="input-group input-group-sm mb-3" id="stylebox">
+                                    <label for="contactNumber" class="form-label">Contact Number:</label>
                                     <input type="number" class="form-control" id="contactNumber" placeholder="Enter the contact number"
                                         name="contactNumber" required>
                                 </div>
                                 
                                 <!-- Email -->
-                                <div class="mb-3">
-                                    <label for="email" class="form-label mb-1">Email:</label>
-                                    <input type="text" class="form-control" id="email"
-                                        placeholder="Enter first name" name="email" required>
+                                <div class="input-group input-group-sm mb-5" id="stylebox">
+                                    <label for="email" class="form-label">Email:</label>
+                                    <input type="text" class="form-control" id="email" placeholder="Enter first name" name="email" required>
                                 </div>
 
-                                <!-- Status -->
+                                <!-- Role Selection (from Account-Management-update-accounts) -->
                                 <div class="mb-3">
                                     <label for="inputGroupSelect01" class="form-label mb-1">Role:</label>
                                     <select class="form-select" id="inputGroupSelect01">
@@ -63,17 +65,14 @@
                                     </select>
                                 </div>
 
-                                <!-- Password Reset -->
+                                <!-- Password Reset Button (from Account-Management-update-accounts) -->
                                 <button type="button" class="btn btn-sm btn-outline-danger w-100" id="resetBTN">Reset Password</button>
 
-
-                            </div>
-                            
-                            <!-- Profile Picture-->
-                            <div  class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5 d-flex flex-column align-items-center text-center">
-                                <input type="file" class="image-resize-filepond form-control" style="width: 150px; height: 200px;" id="imageUpload"
-                                    name="accountPic"  required>
-                                <span class="badge bg-success">Active</span>
+                                <!-- Profile Picture -->
+                                <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5 d-flex flex-column align-items-center text-center">
+                                    <input type="file" class="image-resize-filepond form-control" style="width: 150px; height: 200px;" id="imageUpload" name="accountPic" required>
+                                    <span class="badge bg-success">Active</span>
+                                </div>
                             </div>
                         </div>
                     </form>
