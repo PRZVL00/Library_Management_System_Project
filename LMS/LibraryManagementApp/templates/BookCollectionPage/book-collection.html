@@ -108,18 +108,26 @@
                         {
                             data: 'book_master_id',
                             render: function (data, type, row) {
-                                return `<button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
-                                                data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
-                                                <i class="bi bi-info-circle"></i>
-                                            </button>
-                                            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
-                                                data-bs-target="#book-edit-modal" data-id="${data}">
-                                                <i class="bi bi-backpack"></i>
-                                            </button>`;
-                            }, className: 'text-center'
+                                const infoButton = `<button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
+                                <i class="bi bi-info-circle"></i>
+                            </button>`;
+                                const addToShelfButton = row.has_available_books
+                                    ? `<button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                            data-bs-target="#book-edit-modal" data-id="${data}">
+                            <i class="bi bi-backpack"></i>
+                        </button>`
+                                    : `<button class="btn btn-outline-secondary btn-sm" disabled>
+                            <i class="bi bi-backpack"></i> Out of Stock
+                        </button>`;
+
+                                return `${infoButton} ${addToShelfButton}`;
+                            },
+                            className: 'text-center'
                         }
                     ]
-        
+
+
                 });
                 tableInitialized = true;
             }
@@ -132,13 +140,13 @@
                     page: pageNumber
                 },
                 dataType: 'json',
-                success: function(data) {
+                success: function (data) {
                     // Update the book cards with the new HTML
                     $('#books').html(data.html);
                     // Update pagination controls
                     updatePagination(pageNumber, data.has_next);
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error("AJAX Error: " + status + error);
                 }
             });
@@ -155,12 +163,12 @@
             pagination.append(`<button class="btn btn-primary" id="next" ${hasNext ? '' : 'disabled'}>Next</button>`);
 
             // Previous button event
-            $('#prev').off('click').on('click', function() {
+            $('#prev').off('click').on('click', function () {
                 loadBooks(currentPage - 1);
             });
 
             // Next button event
-            $('#next').off('click').on('click', function() {
+            $('#next').off('click').on('click', function () {
                 loadBooks(currentPage + 1);
             });
         }
@@ -220,9 +228,10 @@
                     $('#book-authors').html(authorsHtml);
 
                     // Update book image
-                    if(response.image_url) {
+                    if (response.image_url) {
                         $('#book-image').attr('src', response.image_url);
-                    }else{
+                    } else {
+
                         $('#book-image').attr('src', "{% static 'assets/static/images/No-Image-Placeholder.svg.png' %}");
                     }
 
@@ -237,6 +246,32 @@
                 }
             });
         });
+
+        $(document).on('click', '#AddToBag', function () {
+            var book_master_id = $(this).data('id'); // Get the data-id from the button
+
+            // Make an AJAX request to fetch the book details
+            $.ajax({
+                url: "{% url 'reserve-book' %}", // Django URL
+                type: "POST",
+                data: {
+                    'book_master_id': book_master_id,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if(response.isSuccess){
+                        Swal.fire({
+                            icon: "success",
+                            title: response.message,
+                        })
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        });
+
 
     });    
 </script>

@@ -89,7 +89,7 @@ class BookAuthor(models.Model):
     def __str__(self):
         return f'{self.book.title} - {self.author}'
     
-class Reservatiop(models.Model):
+class Reservation(models.Model):
     reservation_id = models.AutoField(primary_key=True)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     date_reserved = models.DateTimeField()

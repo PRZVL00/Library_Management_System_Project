@@ -552,16 +552,22 @@
                     {
                         data: 'status',
                         render: function (data, type, row) {
-                            const isDisabled = data === 4 ? 'disabled' : '';
-                            const selectedStatus1 = data === 1 ? 'selected' : '';
+]                            const selectedStatus1 = data === 1 ? 'selected' : '';
                             const selectedStatus2 = data === 2 ? 'selected' : '';
                             const selectedStatus3 = data === 3 ? 'selected' : '';
+                            const selectedStatus4 = data === 4 ? 'selected' : '';
+                            const isDisabled = (data === 3 || data === 4) ? 'disabled' : '';
+
+
 
                             return `<select class="form-select status-select" id="status-${row.book_id}" ${isDisabled} required name="status" data-id="${row.book_id}">
                                         <option disabled hidden value="0">Status</option>
                                         <option value="1" ${selectedStatus1}>Available</option>
-                                        <option value="2" ${selectedStatus2}>Not Available</option>
-                                        <option value="3" ${selectedStatus3}>Under Maintenance</option>
+                                        <option value="2" ${selectedStatus2}>Under Maintenance</option>
+                                        <option value="3" ${selectedStatus3}>Reserved</option>
+                                        <option value="4" ${selectedStatus4}>Borrowed</option>
+
+
                                     </select>`;
 
                         },
