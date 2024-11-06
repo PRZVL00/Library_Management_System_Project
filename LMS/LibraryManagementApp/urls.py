@@ -25,6 +25,7 @@ urlpatterns = [
     path('check-ISBN', views.CheckISBN, name="check-ISBN"),
     path('add-category', views.AddCategory, name="add-category"),
     path('get-categories', views.GetCategories, name="get-categories"),
+    path('get-status', views.GetStatus, name="get-status"),
     path('book-management/', views.BookManagement, name="book-management"),
     path('get-books', views.GetBooks, name="get-books"),
     path('get-bookmaster-books', views.GetBookMasterBooks, name="get-bookmaster-books"),
@@ -33,7 +34,9 @@ urlpatterns = [
     path('update-status', views.UpdateStatus, name="update-status"),
     path('update-book', views.UpdateBook, name="update-book"),
     path('remove-book', views.RemoveBook, name="remove-book"),
+    path('get-accounts', views.GetAccounts, name="get-accounts"),
+    path('get-account-info/', views.GetAccountInfo, name='get-account-info'),
+    path('update-account', views.UpdateAccount, name="update-account"),
     path('transaction-history/', views.TransactionHistory, name="transaction-history"),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

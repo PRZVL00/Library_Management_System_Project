@@ -363,6 +363,12 @@ def GetCategories(request):
     if request.method == 'GET':
         categoryList = list(DimCategory.objects.values())
         return JsonResponse({'categories': categoryList})
+    
+@login_required(login_url='login')
+def GetStatus(request):
+    if request.method == 'GET':
+        statusList = list(DimStatus.objects.values())
+        return JsonResponse({'status': statusList})
 
 
 @login_required(login_url='login')
@@ -462,6 +468,7 @@ def GetBookInfo(request):
         authors = BookAuthor.objects.filter(book_master=book_master_id).values_list('author', flat=True)
         categories = BookCategory.objects.filter(book_master=book_master_id).values_list('category_id', flat=True)
 
+
         data = {
             'book_master_id': book_master.book_master_id,
             'image_url': book_master.image.url if book_master.image and hasattr(book_master.image, 'url') else None,
@@ -473,6 +480,7 @@ def GetBookInfo(request):
             'location': book_master.location,
             'duration': book_master.duration,
             'late_fee': book_master.late_fee,
+
             'categories': list(categories),  # Now just returning the category IDs
             'soft_copy': book_master.soft_copy.url if book_master.soft_copy and hasattr(book_master.soft_copy, 'url') else None,
             'summary': book_master.summary
@@ -483,11 +491,12 @@ def GetBookInfo(request):
         return JsonResponse({'error': 'Book not found'}, status=404)
 
     
+
 @login_required(login_url='login')
 def GetAccounts(request):
     if request.method == 'GET':
         accountList = list(CustomUser.objects.select_related('status').values(
-            
+            'id',
             'first_name',
             'last_name', 
             'id_number', 
@@ -614,6 +623,110 @@ def RemoveBook(request):
             return JsonResponse({'isSuccess': False, 'message': str(e)})
 
     return JsonResponse({'isSuccess': False, 'message': 'Invalid request method.'})
+
+def GetAccountInfo(request):
+    account_id = request.GET.get('id')
+    try:
+        book = CustomUser.objects.get(id=account_id)
+        data = {
+            'account_id': book.id,
+            'first_name': book.first_name, 
+            'last_name': book.last_name,
+            'email': book.email,
+            'is_active': book.is_active,
+            'id_number': book.id_number,
+            'cellphone_number': book.cellphone_number,
+            'image_url': book.image.url,
+        }
+
+        return JsonResponse(data)
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'error': 'Account not found'}, status=404)
+    
+
+@login_required(login_url='login')
+def UpdateAccount(request):
+    if request.method == 'POST':
+        account_id = request.POST.get('accountID')  # Ensure you have the book ID in your form
+        account = CustomUser.objects.get(id=account_id)
+
+        # Update the fields from the request
+        account.first_name = request.POST.get('firstName')
+        account.last_name = request.POST.get('lastName')
+        account.id_number = request.POST.get('studentID')
+        account.cellphone_number = request.POST.get('contactNumber')
+        account.email = request.POST.get('email')
+
+        # Handle image upload if provided
+        if 'accountPic' in request.FILES:
+            account.image = request.FILES['accountPic']
+        
+        # Save the account
+        account.save()
+
+        return JsonResponse({'isSuccess': 'true', 'message': 'Account update successfuly.'})            
+
+    return JsonResponse({'isSuccess': 'false', 'message': 'Account update unsuccessful. please try again.'})
+    
+
+@login_required(login_url='login')
+def GetAccounts(request):
+    if request.method == 'GET':
+        accountList = list(CustomUser.objects.select_related('status').values(
+            'id',
+            'first_name',
+            'last_name', 
+            'id_number', 
+            'cellphone_number', 
+            'email',
+            'is_active'
+        ))
+        return JsonResponse({'accounts': accountList})
+
+def GetAccountInfo(request):
+    account_id = request.GET.get('id')
+    try:
+        book = CustomUser.objects.get(id=account_id)
+        data = {
+            'account_id': book.id,
+            'first_name': book.first_name, 
+            'last_name': book.last_name,
+            'email': book.email,
+            'is_active': book.is_active,
+            'id_number': book.id_number,
+            'cellphone_number': book.cellphone_number,
+            'image_url': book.image.url,
+        }
+
+        return JsonResponse(data)
+    except Book.DoesNotExist:
+        return JsonResponse({'error': 'Book not found'}, status=404)
+    
+
+@login_required(login_url='login')
+def UpdateAccount(request):
+    if request.method == 'POST':
+        account_id = request.POST.get('accountID')  # Ensure you have the book ID in your form
+        account = CustomUser.objects.get(id=account_id)
+
+        # Update the fields from the request
+        account.first_name = request.POST.get('firstName')
+        account.last_name = request.POST.get('lastName')
+        account.id_number = request.POST.get('studentID')
+        account.cellphone_number = request.POST.get('contactNumber')
+        account.email = request.POST.get('email')
+
+        # Handle image upload if provided
+        if 'accountPic' in request.FILES:
+            account.image = request.FILES['accountPic']
+        
+        # Save the account
+        account.save()
+
+        return JsonResponse({'isSuccess': 'true', 'message': 'Account update successfuly.'})            
+
+    return JsonResponse({'isSuccess': 'false', 'message': 'Account update unsuccessful. please try again.'})
+    
 
 @login_required(login_url='login')
 def TransactionHistory(request):

@@ -1,89 +1,90 @@
 {% load static %}
-<div class="modal fade" id="account-edit-modal" tabindex="-1" role="dialog" aria-labelledby="book-info"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-centered modal-dialog-scrollable" role="document">
+<div class="modal fade" id="account-edit-modal" tabindex="-1" role="dialog" aria-labelledby="account-info" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
+        role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <p class="modal-title" id="book-info">Account Edit </p>
+            <div class="modal-header my--3">
+                <h5 class="modal-title" id="account-edit">Account Edit
+                </h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <i data-feather="x"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-7 col-sm-7 col-md-7 col-lg-7 col-xl-7">
-                        <form action="POST" id="account-edit-form">
-                            <!--First Name Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="text" class="form-control" placeholder="First Name"
-                                    aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                    id="fname-input">
-                                <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                        class="bi bi-pen"></span></button>
-                            </div>
+                <div class="container">
+                    <form id="accountEditForm" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-7 col-sm-7 col-md-7 col-lg-7 col-xl-7">
 
-                            <!--Last Name Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="text" class="form-control" placeholder="Last Name"
-                                    aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                    id="lname-input">
-                                <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                        class="bi bi-pen"></span></button>
-                            </div>
+                                <!-- Profile Picture-->
+                                <input type="number" id="accountID" name="accountID" hidden>
+                                <!-- First Name -->
+                                <div class="input-group input-group-sm mb-3" id="stylebox">
+                                    <label for="firstName" class="form-label">First Name:</label>
+                                    <input type="text" class="form-control ml-2" id="firstName"
+                                        placeholder="Enter first name" name="firstName" required>
+                                </div>
 
-                            <!--Student ID # Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="text" class="form-control" placeholder="Student ID #"
-                                    aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                    id="studentID-input">
-                                <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                        class="bi bi-pen"></span></button>
-                            </div>
 
-                            <!--Contact Number Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="text" class="form-control" placeholder="Contact Number"
-                                    aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                    id="cnum-input">
-                                <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                        class="bi bi-pen"></span></button>
-                            </div>
+                                <div class="input-group input-group-sm mb-3" id="stylebox">
+                                    <label for="lastName" class="form-label">Last Name:</label>
+                                    <input type="text" class="form-control" id="lastName"
+                                        placeholder="Enter first name" name="lastName" required>
+                                </div>
 
-                            <!--Email Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="email" class="form-control" placeholder="Email"
-                                    aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                    id="email-input">
-                                <button class="btn btn-primary" type="button" id="button-addon1" disabled><span
-                                        class="bi bi-pen"></span></button>
-                            </div>
+                                <!-- Student ID -->
 
-                            <!--Status Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <select class="form-select" id="inputGroupSelect01">
-                                    <option selected>Choose...</option>
-                                    <option value="1">One</option>
-                                    <option value="2">Two</option>
-                                    <option value="3">Three</option>
-                                </select>
+                                <div class="input-group input-group-sm mb-3" id="stylebox">
+                                    <label for="studentID" class="form-label">Student ID:</label>
+                                    <input type="text" class="form-control" id="studentID"
+                                        placeholder="Enter first name" name="studentID" required>
+                                </div>
+
+                                <!-- Contact Number -->
+
+                                <div class="input-group input-group-sm mb-3" id="stylebox">
+                                    <label for="contactNumber" class="form-label">Contact Number:</label>
+                                    <input type="number" class="form-control" id="contactNumber" placeholder="Enter the contact number"
+                                        name="contactNumber" required>
+                                </div>
+                                
+                                <!-- Email -->
+                                <div class="input-group input-group-sm mb-5" id="stylebox">
+                                    <label for="email" class="form-label">Email:</label>
+                                    <input type="text" class="form-control" id="email" placeholder="Enter first name" name="email" required>
+                                </div>
+
+                                <!-- Role Selection (from Account-Management-update-accounts) -->
+                                <div class="mb-3">
+                                    <label for="inputGroupSelect01" class="form-label mb-1">Role:</label>
+                                    <select class="form-select" id="inputGroupSelect01">
+                                        <option selected>Choose...</option>
+                                        <option value="1">Admin</option>
+                                        <option value="2">Student</option>
+                                    </select>
+                                </div>
+
+                                <!-- Password Reset Button (from Account-Management-update-accounts) -->
+                                <button type="button" class="btn btn-sm btn-outline-danger w-100" id="resetBTN">Reset Password</button>
+
+                                <!-- Profile Picture -->
+                                <div class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5 d-flex flex-column align-items-center text-center">
+                                    <input type="file" class="image-resize-filepond form-control" style="width: 150px; height: 200px;" id="imageUpload" name="accountPic" required>
+                                    <span class="badge bg-success">Active</span>
+                                </div>
                             </div>
-                        </form>
-                        <button class="btn btn-sm btn-outline-danger w-100">Reset Password</button>
-                    </div>
-                    <div
-                        class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5 d-flex flex-column align-items-center text-center">
-                        <img src="{% static 'assets/static/images/faces/2.jpg' %}" class="rounded-circle mb-3"
-                            alt="User Profile Picture" style="width: 150px; height: 150px;">
-                        <span class="badge bg-success">Active</span>
-                    </div>
+                        </div>
+                    </form>
+
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">
                     <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Cancel</span>
+                    <span class="d-none d-sm-block">Close</span>
                 </button>
-                <button type="button" class="btn btn-primary ms-1" data-bs-dismiss="modal" id="save-button">
+                <button type="button" class="btn btn-primary ms-1" data-bs-dismiss="modal" id="submitBTN">
                     <i class="bx bx-check d-block d-sm-none"></i>
                     <span class="d-none d-sm-block">Save</span>
                 </button>
