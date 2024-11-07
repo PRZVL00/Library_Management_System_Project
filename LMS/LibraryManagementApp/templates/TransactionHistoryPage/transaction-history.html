@@ -72,9 +72,21 @@
 <script>
     let table1;
     let table2;
+
     $(document).ready(function () {
         // Initialize the first table on page load
-        table1 = $('#logs').DataTable({
+        table1 = $('#transactionMaster').DataTable({
+            ajax: {
+                url: '{% url "get-transaction" %}',  // Django URL for fetching transactions
+                type: 'GET',
+                dataSrc: ''  // Adjust if JSON data is wrapped in an object
+            },
+            columns: [
+                { data: 'transaction_date', className: 'text-start' },
+                { data: 'borrower', className: 'text-start' },
+                { data: 'number_of_books', className: 'text-start' },
+                { data: 'approver', className: 'text-start' }
+            ],
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
                 'rt' +
                 '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
@@ -86,15 +98,32 @@
 
         table1.columns.adjust().draw();
 
-        let table2Initialized = false; // Flag to check if table2 has been initialized
+        let table2Initialized = false;
 
         // Event listener for tab switch
         $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (event) {
-            let target = $(event.target).attr("href"); // Get the target tab
+            let target = $(event.target).attr("href");
 
             if (target === '#per-book' && !table2Initialized) {
-                // Initialize the second table when the second tab is shown for the first time
-                table2 = $('#logs2').DataTable({
+                table2 = $('#transactionDetail').DataTable({
+                    ajax: {
+                        url: '{% url "get-transaction-detail" %}',
+                        type: 'GET',
+                        dataSrc: ''
+                    },
+                    columns: [
+                        { data: 'book_title', className: 'text-start'},
+                        { data: 'isbn', className: 'text-start'},
+                        { data: 'date_borrowed', className: 'text-start'},
+                        { data: 'due_date', className: 'text-start' },
+                        { data: 'date_returned', className: 'text-start' },
+                        { data: 'status', className: 'text-start' },
+                        { data: 'is_late' , className: 'text-start'},
+                        { data: 'fine', className: 'text-start' },
+                        { data: 'fine_status', className: 'text-start' },
+                        { data: 'borrower', className: 'text-start' },
+                        { data: 'approver', className: 'text-start' }
+                    ],
                     dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
                         'rt' +
                         '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
@@ -102,15 +131,14 @@
                     scrollX: true
                 });
 
+
                 $("#logs2").css("overflow-x", "auto");
 
                 table2.columns.adjust().draw();
-                table2Initialized = true; // Mark as initialized
+                table2Initialized = true;
             } else if (target === '#per-book' && table2Initialized) {
-                // Adjust columns if already initialized
                 table2.columns.adjust().draw();
             }
         });
     });
-
 </script>

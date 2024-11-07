@@ -1043,3 +1043,42 @@ def ReturnSelectedBooks(request):
         except Exception as e:
             # Log the exception or handle errors as needed
             return JsonResponse({'success': False, 'message': str(e)})
+
+def GetTransaction(request):
+    transactions = TransactionMaster.objects.annotate(number_of_books=Count('transactiondetail')).select_related('user', 'approver')
+    data = [
+        {
+            'transaction_date': transaction.transaction_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'borrower': transaction.user.username,
+            'number_of_books': transaction.number_of_books,
+            'approver': transaction.approver.first_name + ' ' + transaction.approver.last_name,
+        }
+        for transaction in transactions
+    ]
+    return JsonResponse(data, safe=False)
+
+def GetTransactionDetail(request):
+    transaction_details = TransactionDetail.objects.select_related('transaction_master', 'book', 'user', 'approver', 'book__book_master', 'book__status')
+    
+    data = [
+        {
+            'book_title': detail.book.book_master.title,
+            'isbn': detail.book.book_master.isbn,
+            'date_borrowed': detail.date_borrowed.strftime('%Y-%m-%d %H:%M:%S'),
+            'due_date': detail.expected_date_return.strftime('%Y-%m-%d %H:%M:%S'),
+            'date_returned': detail.actual_date_return.strftime('%Y-%m-%d %H:%M:%S') if detail.actual_date_return else 'Not Returned',
+            'status': 'Returned' if detail.is_returned else 'In Progress',
+            'is_late': 'Yes' if detail.is_late else 'No',
+            'fine': str(detail.late_fee) if detail.late_fee else '0.00',
+            'borrower': detail.user.first_name + ' ' + detail.user.last_name,
+            'approver': detail.approver.first_name + ' ' + detail.approver.last_name,
+            'fine_status': (
+                'No Fine' if not detail.is_late else 
+                'Paid' if detail.is_paid else 
+                'Not Paid'
+            )  # New field with condition for "No Fine" if not late
+        }
+        for detail in transaction_details
+    ]
+    
+    return JsonResponse(data, safe=False)

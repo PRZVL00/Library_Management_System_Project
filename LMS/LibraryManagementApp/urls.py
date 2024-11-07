@@ -45,5 +45,7 @@ urlpatterns = [
     path('load-book', views.LoadReservedBook, name="load-book"),
     path('borrow_selected_books', views.BorrowSelectedBooks, name="borrow_selected_books"),
     path('return_selected_books', views.ReturnSelectedBooks, name="return_selected_books"),
+    path('get-transaction', views.GetTransaction, name="get-transaction"),
+    path('get-transaction-detail', views.GetTransactionDetail, name="get-transaction-detail"),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
