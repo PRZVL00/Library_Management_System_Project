@@ -34,6 +34,7 @@ def create_default_statuses(sender, **kwargs):
 class DimCategory(models.Model):
     category_id = models.AutoField(primary_key=True)
     category_name = models.CharField(max_length=255)
+    added_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True) 
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -52,6 +53,7 @@ class BookMaster(models.Model):
     location = models.CharField(max_length=255)
     soft_copy = models.FileField(upload_to='soft_copies/', null=True, blank=True)
     is_archived = models.BooleanField(default=False)
+    added_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True) 
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -64,6 +66,7 @@ class Book(models.Model):
     status = models.ForeignKey(DimStatus, on_delete=models.CASCADE)
     qr_value = models.CharField(max_length=255)
     qr_image = models.ImageField(upload_to='book_qr/')
+    added_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True) 
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -92,6 +95,7 @@ class BookAuthor(models.Model):
 class Reservation(models.Model):
     reservation_id = models.AutoField(primary_key=True)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    reservist = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     date_reserved = models.DateTimeField()
     expiration_date = models.DateTimeField()
     is_processed = models.BooleanField(default=False)
@@ -106,7 +110,7 @@ class Reservation(models.Model):
 class TransactionMaster(models.Model):
     transaction_master_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    approver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='approver')
+    approver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='T_approver')
     transaction_date = models.DateTimeField()
     date_created = models.DateTimeField(auto_now_add=True)
 
@@ -126,6 +130,8 @@ class TransactionDetail(models.Model):
     is_late = models.BooleanField(default=False)
     is_paid = models.BooleanField(default=False)
     return_id = models.CharField(max_length=255, null=True, blank=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    approver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='approver')
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

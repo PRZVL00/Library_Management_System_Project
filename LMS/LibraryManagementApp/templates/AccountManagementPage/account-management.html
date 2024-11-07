@@ -78,6 +78,7 @@
     let selectedCategories;
 
     $(document).ready(function () {
+        UpdateBagNumber()
         $('#accountManagement').DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
                 'rt' +
@@ -255,7 +256,19 @@
             });
         });
 
-        
+        function UpdateBagNumber(){
+            $.ajax({
+                url: "{% url 'update-bag-number' %}", 
+                type: "GET",
+                success: function (response) {
+                    console.log(response.total_reservations);
+                    $('.notification-dot').text(response.total_reservations);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
 
     });
 </script>
