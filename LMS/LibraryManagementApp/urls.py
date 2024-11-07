@@ -39,5 +39,8 @@ urlpatterns = [
     path('get-account-info/', views.GetAccountInfo, name='get-account-info'),
     path('update-account', views.UpdateAccount, name="update-account"),
     path('transaction-history/', views.TransactionHistory, name="transaction-history"),
+    path('update-bag-number', views.UpdateBagNumber, name="update-bag-number"),
+    path('get-reserved', views.GetReserved, name="get-reserved"),
+    path('cancel-reservation/', views.CancelReservation, name='cancel-reservation'),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

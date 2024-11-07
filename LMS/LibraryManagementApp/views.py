@@ -193,6 +193,9 @@ def ReserveBook(request):
             book_master_id=book_master_id,
             status=1  # Assuming 1 means 'available'
         ).first()
+
+        current_user = request.user
+
         
         if available_book:
             reserved_status = DimStatus.objects.get(status_id=3)  
@@ -208,10 +211,22 @@ def ReserveBook(request):
             reservation = Reservation.objects.create(
                 book=available_book,
                 date_reserved=date_reserved,
-                expiration_date=expiration_date
+                expiration_date=expiration_date,
+                reservist = current_user
             )
+
+            # Check if there are still available books for the given BookMaster ID
+            still_available = Book.objects.filter(
+                book_master_id=book_master_id,
+                status=1  # status=1 means 'available'
+            ).exists()
             
-            return JsonResponse({'isSuccess': 'true', 'message': 'Book added to your bag successfully!'})
+            # Return response with success message and availability status
+            return JsonResponse({
+                'isSuccess': 'true',
+                'message': 'Book added to your bag successfully!',
+                'stillAvailable': 'true' if still_available else 'false'
+            })
 
         else:
             # No available book found
@@ -268,7 +283,8 @@ def RegisterBook(request):
         print("Book Picture:", book_pic)
         print("Soft Copy:", soft_copy)
 
-        
+        current_user = request.user
+
         try:
             # Check if the ISBN already exists
             existing_book = BookMaster.objects.filter(Q(isbn=isbn) & Q(is_archived = True)).first()
@@ -281,7 +297,9 @@ def RegisterBook(request):
                     book_master=existing_book,
                     status_id=status_id,
                     qr_value='',  
-                    qr_image=''
+                    qr_image='',
+                    added_by=current_user  # Save the user who added the book
+
                 )
                 book.save()
 
@@ -299,7 +317,9 @@ def RegisterBook(request):
                     duration=duration,
                     image=book_pic,
                     summary=summary,
-                    soft_copy=soft_copy
+                    soft_copy=soft_copy,
+                    added_by=current_user  # Save the user who added the book
+
                 )
                 book_master.save()
 
@@ -307,7 +327,9 @@ def RegisterBook(request):
                     book_master=book_master,
                     status_id=status_id,
                     qr_value='',  
-                    qr_image=''
+                    qr_image='',
+                    added_by=current_user  # Save the user who added the book
+
                 )
                 book.save()
 
@@ -791,3 +813,73 @@ def UpdateAccount(request):
 @login_required(login_url='login')
 def TransactionHistory(request):
     return render(request, 'TransactionHistoryPage/transaction-history.html', {})
+
+def UpdateBagNumber(request):
+    current_user = request.user
+
+    try:
+        # Get the current time (to filter expiration date)
+        now = datetime.now()
+
+        # Build the conditions individually using Q() and combine them with & (AND)
+        conditions = Q(reservist=current_user) & Q(is_processed=False) & Q(is_canceled=False) & Q(is_expired=False) & Q(expiration_date__gt=now)
+
+        # Filter reservations using the combined Q object and count
+        reservation_count = Reservation.objects.filter(conditions).count()
+
+        # Return the count as a JSON response
+        return JsonResponse({'total_reservations': reservation_count})
+
+    except Exception as e:
+        # Handle any exceptions and return a failure response
+        return JsonResponse({'error': str(e)}, status=500)
+
+def GetReserved(request):
+    # Get the current logged-in user
+    user = request.user
+
+    # Get the current date and time
+    current_time = timezone.now()
+
+    # Query reservations with filters applied
+    reservations = Reservation.objects.filter(
+        reservist=user, 
+        expiration_date__gt=current_time, 
+        is_processed=False, 
+        is_canceled=False, 
+        is_expired=False
+    ).select_related('book__book_master')  # Use select_related to avoid additional queries
+
+    # Prepare data to return in the DataTable format
+    data = []
+    for reservation in reservations:
+        book = reservation.book.book_master  # Accessing the related BookMaster
+        
+        # Populate the data list with reservation details
+        data.append({
+            'book_title': book.title,
+            'reservation_date': reservation.date_reserved.strftime('%Y-%m-%d %H:%M:%S'),
+            'borrow_duration': book.duration,
+            'late_fee': str(book.late_fee),  # Make sure it's a string to display
+            'reservation_id': reservation.reservation_id
+        })
+
+    # Return data in JSON format
+    return JsonResponse({'reserved': data})
+
+def CancelReservation(request):
+    if request.method == 'POST':
+        # Get the reservation ID from the AJAX request
+        reservation_id = request.POST.get('reservation_id')
+
+        # Get the reservation object or return a 404 if not found
+        reservation = Reservation.objects.filter(reservation_id=reservation_id).first()
+
+        # Update the is_canceled field to True
+        reservation.is_canceled  = True
+        reservation.save()
+
+        # Return a success response
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
