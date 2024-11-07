@@ -42,5 +42,8 @@ urlpatterns = [
     path('update-bag-number', views.UpdateBagNumber, name="update-bag-number"),
     path('get-reserved', views.GetReserved, name="get-reserved"),
     path('cancel-reservation/', views.CancelReservation, name='cancel-reservation'),
+    path('load-book', views.LoadReservedBook, name="load-book"),
+    path('borrow_selected_books', views.BorrowSelectedBooks, name="borrow_selected_books"),
+    path('return_selected_books', views.ReturnSelectedBooks, name="return_selected_books"),
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

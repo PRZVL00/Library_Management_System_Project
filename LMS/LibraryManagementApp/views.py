@@ -22,6 +22,7 @@ from django.db.models import Count
 from django.db.models import Count, Q, BooleanField, Case, When
 from django.utils import timezone
 from datetime import timedelta
+import json
 
 
 
@@ -646,7 +647,7 @@ def UpdateBook(request):
         except (TypeError, ValueError):
             print("Conversion failed: book_master_id is not a valid integer.")
 
-        book_master = Book.objects.get(book_master_id=book_master_id)
+        book_master = BookMaster.objects.get(book_master_id=book_master_id)
 
         # Update the fields from the request
         book_master.title = request.POST.get('bookTitle')
@@ -656,14 +657,16 @@ def UpdateBook(request):
         book_master.late_fee = request.POST.get('fine')
         book_master.duration = request.POST.get('duration')
         book_master.summary = request.POST.get('summary')
-
+        
         # Handle image upload if provided
         if 'bookPic' in request.FILES:
-            book_master.image = request.FILES['bookPic']
+            book_master.image = request.FILES.get('bookPic')
+            print(f"Book Picture: {book_master.image.name}")  # Debug: Check the file name
+
         if 'softcopy' in request.FILES:
-            book_master.soft_copy = request.FILES['softcopy']
+            book_master.soft_copy = request.FILES.get('softcopy')
         
-        # Save the book
+        # Save the book master instance
         book_master.save()
 
         # Clear existing authors and categories, if necessary
@@ -673,19 +676,18 @@ def UpdateBook(request):
         # Update authors
         authors = request.POST.getlist('author[]')
         for author in authors:
-            BookAuthor.objects.create(book_master=book_master_id, author=author)
+            BookAuthor.objects.create(book_master=book_master, author=author)
             
         # Update categories
         categories = request.POST.getlist('categories')
-
-        print(categories)
         for category_id in categories:
             category = DimCategory.objects.get(category_id=category_id)
-            BookCategory.objects.create(book_master=book_master_id, category_id=category.category_id)
+            BookCategory.objects.create(book_master=book_master, category=category)
 
-        return JsonResponse({'isSuccess': 'true', 'message': 'Category added successfuly.'})            
+        return JsonResponse({'isSuccess': 'true', 'message': 'Book updated successfully.'})            
 
-    return JsonResponse({'isSuccess': 'false', 'message': 'Book update unsuccessful. please try again.'})            
+    return JsonResponse({'isSuccess': 'false', 'message': 'Book update unsuccessful. Please try again.'})
+         
 
 @login_required(login_url='login')
 def RemoveBook(request):
@@ -834,6 +836,7 @@ def UpdateBagNumber(request):
         # Handle any exceptions and return a failure response
         return JsonResponse({'error': str(e)}, status=500)
 
+#bag page
 def GetReserved(request):
     # Get the current logged-in user
     user = request.user
@@ -874,12 +877,169 @@ def CancelReservation(request):
 
         # Get the reservation object or return a 404 if not found
         reservation = Reservation.objects.filter(reservation_id=reservation_id).first()
+        if not reservation:
+            return JsonResponse({'success': False, 'message': 'Reservation not found.'})
 
         # Update the is_canceled field to True
-        reservation.is_canceled  = True
+        reservation.is_canceled = True
         reservation.save()
+
+        # Update the book's status to 1 (assuming '1' corresponds to an available status in DimStatus)
+        book = reservation.book
+        available_status = DimStatus.objects.get(pk=1)  # Modify this if '1' isn't the correct ID
+        book.status = available_status
+        book.save()
 
         # Return a success response
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+def LoadReservedBook(request):
+   if request.method == "POST":
+        borrower = request.POST.get('borrower')
+        print(borrower)
+        
+        # Try finding the user by QR or email
+        user = CustomUser.objects.filter(qr_value=borrower).first()
+        if not user:
+            user = CustomUser.objects.filter(username=borrower).first()
+        
+        if not user:
+            return JsonResponse({
+                'isSuccess': 'false',
+                'message': 'User not found.'
+            })
+
+        # Get user's reserved and borrowed books
+        reserved_books = Reservation.objects.filter(reservist=user, is_processed=False, is_canceled = False, is_expired = False).values(
+            'reservation_id',
+            'book__book_master__book_master_id', 
+            'book__book_master__title', 
+            'book__book_master__isbn', 
+            'book__book_master__image', 
+        )
+
+        print(reserved_books)
+
+        borrowed_books = TransactionDetail.objects.filter(user=user, is_returned=False).values(
+            'transaction_detail_id',
+            'book__book_master__book_master_id', 
+            'book__book_master__title', 
+            'book__book_master__isbn', 
+            'book__book_master__image', 
+            'expected_date_return'
+        )
+                # Format the reserved and borrowed books
+        reserved_books_data = list(reserved_books)
+        borrowed_books_data = list(borrowed_books)
+
+        # Get the number of reserved, on-hand, and delayed books
+        reserved_books_count = len(reserved_books_data)
+        on_hand_books_count = len(borrowed_books_data)
+        delayed_books_count = sum(1 for book in borrowed_books_data if timezone.now() > book['expected_date_return'])
+
+        # Return user data and book details
+        return JsonResponse({
+            'isSuccess': 'true',
+            'user': {
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'cellphone_number': user.cellphone_number,
+                'email': user.email,
+                'reserved_books_count': reserved_books_count,
+                'on_hand_books_count': on_hand_books_count,
+                'delayed_books_count': delayed_books_count,
+                'profile_pic':user.image.url,
+            },
+            'reserved_books': reserved_books_data,
+            'borrowed_books': borrowed_books_data
+        })
+def BorrowSelectedBooks(request):
+    if request.method == "POST":
+        # Get the list of books to borrow (passed as JSON)
+        to_borrow = request.POST.get('to_borrow')
+        
+        if to_borrow:
+            to_borrow = json.loads(to_borrow)  # Convert JSON string to Python list
+
+            try:
+                # List to store transaction details
+                transaction_details = []
+                
+                # Iterate over the selected books to borrow
+                for reservation_id in to_borrow:
+                    # Find the reservation
+                    reservation = Reservation.objects.get(reservation_id=reservation_id, is_processed=False)
+                    
+                    # Ensure that the reservist is not None (i.e., someone made the reservation)
+                    if not reservation.reservist:
+                        return JsonResponse({'success': False, 'message': f'Reservation {reservation_id} does not have a reservist.'})
+                    
+                    # Create a TransactionMaster record for the reservist (borrower)
+                    transaction_master = TransactionMaster.objects.create(
+                        user=reservation.reservist,  # Use the reservist as the borrower
+                        approver=request.user,  # You can change approver logic as needed
+                        transaction_date=timezone.now()
+                    )
+
+                    # Set reservation as processed
+                    reservation.is_processed = True
+                    reservation.save()
+
+                    # Get the corresponding book and update its status
+                    book = reservation.book
+                    book.status = DimStatus.objects.get(status_name='Borrowed')  # Update the book status to "Borrowed"
+                    book.save()
+
+                    # Create a transaction detail for each borrowed book
+                    transaction_detail = TransactionDetail.objects.create(
+                        transaction_master=transaction_master,
+                        book=book,
+                        date_borrowed=timezone.now(),
+                        expected_date_return=timezone.now() + timezone.timedelta(days=book.book_master.duration),
+                        user=reservation.reservist,  # Borrower is the reservist
+                        approver=request.user  # Approver can be different if necessary
+                    )
+
+                    transaction_details.append(transaction_detail)
+
+                # Return success response
+                return JsonResponse({'success': True, 'transaction_master_id': transaction_master.transaction_master_id})
+
+            except Reservation.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'Some reservations not found or already processed.'})
+        else:
+            return JsonResponse({'success': False, 'message': 'No books selected.'})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+def ReturnSelectedBooks(request):
+    if request.method == "POST":
+        try:
+            # Get the list of transaction detail IDs that the user wants to return
+            to_return = request.POST.get('to_return')
+            to_return = json.loads(to_return)
+
+            # Query the TransactionDetail objects by IDs in to_return
+            transaction_details = TransactionDetail.objects.filter(transaction_detail_id__in=to_return)
+
+            # Loop through each transaction detail and update the book's status and transaction detail status
+            for transaction_detail in transaction_details:
+                # Get the related book and update its status to "Available"
+                book = transaction_detail.book
+                available_status = DimStatus.objects.get(status_name="Available")  # Assuming "Available" is a valid status
+                book.status = available_status  # Update the book's status to available
+                book.save()
+
+                # Mark the transaction as returned
+                transaction_detail.is_returned = True
+                transaction_detail.actual_date_return = transaction_detail.expected_date_return  # Or you can set the actual return date to now
+                transaction_detail.save()
+
+            return JsonResponse({
+                'success': True,
+            })
+        except Exception as e:
+            # Log the exception or handle errors as needed
+            return JsonResponse({'success': False, 'message': str(e)})

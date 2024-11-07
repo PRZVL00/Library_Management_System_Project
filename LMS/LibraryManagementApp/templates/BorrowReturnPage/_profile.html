@@ -1,14 +1,14 @@
 {% load static %}
-<div class="card">
+<div class="card" id="user-profile">
     <div class="card-content">
         <div class="card-body text-center">
-            <img src={% static 'assets/static/images/faces/2.jpg' %} class="rounded-circle mb-3" alt="User Profile Picture" style="width: 150px; height: 150px;">
-            <h5 class="card-title">First Name Last Name</h5>
-            <p class="card-text">(63+) xxx-xxx-xxxx</p>
-            <p class="card-text">user@example.com</p>
-            <p class="card-text">Reserved Books: 5</p>
-            <p class="card-text">On-Hand Books: 3</p>
-            <p class="card-text">Delayed Books: 1</p>
+            <img src="{% static 'assets/static/images/faces/2.jpg' %}" class="rounded-circle mb-3" alt="User Profile Picture" style="width: 150px; height: 150px;" id="user-profile-picture">
+            <h5 class="card-title" id="user-full-name">First Name Last Name</h5>
+            <p class="card-text" id="user-phone"> (63+) xxx-xxx-xxxx</p>
+            <p class="card-text" id="user-email">user@example.com</p>
+            <p class="card-text" id="reserved-books">Reserved Books: 5</p>
+            <p class="card-text" id="on-hand-books">On-Hand Books: 3</p>
+            <p class="card-text" id="delayed-books">Delayed Books: 1</p>
             <button type="button" class="btn btn-outline-primary rounded-pill">History</button>
             <button type="button" class="btn btn-outline-danger rounded-pill">Ban</button>    
         </div>
