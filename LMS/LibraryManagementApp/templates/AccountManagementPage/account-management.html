@@ -10,8 +10,7 @@
 </head>
 
 <body class='d-flex flex-column vh-100'>
-    <script src={% static 'assets/static/js/initTheme.js' %}></script>
-
+    <script src={% static "assets/static/js/initTheme.js" %}></script>
     <div id="app">
         {% include "_sideNavigation.html" %}
         <div id="main">
@@ -41,25 +40,19 @@
             <div class="page-content">
                 <!--Start Your Page Here-->
                 <div class="table-responsive">
-                    <!-- Modal for edit profile will be used here but with some changes -->
-                    <!-- Buttons for each input field will be disabled and also the input fields -->
-                    <!-- Reset Password will be remove and save buttons and cancel will be replaced as close -->
-                    <table class="table table-striped" id="accountManagement">
+                    <table class="table table-striped" id="accounts">
                         <thead>
                             <tr>
+                                <th class="text-start">Student ID#</th>
                                 <th class="text-start">First Name</th>
                                 <th class="text-start">Last Name</th>
-                                <th class="text-start">Student ID#</th>
                                 <th class="text-start">Contact #</th>
                                 <th class="text-start">Email</th>
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-
-                        </tbody>
+                        
                     </table>
-
                 </div>
             </div>
             {% include "AccountManagementPage/_account-edit.html" %}
@@ -71,15 +64,9 @@
 
 </html>
 
-
 <script>
-
-    let categoriesFetched = false;
-    let selectedCategories;
-
     $(document).ready(function () {
-        UpdateBagNumber()
-        $('#accountManagement').DataTable({
+        $("#accounts").DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
                 'rt' +
                 '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
@@ -92,9 +79,9 @@
                 dataSrc: 'accounts'
             },
             columns: [
+                { data: 'id_number', className: 'text-start' },
                 { data: 'first_name' },
                 { data: 'last_name' },
-                { data: 'id_number', className: 'text-start' },
                 { data: 'cellphone_number', className: 'text-start' },
                 { data: 'email' },
                 {
@@ -111,17 +98,6 @@
                 }
             ]
 
-        });
-
-        $.ajax({
-            url: "{% url 'get-accounts' %}",
-            type: 'GET',
-            success: function (response) {
-                const accounts = response.accounts;
-            },
-            error: function (xhr, status, error) {
-                alert("An error occurred: " + error);
-            }
         });
 
         // Register FilePond plugins
@@ -156,21 +132,6 @@
             storeAsFile: true
         });
 
-
-        // Clear button functionality
-        $('#clearBtn').click(function () {
-            // Clear all text inputs
-            $('input[type="text"], input[type="number"], input[type="file"]').val('');
-
-            // Clear all textareas
-            $('textarea').val('');
-
-            // Reset all select elements
-            $('select').prop('selectedIndex', 0);
-
-            pond.removeFiles(); // Clears all uploaded and pending files
-        });
-
         $(document).on('click', '#Edit', function () {
             var dataId = $(this).data('id');
 
@@ -188,11 +149,13 @@
                         console.error('Error loading file:', error);
                     });
 
-                    $('#accountID').val(response.account_id)
-                    $('#firstName').val(response.first_name);
-                    $('#lastName').val(response.last_name);
-                    $('#studentID').val(response.id_number);
-                    $('#contactNumber').val(response.cellphone_number);
+                    console.log(response)
+
+                    $('#account_id').val(response.account_id)
+                    $('#first_name').val(response.first_name);
+                    $('#last_name').val(response.last_name);
+                    $('#id_number').val(response.id_number);
+                    $('#contact_number').val(response.cellphone_number);
                     $('#email').val(response.email);
 
                     // Open the modal after the form is populated
@@ -204,7 +167,7 @@
             });
         });
 
-        $('#submitBTN').click(function () {
+        $('#save-button').click(function () {
             $('#accountEditForm').submit();
         });
 
@@ -236,6 +199,9 @@
 
                         pond.removeFiles();
 
+                        $("#accounts").DataTable().ajax.reload(null, false); // false keeps the current page
+
+
                     } else {
                         Toastify({
                             text: response.message,
@@ -256,9 +222,9 @@
             });
         });
 
-        function UpdateBagNumber(){
+        function UpdateBagNumber() {
             $.ajax({
-                url: "{% url 'update-bag-number' %}", 
+                url: "{% url 'update-bag-number' %}",
                 type: "GET",
                 success: function (response) {
                     console.log(response.total_reservations);
@@ -269,6 +235,12 @@
                 }
             });
         }
+
+    });
+</script>
+
+
+	
 
     });
 </script>

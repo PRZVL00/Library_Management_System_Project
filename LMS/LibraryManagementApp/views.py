@@ -711,98 +711,44 @@ def RemoveBook(request):
 def GetAccountInfo(request):
     account_id = request.GET.get('id')
     try:
-        book = CustomUser.objects.get(id=account_id)
-        data = {
-            'account_id': book.id,
-            'first_name': book.first_name, 
-            'last_name': book.last_name,
-            'email': book.email,
-            'is_active': book.is_active,
-            'id_number': book.id_number,
-            'cellphone_number': book.cellphone_number,
-            'image_url': book.image.url,
-        }
-
-        return JsonResponse(data)
-    except CustomUser.DoesNotExist:
-        return JsonResponse({'error': 'Account not found'}, status=404)
-    
-
-@login_required(login_url='login')
-def UpdateAccount(request):
-    if request.method == 'POST':
-        account_id = request.POST.get('accountID')  # Ensure you have the book ID in your form
         account = CustomUser.objects.get(id=account_id)
-
-        # Update the fields from the request
-        account.first_name = request.POST.get('firstName')
-        account.last_name = request.POST.get('lastName')
-        account.id_number = request.POST.get('studentID')
-        account.cellphone_number = request.POST.get('contactNumber')
-        account.email = request.POST.get('email')
-
-        # Handle image upload if provided
-        if 'accountPic' in request.FILES:
-            account.image = request.FILES['accountPic']
-        
-        # Save the account
-        account.save()
-
-        return JsonResponse({'isSuccess': 'true', 'message': 'Account update successfuly.'})            
-
-    return JsonResponse({'isSuccess': 'false', 'message': 'Account update unsuccessful. please try again.'})
-    
-
-@login_required(login_url='login')
-def GetAccounts(request):
-    if request.method == 'GET':
-        accountList = list(CustomUser.objects.select_related('status').values(
-            'id',
-            'first_name',
-            'last_name', 
-            'id_number', 
-            'cellphone_number', 
-            'email',
-            'is_active'
-        ))
-        return JsonResponse({'accounts': accountList})
-
-def GetAccountInfo(request):
-    account_id = request.GET.get('id')
-    try:
-        book = CustomUser.objects.get(id=account_id)
         data = {
-            'account_id': book.id,
-            'first_name': book.first_name, 
-            'last_name': book.last_name,
-            'email': book.email,
-            'is_active': book.is_active,
-            'id_number': book.id_number,
-            'cellphone_number': book.cellphone_number,
-            'image_url': book.image.url,
+            'account_id': account.id,
+            'first_name': account.first_name, 
+            'last_name': account.last_name,
+            'email': account.email,
+            'is_active': account.is_active,
+            'id_number': account.id_number,
+            'cellphone_number': account.cellphone_number,
+            'image_url': account.image.url,
         }
 
         return JsonResponse(data)
     except Book.DoesNotExist:
         return JsonResponse({'error': 'Book not found'}, status=404)
+
     
 
 @login_required(login_url='login')
 def UpdateAccount(request):
     if request.method == 'POST':
-        account_id = request.POST.get('accountID')  # Ensure you have the book ID in your form
+        account_id = request.POST.get('account_id')  # Ensure you have the book ID in your form
         account = CustomUser.objects.get(id=account_id)
 
+        print(account)
+
         # Update the fields from the request
-        account.first_name = request.POST.get('firstName')
-        account.last_name = request.POST.get('lastName')
-        account.id_number = request.POST.get('studentID')
-        account.cellphone_number = request.POST.get('contactNumber')
+        account.first_name = request.POST.get('first_name')
+        account.last_name = request.POST.get('last_name')
+        account.id_number = request.POST.get('id_number')
+        account.cellphone_number = request.POST.get('contact_number')
         account.email = request.POST.get('email')
 
+        print(request.FILES.get('profile_picture'))
+
         # Handle image upload if provided
-        if 'accountPic' in request.FILES:
-            account.image = request.FILES['accountPic']
+        if 'profile_picture' in request.FILES:
+            account.image = request.FILES.get('profile_picture')
         
         # Save the account
         account.save()
@@ -872,7 +818,7 @@ def GetReserved(request):
 
 def CancelReservation(request):
     if request.method == 'POST':
-        # Get the reservation ID from the AJAX request
+        # Get the reservation ID fromupdat the AJAX request
         reservation_id = request.POST.get('reservation_id')
 
         # Get the reservation object or return a 404 if not found
