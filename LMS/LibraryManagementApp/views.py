@@ -1069,3 +1069,37 @@ def GetUserTransaction(request):
     ]
     
     return JsonResponse(data, safe=False)
+
+def InOut(request):
+    return render(request, 'InOutPage/inout.html', {})
+
+from django.utils import timezone
+from django.http import JsonResponse
+from .models import CustomUser, Logbook
+
+def CreateLog(request):
+    if request.method == 'POST':
+        try:
+            qr_value = request.POST.get('qr_value')
+
+            # Retrieve the user based on the provided QR value
+            user = CustomUser.objects.filter(qr_value=qr_value).first()
+
+            if user:
+                # Retrieve the latest log for the user
+                latest_log = Logbook.objects.filter(user=user).order_by('-time_in').first()
+
+                # If there's an existing log and the time_out is empty, fill it
+                if latest_log and latest_log.time_out is None:
+                    latest_log.time_out = timezone.now()
+                    latest_log.save()
+                else:
+                    # Otherwise, create a new log entry with time_in
+                    Logbook.objects.create(
+                        user=user,
+                        time_in=timezone.now()
+                    )
+            
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})

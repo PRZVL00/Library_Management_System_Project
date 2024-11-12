@@ -49,6 +49,8 @@ urlpatterns = [
     path('get-transaction-detail', views.GetTransactionDetail, name="get-transaction-detail"),
     path('get-user-profile', views.GetUserProfile, name="get-user-profile"),
     path('get-user-transaction', views.GetUserTransaction, name="get-user-transaction"),
+    path('in-out/', views.InOut, name="in-out"),
+    path('create-log', views.CreateLog, name="create-log"),
     
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

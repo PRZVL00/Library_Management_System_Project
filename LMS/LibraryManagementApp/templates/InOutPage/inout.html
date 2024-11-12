@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In and Out Monitoring</title>
+    {% include "_CSSreferences.html" %}
+</head>
+<body class='d-flex flex-column vh-100'>
+    <script src={% static 'assets/static/js/initTheme.js' %}></script>
+
+    <!--Header-->
+    <header class="text-center mb-4 mt-2">
+        <img src="{% static 'assets/static/images/logo.png' %}" alt="School Logo" style="height: 200px;">
+        <h1>Paliparan National High School</h1>
+    </header>
+
+    <div class="d-flex flex-column align-items-center vh-100">
+
+        <!-- Welcome Message and Instructions -->
+        <div class="text-center mb-3">
+            <h2 class="fw-bold">WELCOME</h2>
+            <p class="text-muted">Please scan your QR code on the scanner below.</p>
+        </div>
+
+        <!-- Clock Card -->
+        <div class="card p-4 text-center shadow-lg" style="width: 250px;">
+            <div id="clock" class="digital-clock display-3 text-primary fw-bold" style="text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);">
+                00:00
+            </div>
+        </div>
+
+        <!-- Footer with Home Button -->
+        <footer class="mt-4">
+            <a href="{% url 'dashboard' %}" class="btn btn-primary">Home</a>
+        </footer>
+    </div>
+
+    {% include "_JSreferences.html" %}
+
+    <script>
+        // Digital clock function
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').innerText = `${hours}:${minutes}`;
+        }
+
+        // Update clock every minute
+        setInterval(updateClock, 60000);
+        updateClock(); // Initial call to display the time immediately
+
+        // QR Code Handling
+        let qrData = '';
+
+        document.addEventListener('keypress', function(event) {
+            // Check if Enter key is pressed to submit the QR data
+            if (event.key === 'Enter') {
+                if (qrData) {
+                    console.log(qrData)
+                    sendQRData(qrData); // Send the collected QR data
+                    qrData = ''; // Reset for the next scan
+                }
+            } else {
+                qrData += event.key; // Collect QR code characters
+            }
+        });
+
+        // AJAX function to send QR data to server
+        function sendQRData(qrValue) {
+            $.ajax({
+                url: '{% url "create-log" %}', // Replace with your Django view URL name
+                type: 'POST',
+                data: {
+                    'qr_value': qrValue,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}' // CSRF token for Django
+                },
+                success: function(response) {
+                    console.log('QR code successfully sent:', response);
+                    // Optionally handle the response, such as displaying a success message
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error sending QR code:', error);
+                    // Optionally handle the error
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
