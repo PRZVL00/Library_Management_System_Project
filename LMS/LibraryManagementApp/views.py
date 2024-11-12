@@ -1007,11 +1007,11 @@ def GetTransactionDetail(request):
     transaction_details = TransactionDetail.objects.select_related('transaction_master', 'book', 'user', 'approver', 'book__book_master', 'book__status')
     
     data = [
-        {
+        {   'transaction_date': detail.transaction_master.transaction_date.strftime('%Y-%m-%d'),
             'book_title': detail.book.book_master.title,
             'isbn': detail.book.book_master.isbn,
             'date_borrowed': detail.date_borrowed.strftime('%Y-%m-%d %H:%M:%S'),
-            'due_date': detail.expected_date_return.strftime('%Y-%m-%d %H:%M:%S'),
+            'due_date': detail.expected_date_return.strftime('%Y-%m-%d'),
             'date_returned': detail.actual_date_return.strftime('%Y-%m-%d %H:%M:%S') if detail.actual_date_return else 'Not Returned',
             'status': 'Returned' if detail.is_returned else 'In Progress',
             'is_late': 'Yes' if detail.is_late else 'No',
@@ -1023,6 +1023,47 @@ def GetTransactionDetail(request):
                 'Paid' if detail.is_paid else 
                 'Not Paid'
             )  # New field with condition for "No Fine" if not late
+        }
+        for detail in transaction_details
+    ]
+    
+    return JsonResponse(data, safe=False)
+
+def GetUserProfile(request):
+    current_user = request.user
+    user_profile = CustomUser.objects.filter(id=current_user.id).first()
+
+    # Serialize user data
+    if user_profile:
+        data = {
+            'id': user_profile.id,
+            'name': user_profile.get_full_name(),
+            'student_id': user_profile.id_number,
+            'contact': user_profile.cellphone_number,
+            'email': user_profile.email,
+            'image_url': user_profile.image.url if user_profile.image else None,
+            'qr_image_url': user_profile.qr_image.url if user_profile.qr_image else None
+        }
+        return JsonResponse(data)
+    else:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    
+from django.http import JsonResponse
+from datetime import datetime
+
+def GetUserTransaction(request):
+    current_user = request.user
+    transaction_details = TransactionDetail.objects.select_related(
+        'transaction_master', 'book', 'user', 'approver', 'book__book_master', 'book__status'
+    ).filter(user=current_user, is_returned = False)  # Filter by the current user
+    
+    data = [
+        {   
+            'transaction_date': detail.transaction_master.transaction_date.strftime('%Y-%m-%d'),
+            'book_title': detail.book.book_master.title,
+            'date_borrowed': detail.date_borrowed.strftime('%Y-%m-%d %H:%M:%S'),
+            'due_date': detail.expected_date_return.strftime('%Y-%m-%d'),
+            'status': 'Late' if detail.expected_date_return < datetime.now() else 'On Time'
         }
         for detail in transaction_details
     ]
