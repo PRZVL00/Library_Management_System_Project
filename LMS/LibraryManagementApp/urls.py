@@ -52,6 +52,14 @@ urlpatterns = [
     path('in-out/', views.InOut, name="in-out"),
     path('create-log', views.CreateLog, name="create-log"),
     path('get-log', views.GetLog, name="get-log"),
+    path('get-first-row', views.GetFirstRow, name="get-first-row"),
+    path('get-second-row', views.GetSecondRow, name="get-second-row"),
+    path('get-third-row/', views.GetThirdRow, name='get-third-row'),
+    path('get-current-visitors/', views.GetCurrentVisitors, name='get-current-visitors'),  
+    path('get-fourth-row/', views.GetFourthRow, name='get-fourth-row'),
+
+
+
     
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

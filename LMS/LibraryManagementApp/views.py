@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.template.loader import render_to_string
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.db.models import Q, Exists, OuterRef
 from django.templatetags.static import static
 from django.db.models import Count
@@ -25,11 +25,6 @@ from datetime import timedelta
 import json
 from django.core.exceptions import ObjectDoesNotExist
 
-
-
-
-
-# Create your views here.
 def Login(request):
     return render(request, 'LogInPage/login.html', {})
 
@@ -140,11 +135,10 @@ def RegisterUser(request):
 
 @login_required(login_url='login')
 def Dashboard(request):
-    # Check if the user is both staff and admin
-    if request.user.is_staff and request.user.is_superuser:
+    if request.user.is_staff or  request.user.is_superuser:
         return render(request, 'DashboardPage/dashboard.html', {})
     else:
-        return redirect('sbook-collection') 
+        return redirect('book-collection') 
 
 @login_required(login_url='login')
 def BookCollection(request):
@@ -178,16 +172,23 @@ def LoadBooks(request):
 
 @login_required(login_url='login')
 def BorrowReturn(request):
-    return render(request, 'BorrowReturnPage/borrow-return.html', {})
+    if request.user.is_staff or  request.user.is_superuser:
+        return render(request, 'BorrowReturnPage/borrow-return.html', {})
+    else:
+        return redirect('book-collection')
 
 @login_required(login_url='login')
 def AccountManagement(request):
-    return render(request, 'AccountManagementPage/account-management.html', {})
+    if request.user.is_staff or  request.user.is_superuser:
+        return render(request, 'AccountManagementPage/account-management.html', {})
+    else:
+        return redirect('book-collection')
 
 @login_required(login_url='login')
 def Bag(request):
     return render(request, 'BagPage/bag.html', {})
 
+@login_required(login_url='login')
 def ReserveBook(request):
     if request.method == 'POST':
         book_master_id = request.POST.get('book_master_id')
@@ -240,7 +241,10 @@ def ReserveBook(request):
 
 @login_required(login_url='login')
 def LogbookPage(request):
-    return render(request, 'LogbookPage/logbook.html', {})
+    if request.user.is_staff or  request.user.is_superuser:
+        return render(request, 'LogbookPage/logbook.html', {})
+    else:
+        return redirect('book-collection')
 
 @login_required(login_url='login')
 def Profile(request):
@@ -248,11 +252,19 @@ def Profile(request):
 
 @login_required(login_url='login')
 def BookRegistration(request):
-    return render(request, 'BookRegistrationPage/book-registration.html', {})
+    if request.user.is_staff or  request.user.is_superuser:
+        return render(request, 'BookRegistrationPage/book-registration.html', {})
+    else:
+        return redirect('book-collection')
+    
 
 @login_required(login_url='login')
 def BookManagement(request):
-    return render(request, 'BookManagementPage/book-management.html', {})
+    if request.user.is_staff or  request.user.is_superuser:
+        return render(request, 'BookManagementPage/book-management.html', {})
+    else:
+        return redirect('book-collection')
+    
 
 @login_required(login_url='login')
 def RegisterBook(request):
@@ -399,7 +411,6 @@ def CheckISBN(request):
         except:
             pass
 
-
 @login_required(login_url='login')
 def AddCategory(request):
     if request.method == 'POST':
@@ -435,15 +446,6 @@ def GetStatus(request):
     if request.method == 'GET':
         statusList = list(DimStatus.objects.values())
         return JsonResponse({'status': statusList})
-
-
-@login_required(login_url='login')
-def BookManagement(request):
-    return render(request, 'BookManagementPage/book-management.html', {})
-
-
-# NOTE: FIX THIS
-from django.db.models import Prefetch
 
 @login_required(login_url='login')
 def GetBooks(request):
@@ -514,6 +516,7 @@ def GetBooks(request):
 
         return JsonResponse({'books': formatted_books})
     
+@login_required(login_url='login')
 def GetBookMasterBooks(request):
     if request.method == 'GET':
         book_master_id = request.GET.get('BookMasterID')
@@ -540,6 +543,7 @@ def GetBookMasterBooks(request):
         except Book.DoesNotExist:
             return JsonResponse({'error': 'BookMaster or Books not found'}, status=404)
 
+@login_required(login_url='login')
 def GetBookInfo(request):
     book_master_id = request.GET.get('id')
     try:
@@ -576,8 +580,6 @@ def GetBookInfo(request):
     except BookMaster.DoesNotExist:
         return JsonResponse({'error': 'Book not found'}, status=404)
 
-    
-
 @login_required(login_url='login')
 def GetAccounts(request):
     if request.method == 'GET':
@@ -592,6 +594,7 @@ def GetAccounts(request):
         ))
         return JsonResponse({'accounts': accountList})
 
+@login_required(login_url='login')
 def UpdateStatus(request):
     if request.method == 'POST':
         book_id = request.POST.get('book_id')
@@ -691,7 +694,6 @@ def UpdateBook(request):
 
     return JsonResponse({'isSuccess': 'false', 'message': 'Book update unsuccessful. Please try again.'})
          
-
 @login_required(login_url='login')
 def RemoveBook(request):
     if request.method == 'POST':
@@ -711,6 +713,7 @@ def RemoveBook(request):
 
     return JsonResponse({'isSuccess': False, 'message': 'Invalid request method.'})
 
+@login_required(login_url='login')
 def GetAccountInfo(request):
     account_id = request.GET.get('id')
     try:
@@ -729,8 +732,6 @@ def GetAccountInfo(request):
         return JsonResponse(data)
     except Book.DoesNotExist:
         return JsonResponse({'error': 'Book not found'}, status=404)
-
-    
 
 @login_required(login_url='login')
 def UpdateAccount(request):
@@ -760,11 +761,14 @@ def UpdateAccount(request):
 
     return JsonResponse({'isSuccess': 'false', 'message': 'Account update unsuccessful. please try again.'})
     
-
 @login_required(login_url='login')
 def TransactionHistory(request):
-    return render(request, 'TransactionHistoryPage/transaction-history.html', {})
+    if request.user.is_staff or request.user.is_superuser:
+        return render(request, 'TransactionHistoryPage/transaction-history.html', {})
+    else:
+        return redirect('book-collection')
 
+@login_required(login_url='login')
 def UpdateBagNumber(request):
     current_user = request.user
 
@@ -785,7 +789,7 @@ def UpdateBagNumber(request):
         # Handle any exceptions and return a failure response
         return JsonResponse({'error': str(e)}, status=500)
 
-#bag page
+@login_required(login_url='login')
 def GetReserved(request):
     # Get the current logged-in user
     user = request.user
@@ -819,6 +823,7 @@ def GetReserved(request):
     # Return data in JSON format
     return JsonResponse({'reserved': data})
 
+@login_required(login_url='login')
 def CancelReservation(request):
     if request.method == 'POST':
         # Get the reservation ID fromupdat the AJAX request
@@ -844,6 +849,7 @@ def CancelReservation(request):
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
+@login_required(login_url='login')
 def LoadReservedBook(request):
    if request.method == "POST":
         borrower = request.POST.get('borrower')
@@ -904,6 +910,8 @@ def LoadReservedBook(request):
             'reserved_books': reserved_books_data,
             'borrowed_books': borrowed_books_data
         })
+
+@login_required(login_url='login')
 def BorrowSelectedBooks(request):
     if request.method == "POST":
         # Get the list of books to borrow (passed as JSON)
@@ -963,6 +971,7 @@ def BorrowSelectedBooks(request):
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
+@login_required(login_url='login')
 def ReturnSelectedBooks(request):
     if request.method == "POST":
         try:
@@ -993,6 +1002,7 @@ def ReturnSelectedBooks(request):
             # Log the exception or handle errors as needed
             return JsonResponse({'success': False, 'message': str(e)})
 
+@login_required(login_url='login')
 def GetTransaction(request):
     transactions = TransactionMaster.objects.annotate(number_of_books=Count('transactiondetail')).select_related('user', 'approver')
     data = [
@@ -1006,6 +1016,7 @@ def GetTransaction(request):
     ]
     return JsonResponse(data, safe=False)
 
+@login_required(login_url='login')
 def GetTransactionDetail(request):
     transaction_details = TransactionDetail.objects.select_related('transaction_master', 'book', 'user', 'approver', 'book__book_master', 'book__status')
     
@@ -1032,6 +1043,7 @@ def GetTransactionDetail(request):
     
     return JsonResponse(data, safe=False)
 
+@login_required(login_url='login')
 def GetUserProfile(request):
     current_user = request.user
     user_profile = CustomUser.objects.filter(id=current_user.id).first()
@@ -1050,10 +1062,8 @@ def GetUserProfile(request):
         return JsonResponse(data)
     else:
         return JsonResponse({'error': 'User not found'}, status=404)
-    
-from django.http import JsonResponse
-from datetime import datetime
 
+@login_required(login_url='login')
 def GetUserTransaction(request):
     current_user = request.user
     transaction_details = TransactionDetail.objects.select_related(
@@ -1076,6 +1086,7 @@ def GetUserTransaction(request):
 def InOut(request):
     return render(request, 'InOutPage/inout.html', {})
 
+@login_required(login_url='login')
 def CreateLog(request):
     if request.method == 'POST':
         try:
@@ -1103,6 +1114,7 @@ def CreateLog(request):
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
 
+@login_required(login_url='login')
 def GetLog(request):
     if request.method == 'GET':
         try:
@@ -1126,3 +1138,224 @@ def GetLog(request):
 
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
+@login_required(login_url='login')
+def GetFirstRow(request):
+    total_books = Book.objects.filter(book_master__is_archived=False).count()
+    print(total_books)
+
+    total_borrowed = Book.objects.filter(status=4).count()
+    print(total_borrowed)
+
+    # Get total late transactions
+    total_late = TransactionDetail.objects.filter(
+        Q(expected_date_return__date__lt=datetime.now().date()) &  # Only compare dates
+        Q(actual_date_return__isnull=True)  
+    ).count()
+    print(total_late)
+
+    active_users = CustomUser.objects.filter(is_active=True).count()
+    print(active_users)
+    
+    # Return the data as JSON
+    return JsonResponse({
+        'total_books': total_books,
+        'total_borrowed': total_borrowed,
+        'total_late': total_late,
+        'active_users': active_users
+    })
+
+@login_required(login_url='login')
+def GetSecondRow(request):
+    if request.method == 'POST':
+        time_range = request.POST.get('time_range')
+        today = datetime.now()
+
+        # Initialize empty lists for data
+        labels = []
+        borrowed_data = []
+        returned_data = []
+        date_ranges = []
+        year = today.year  # Current year
+
+        try:
+            for i in range(12):
+                start_date = None
+                end_date = None
+                period_label = ""
+
+                if time_range == 'daily':
+                    start_date = today - timedelta(days=i)
+                    # Set start_date to midnight (beginning of the day)
+                    start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                    # Set end_date to the last second of the day
+                    end_date = start_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+                    period_label = start_date.strftime("%b %d")  # Format label as 'Feb 01'
+                    labels.append(period_label)
+
+                elif time_range == 'weekly':
+                    # For weekly, reset the time to midnight for both start and end
+                    week_start_date = today - timedelta(weeks=i, days=today.weekday())
+                    week_end_date = week_start_date + timedelta(days=6)
+                    # Set the time of the week start date to midnight and week end date to 23:59:59
+                    start_date = week_start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                    end_date = week_end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+                    period_label = f"Week {today.isocalendar()[1] - i}"
+                    labels.append(period_label)
+
+                elif time_range == 'monthly':
+                    # For monthly, reset time to midnight for both start and end
+                    first_day_of_month = today.replace(day=1) - timedelta(days=i * 30)
+                    last_day_of_month = (first_day_of_month.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+                    # Set the time of both start and end date to midnight and 23:59:59 respectively
+                    start_date = first_day_of_month.replace(hour=0, minute=0, second=0, microsecond=0)
+                    end_date = last_day_of_month.replace(hour=23, minute=59, second=59, microsecond=999999)
+                    period_label = first_day_of_month.strftime("%b %Y")  # Format label as 'Feb 2024'
+                    labels.append(period_label)
+
+                # Fetch borrowed and returned counts for the date range
+                borrowed_count = TransactionDetail.objects.filter(
+                    date_borrowed__range=[start_date, end_date], is_returned=False
+                ).count()
+                returned_count = TransactionDetail.objects.filter(
+                    actual_date_return__range=[start_date, end_date], is_returned=True
+                ).count()
+
+                borrowed_data.append(borrowed_count)
+                returned_data.append(returned_count)
+
+                # Calculate date range (for tooltip display)
+                date_ranges.append(f"{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+
+            # Reverse the data to maintain chronological order
+            labels.reverse()
+            borrowed_data.reverse()
+            returned_data.reverse()
+            date_ranges.reverse()
+
+            return JsonResponse({
+                'labels': labels,
+                'borrowed_data': borrowed_data,
+                'returned_data': returned_data,
+                'date_ranges': date_ranges,  # Send date ranges for tooltips
+                'current_year': year
+            })
+
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'error': 'Something went wrong'}, status=500)
+        
+def GetThirdRow(request):
+    try:
+        # Fetch the top 5 main categories with their book counts
+        categories = BookCategory.objects.filter(is_main=True) \
+            .values('category__category_name') \
+            .annotate(book_count=Count('book_master')) \
+            .order_by('-book_count')[:5]
+
+        # Extract category names and counts
+        category_names = [category['category__category_name'] for category in categories]
+        book_counts = [category['book_count'] for category in categories]
+
+        # Add 'Others' category, summing the remaining count of books
+        remaining_books_count = BookCategory.objects.filter(is_main=True) \
+            .exclude(category__category_name__in=category_names) \
+            .aggregate(remaining_books=Count('book_master'))['remaining_books']
+
+        category_names.append('Others')
+        book_counts.append(remaining_books_count)
+
+        return JsonResponse({
+            'category_names': category_names,
+            'book_counts': book_counts,
+        })
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return JsonResponse({'error': 'Something went wrong'}, status=500)
+
+def GetCurrentVisitors(request):
+    try:
+        # Fetch all logs where time_out is null (currently inside the library)
+        logs = Logbook.objects.filter(time_out__isnull=True).select_related('user')
+
+        # Prepare the data for the response
+        log_data = []
+        for log in logs:
+            log_data.append({
+                'full_name': f'{log.user.first_name} {log.user.last_name}',  # Concatenate first and last name
+                'id_number': log.user.id_number,  # Use the id_number field for the ID column
+                'username': log.user.username,  # Use the username field for the Username column
+                'time_in': log.time_in.strftime('%Y-%m-%d %H:%M:%S')  # Format time_in
+            })
+
+        return JsonResponse(log_data, safe=False)
+
+    except Exception as e:
+        print(f"Error fetching logs: {e}")
+        return JsonResponse({'error': 'An error occurred while fetching logs.'}, status=500)
+    
+@login_required(login_url='login')
+def GetFourthRow(request):
+    if request.method == 'POST':
+        time_range = request.POST.get('time_range')
+        today = datetime.now()
+
+        # Initialize empty lists for data
+        labels = []
+        entered_data = []
+        date_ranges = []
+
+        try:
+            for i in range(12):
+                start_date = None
+                end_date = None
+                period_label = ""
+
+                if time_range == 'daily':
+                    start_date = today - timedelta(days=i)
+                    start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                    end_date = start_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+                    period_label = start_date.strftime("%b %d")  # Format label as 'Feb 01'
+                    labels.append(period_label)
+
+                elif time_range == 'weekly':
+                    week_start_date = today - timedelta(weeks=i, days=today.weekday())
+                    week_end_date = week_start_date + timedelta(days=6)
+                    start_date = week_start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+                    end_date = week_end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+                    period_label = f"Week {today.isocalendar()[1] - i}"
+                    labels.append(period_label)
+
+                elif time_range == 'monthly':
+                    first_day_of_month = today.replace(day=1) - timedelta(days=i * 30)
+                    last_day_of_month = (first_day_of_month.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+                    start_date = first_day_of_month.replace(hour=0, minute=0, second=0, microsecond=0)
+                    end_date = last_day_of_month.replace(hour=23, minute=59, second=59, microsecond=999999)
+                    period_label = first_day_of_month.strftime("%b %Y")  # Format label as 'Feb 2024'
+                    labels.append(period_label)
+
+                # Fetch the number of people who entered the library
+                entered_count = Logbook.objects.filter(
+                    time_in__range=[start_date, end_date],
+                ).count()
+
+                entered_data.append(entered_count)
+
+                # Calculate date range for tooltip
+                date_ranges.append(f"{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
+
+            # Reverse the data to maintain chronological order
+            labels.reverse()
+            entered_data.reverse()
+            date_ranges.reverse()
+
+            return JsonResponse({
+                'labels': labels,
+                'entered_data': entered_data,
+                'date_ranges': date_ranges,  # Send date ranges for tooltips
+            })
+
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'error': 'Something went wrong'}, status=500)
