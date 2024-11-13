@@ -110,6 +110,12 @@
                     <span>Log Book</span>
                     </a>
                 </li>
+                <li class="sidebar-item {% if request.path == '/in-out/' %}active{% endif %}">
+                    <a href={% url "in-out" %} class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>In/Out</span>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
