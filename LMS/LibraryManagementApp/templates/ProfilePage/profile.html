@@ -257,34 +257,34 @@
             });
         });
 
-        function GetProfile(){
+        function GetProfile() {
             $.ajax({
-            url: "{% url 'get-user-profile' %}",
-            type: 'GET',
-            success: function (response) {
-                if (!response.error) {
-                    console.log('Response ID:', response.id);  // Log the response.id to verify it
-                    $('#edit-profile-btn').attr('data-id', response.id);
-                    $('#profile-first-name').text(response.name);
-                    $('#profile-student-id').text(response.student_id);
-                    $('#profile-contact').text(response.contact);
-                    $('#profile-email').text(response.email);
+                url: "{% url 'get-user-profile' %}",
+                type: 'GET',
+                success: function (response) {
+                    if (!response.error) {
+                        console.log('Response ID:', response.id);  // Log the response.id to verify it
+                        $('#edit-profile-btn').attr('data-id', response.id);
+                        $('#profile-first-name').text(response.name);
+                        $('#profile-student-id').text(response.student_id);
+                        $('#profile-contact').text(response.contact);
+                        $('#profile-email').text(response.email);
 
-                    // Update profile and QR images
-                    if (response.image_url) {
-                        $('img[alt="User Profile Picture"]').attr('src', response.image_url);
+                        // Update profile and QR images
+                        if (response.image_url) {
+                            $('img[alt="User Profile Picture"]').attr('src', response.image_url);
+                        }
+                        if (response.qr_image_url) {
+                            $('img[alt="User QR Code"]').attr('src', response.qr_image_url);
+                        }
+                    } else {
+                        console.error(response.error);
                     }
-                    if (response.qr_image_url) {
-                        $('img[alt="User QR Code"]').attr('src', response.qr_image_url);
-                    }
-                } else {
-                    console.error(response.error);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
                 }
-            },
-            error: function (xhr, status, error) {
-                console.error('Error fetching data:', error);
-            }
-        });
+            });
         }
 
     });
