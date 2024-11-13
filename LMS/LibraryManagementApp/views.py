@@ -23,6 +23,8 @@ from django.db.models import Count, Q, BooleanField, Case, When
 from django.utils import timezone
 from datetime import timedelta
 import json
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 
@@ -54,7 +56,6 @@ def VerifyLogin(request):
                print("Redirecting to book-collection")
                return JsonResponse({'isAuthenticated': True,'message': 'Logged in successfully', 'url': 'book-collection'})
 
-
 def Forgotpassword(request):
     return render(request, 'ForgotpasswordPage/ForgotpasswordPage.html', {})
 
@@ -67,12 +68,9 @@ def ResetPassword(request):
 def ResetPassSucc(request):
     return render(request, 'ForgotpasswordPage/ResetPassAuthPage/ResetPasswordPage/ResetPassSuccPage/ResetPassSucc.html', {})
 
-# Registration Page Functions
-# @login_required(login_url='login')
 def Registration(request):
     return render(request, 'RegistrationPage/registration.html', {})
 
-# @login_required(login_url='login')
 def RegisterUser(request):
     if request.method == 'POST':
         profile_picture = request.FILES.get('profilePicture')
@@ -139,9 +137,14 @@ def RegisterUser(request):
             return JsonResponse({'isSuccess': 'false', 'message': 'An error occurred: ' + str(e)})
 
     return JsonResponse({'isSuccess': 'false', 'message': 'Invalid request method'})
+
 @login_required(login_url='login')
 def Dashboard(request):
-    return render(request, 'DashboardPage/dashboard.html', {})
+    # Check if the user is both staff and admin
+    if request.user.is_staff and request.user.is_superuser:
+        return render(request, 'DashboardPage/dashboard.html', {})
+    else:
+        return redirect('sbook-collection') 
 
 @login_required(login_url='login')
 def BookCollection(request):
@@ -236,7 +239,7 @@ def ReserveBook(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
 @login_required(login_url='login')
-def Logbook(request):
+def LogbookPage(request):
     return render(request, 'LogbookPage/logbook.html', {})
 
 @login_required(login_url='login')
@@ -1073,10 +1076,6 @@ def GetUserTransaction(request):
 def InOut(request):
     return render(request, 'InOutPage/inout.html', {})
 
-from django.utils import timezone
-from django.http import JsonResponse
-from .models import CustomUser, Logbook
-
 def CreateLog(request):
     if request.method == 'POST':
         try:
@@ -1103,3 +1102,27 @@ def CreateLog(request):
             return JsonResponse({'success': True})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
+
+def GetLog(request):
+    if request.method == 'GET':
+        try:
+            logs = Logbook.objects.all()  # Retrieve all log entries
+            data = [
+                {
+                    'user': log.user.first_name + " " + log.user.last_name,
+                    'id_number': log.user.id_number,
+                    'email': log.user.email,
+                    'time_in': log.time_in.strftime('%Y-%m-%d %H:%M:%S') if log.time_in else 'Not In',
+                    'time_out': log.time_out.strftime('%Y-%m-%d %H:%M:%S') if log.time_out else 'Not Out'
+                }
+                for log in logs  # Iterate through all logs
+            ]
+            
+            # Ensure data is always an array, even if empty
+            return JsonResponse(data, safe=False) if data else JsonResponse([], safe=False)
+
+        except ObjectDoesNotExist:
+            return JsonResponse({'error': 'Logbook records not found'}, status=404)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)

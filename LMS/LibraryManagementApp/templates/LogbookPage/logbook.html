@@ -47,32 +47,13 @@
                     <table class="table table-striped" id="logs">
                         <thead>
                             <tr>
-                                <th>Date</th>
                                 <th>Name</th>
+                                <th>Id Number</th>
+                                <th>Email</th>
                                 <th>Time In</th>
                                 <th>Time Out</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>08-15-2024</td>
-                                <td><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Timothy Bautista</a></td>
-                                <td>01:15</td>
-                                <td>01:15</td>
-                            </tr>
-                            <tr>
-                                <td>08-15-2024</td>
-                                <td><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Millard Monzon</a></td>
-                                <td>01:15</td>
-                                <td>01:15</td>
-                            </tr>
-                            <tr>
-                                <td>08-15-2024</td>
-                                <td><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Dominique Fetalbo</a></td>
-                                    <td>01:15</td>
-                                <td>01:15</td>
-                            </tr>
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -90,13 +71,34 @@
     $(document).ready(function () {
         $('#logs').DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
-                 'rt' +
-                 '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
+                'rt' +
+                '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
             buttons: ['copy', 'excel', 'pdf'],
             responsive: false,
-            scrollX: true
+            scrollX: true,
+            ajax: {
+                url: "{% url 'get-log' %}",
+                type: 'GET',
+                success: function (data) {
+                    if (Array.isArray(data) && data.length > 0) {
+                        $('#logs').DataTable().clear().rows.add(data).draw();
+                    } else {
+                        // Handle empty or malformed data
+                        alert('No log data available.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error loading log data: " + error);
+                }
+            },
+            columns: [
+                { data: 'user' },
+                { data: 'id_number', className: 'text-start' },
+                { data: 'email', className: 'text-start' },
+                { data: 'time_in' },
+                { data: 'time_out', className: 'text-start' }
+            ]
         });
     });
+
 </script>
-
-

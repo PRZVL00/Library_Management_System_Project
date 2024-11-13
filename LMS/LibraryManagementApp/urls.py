@@ -19,7 +19,7 @@ urlpatterns = [
     path('account-management/', views.AccountManagement, name="account-management"),
     path('bag/', views.Bag, name="bag"),
     path('reserve-book', views.ReserveBook, name="reserve-book"),
-    path('logbook/', views.Logbook, name="logbook"),
+    path('logbook/', views.LogbookPage, name="logbook"),
     path('profile/', views.Profile, name="profile"),
     path('book-registration/', views.BookRegistration, name="book-registration"),
     path('register-book', views.RegisterBook, name="register-book"),
@@ -51,6 +51,7 @@ urlpatterns = [
     path('get-user-transaction', views.GetUserTransaction, name="get-user-transaction"),
     path('in-out/', views.InOut, name="in-out"),
     path('create-log', views.CreateLog, name="create-log"),
+    path('get-log', views.GetLog, name="get-log"),
     
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
