@@ -154,8 +154,7 @@
                                 <i class="bi bi-info-circle"></i>
                             </button>`;
                                 const addToShelfButton = row.has_available_books
-                                    ? `<button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
-                            data-bs-target="#book-edit-modal" data-id="${data}">
+                                    ? `<button class="btn btn-outline-primary btn-sm AddToBag" data-id="${data}" data-trigger="table">
                             <i class="bi bi-backpack"></i>
                         </button>`
                                     : `<button class="btn btn-outline-secondary btn-sm" disabled>
@@ -303,6 +302,7 @@
         $(document).on('click', '.AddToBag', function () {
             var button = $(this); // Store a reference to the clicked button
             var book_master_id = button.data('id'); // Get the data-id from the button
+            var trigger = button.data('trigger') || "card"; // If no 'data-trigger', use "card" as default
 
             // Make an AJAX request to fetch the book details
             $.ajax({
@@ -322,8 +322,15 @@
                             if (result.isConfirmed || result.isDismissed) {
                                 console.log("SHEESH")
                                 if (response.stillAvailable === false) {
-                                    button.text('Out of Stock')  // Update the button text
+                                    if(trigger == "card"){
+                                        button.text('Out of Stock')  // Update the button text
                                         .attr('disabled', true);  // Disable the button
+                                    }
+                                    else {
+                                        var table = $('#bookTable').DataTable(); // Get the DataTable instance
+                                        table.ajax.reload(null, false);  // Reload the table data, keeping the current pagination and search state
+                                    }
+                                    
 
                                     UpdateBagNumber();  // Call the function to update the bag number (if applicable)
                                 }
