@@ -30,8 +30,8 @@
                     <div class="position-relative me-3">
                         <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
                         <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="bagContent">
+                            
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     </div>
@@ -69,6 +69,7 @@
 
 <script>
     $(document).ready(function () {
+        UpdateBagNumber()
         $('#logs').DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
                 'rt' +
@@ -99,6 +100,20 @@
                 { data: 'time_out', className: 'text-start' }
             ]
         });
+
+        function UpdateBagNumber(){
+            $.ajax({
+                url: "{% url 'update-bag-number' %}", 
+                type: "GET",
+                success: function (response) {
+                    console.log(response.total_reservations);
+                    $('.notification-dot').text(response.total_reservations);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
     });
 
 </script>

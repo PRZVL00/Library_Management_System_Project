@@ -30,8 +30,8 @@
                     <div class="position-relative me-3">
                         <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
                         <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="bagContent">
+                            
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     </div>
@@ -67,6 +67,7 @@
 <script>
     let bar;
     $(document).ready(function () {
+        UpdateBagNumber()
         // Get Bootstrap primary and secondary colors from CSS variables
         const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-primary').trim();
         const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-secondary').trim();
@@ -371,6 +372,20 @@
                     // Initialize the new chart
                     lineChart = new ApexCharts(document.querySelector("#line"), lineOptions);
                     lineChart.render();  // Render the updated chart
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+
+        function UpdateBagNumber(){
+            $.ajax({
+                url: "{% url 'update-bag-number' %}", 
+                type: "GET",
+                success: function (response) {
+                    console.log(response.total_reservations);
+                    $('.notification-dot').text(response.total_reservations);
                 },
                 error: function (xhr, status, error) {
                     console.error('Error fetching data:', error);
