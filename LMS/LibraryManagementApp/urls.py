@@ -42,7 +42,7 @@ urlpatterns = [
     path('update-bag-number', views.UpdateBagNumber, name="update-bag-number"),
     path('get-reserved', views.GetReserved, name="get-reserved"),
     path('cancel-reservation/', views.CancelReservation, name='cancel-reservation'),
-    path('load-book', views.LoadReservedBook, name="load-book"),
+    path('load-profile/', views.LoadProfile, name='load-profile'),
     path('borrow_selected_books', views.BorrowSelectedBooks, name="borrow_selected_books"),
     path('return_selected_books', views.ReturnSelectedBooks, name="return_selected_books"),
     path('get-transaction', views.GetTransaction, name="get-transaction"),
@@ -59,6 +59,8 @@ urlpatterns = [
     path('get-fourth-row/', views.GetFourthRow, name='get-fourth-row'),
     path('get-category-filters', views.GetCategoryFilters, name='get-category-filters'),
     path('batch-upload', views.BatchUpload, name='batch-upload'),
+    path('get-to-borrow', views.GetToBorrow, name='get-to-borrow'),
+    path('get-to-return', views.GetToReturn, name='get-to-return'),
 
 
 
