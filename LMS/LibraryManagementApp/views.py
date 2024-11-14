@@ -24,6 +24,8 @@ from django.utils import timezone
 from datetime import timedelta
 import json
 from django.core.exceptions import ObjectDoesNotExist
+import pandas as pd
+
 
 def Login(request):
     return render(request, 'LogInPage/login.html', {})
@@ -255,7 +257,7 @@ def ReserveBook(request):
             return JsonResponse({
                 'isSuccess': 'true',
                 'message': 'Book added to your bag successfully!',
-                'stillAvailable': 'true' if still_available else 'false'
+                'stillAvailable': still_available
             })
 
         else:
@@ -300,112 +302,95 @@ def RegisterBook(request):
         isbn = request.POST.get('isbn')  # Ensure to include the ISBN field
         authors = [author for author in request.POST.getlist('author[]') if author]  # Filters out empty or null authors
         location = request.POST.get('location')
-        status_id = request.POST.get('status')  # Get the status ID directly
         duration = (lambda x: -1 if not x else x)(request.POST.get('duration'))
-        late_fee = (lambda x: -1 if not x else x)(request.POST.get('fine'))
         summary = request.POST.get('summary')
         categories = request.POST.getlist('categories')  # Handles multiple categories
+        copies = int(request.POST.get('copies', 1))  # Ensure copies is an integer, default to 1 if not provided
         
         # Handle file uploads
         book_pic = request.FILES.get('bookPic')
         soft_copy = request.FILES.get('softcopy')
 
-        print("Book Title:", book_title)
-        print("Publisher:", publisher)
-        print("Year:", year)
-        print("ISBN:", isbn)
-        print("Authors:", authors)
-        print("Location:", location)
-        print("Status ID:", status_id)
-        print("Duration:", duration)
-        print("Late Fee:", late_fee)
-        print("Summary:", summary)
-        print("Categories:", categories)
-        print("Book Picture:", book_pic)
-        print("Soft Copy:", soft_copy)
+        if not summary:
+            summary = "No summary available"
 
         current_user = request.user
 
         try:
             # Check if the ISBN already exists
-            existing_book = BookMaster.objects.filter(Q(isbn=isbn) & Q(is_archived = True)).first()
+            existing_book = BookMaster.objects.filter(Q(isbn=isbn) & Q(is_archived=False)).first()
 
             book_master_reference = None
 
             if existing_book:
-                # If ISBN exists, create a new Book instance referencing it
-                book = Book(
-                    book_master=existing_book,
-                    status_id=status_id,
-                    qr_value='',  
-                    qr_image='',
-                    added_by=current_user  # Save the user who added the book
-
-                )
-                book.save()
-
+                # If ISBN exists, create new Book instances referencing it
                 book_master_reference = existing_book
 
             else:
-                # If ISBN doesn't exist, create a new BookMaster and Book instance
+                # If ISBN doesn't exist, create a new BookMaster instance
                 book_master = BookMaster(
                     title=book_title,
                     publisher=publisher,
                     year=year,
                     isbn=isbn,
-                    late_fee=late_fee,
+                    late_fee=0,
                     location=location,
                     duration=duration,
                     image=book_pic,
                     summary=summary,
                     soft_copy=soft_copy,
                     added_by=current_user  # Save the user who added the book
-
                 )
                 book_master.save()
+                book_master_reference = book_master
 
+            # Save authors (this should happen once for each book_master_reference)
+            for author_name in authors:
+                if author_name:
+                    book_author = BookAuthor(author=author_name, book_master=book_master_reference)
+                    book_author.save()
+
+            # Save categories
+            is_main_assigned = False  # Track if the main category has been assigned
+            for category_id in categories:
+                if category_id:
+                    category = DimCategory.objects.get(category_id=category_id)
+                    book_category = BookCategory(
+                        book_master=book_master_reference,
+                        category=category,
+                        is_main=not is_main_assigned  # Set is_main=True for the first iteration only
+                    )
+                    book_category.save()
+                    is_main_assigned = True  # Update the flag after the first category is saved
+
+            # Save multiple copies of the book
+            for _ in range(copies):
                 book = Book(
-                    book_master=book_master,
-                    status_id=status_id,
+                    book_master=book_master_reference,
+                    status_id=1,
                     qr_value='',  
                     qr_image='',
                     added_by=current_user  # Save the user who added the book
-
                 )
                 book.save()
 
-                book_master_reference = book_master
+            # After creating the books, generate and assign QR codes
+            for book in Book.objects.filter(book_master=book_master_reference):
+                book.qr_value = f"QR-{book.book_id}-{book_title}-{year}-{isbn}"
+                book.save()
 
-            book.qr_value = f"QR-{book.book_id}-{book_title}-{year}-{isbn}"
-            book.save()
+                # Generate QR code
+                qr_img = qrcode.make(book.qr_value)
 
-            # Generate QR code
-            qr_img = qrcode.make(book.qr_value)
+                # Save the QR code to a BytesIO object
+                qr_buffer = BytesIO()
+                qr_img.save(qr_buffer, format='PNG')
+                qr_buffer.seek(0)
 
-            # Save the QR code to a BytesIO object
-            qr_buffer = BytesIO()
-            qr_img.save(qr_buffer, format='PNG')
-            qr_buffer.seek(0)
-
-            # Save the QR code to the user's qr_image field
-            book.qr_image.save(f'qr_{book.book_id}.png', ContentFile(qr_buffer.read()), save=True)
+                # Save the QR code to the book's qr_image field
+                book.qr_image.save(f'qr_{book.book_id}.png', ContentFile(qr_buffer.read()), save=True)
 
             print('QR Code saved')
-
-            # Save authors
-            for author_name in authors:
-                if author_name:  # Ensure the author name is not empty
-                    # Create and save the author relationship
-                    book_author = BookAuthor(author=author_name, book_master=book_master_reference)  # Use the Book instance
-                    book_author.save()  # Save each author related to the book
-
-            # Save categories
-            for category_id in categories:
-                if category_id:  # Ensure the category ID is not empty
-                    # Create and save the book-category relationship
-                    category = DimCategory.objects.get(category_id=category_id)
-                    book_category = BookCategory(book_master=book_master_reference, category=category)  # Use the Book instance
-                    book_category.save()  # Save each category related to the book
 
             # Return a JSON response indicating success
             return JsonResponse({'isSuccess': 'true'})
@@ -419,8 +404,10 @@ def RegisterBook(request):
         except Exception as e:
             return JsonResponse({'isSuccess': 'false', 'message': 'An error occurred: ' + str(e)})
 
-    # If not POST, redirect or return an error
+    # If not POST, return an error
     return JsonResponse({'isSuccess': 'false', 'message': 'Invalid request method.'})
+
+
 
 @login_required(login_url='login')
 def CheckISBN(request):
@@ -1390,3 +1377,147 @@ def GetCategoryFilters(request):
     if request.method == 'GET':
         category_list = list(DimCategory.objects.values('category_id', 'category_name').distinct())
         return JsonResponse({'categories': category_list})
+    
+@login_required(login_url='login')
+def BatchUpload(request):
+    if request.method == 'POST':
+        # Read the uploaded file
+        excel_file = request.FILES.get('excel_file')
+
+        try:
+            # Load the Excel file into a DataFrame
+            df = pd.read_excel(excel_file)
+
+            # Check for headers
+            expected_headers = [
+                "Title", "ISBN", "Publisher", "Year", "Location", 
+                "Author", "Category", "Copies"
+            ]
+
+            if list(df.columns) != expected_headers:
+                return JsonResponse({"error": "Invalid headers"}, status=400)
+
+            # Process each row
+            for index, row in df.iterrows():
+                title = row['Title']
+                isbn = row['ISBN']
+                publisher = row['Publisher']
+                year = row['Year']
+                location = row['Location']
+                authors = row['Author'].split('/') if pd.notna(row['Author']) else []
+                categories = row['Category'].split('/') if pd.notna(row['Category']) else []
+                copies = int(row['Copies']) if pd.notna(row['Copies']) else 1  # Default to 1 copy if not specified
+
+                print(title, isbn, publisher, year, location, authors, categories, copies)
+
+                # Handle default values for summary and duration
+                summary = "No summary available"  # Default summary
+                duration = 3  # Default duration
+
+                current_user = request.user
+
+                # Check if the ISBN already exists
+                existing_book = BookMaster.objects.filter(Q(isbn=isbn) & Q(is_archived=False)).first()
+
+                book_master_reference = None
+
+                if existing_book:
+                    # If ISBN exists, create a new Book instance referencing it
+                    for _ in range(copies):  # Save multiple copies
+                        book = Book(
+                            book_master=existing_book,
+                            status_id=1,
+                            qr_value='',  
+                            qr_image='',
+                            added_by=current_user  # Save the user who added the book
+                        )
+                        book.save()
+
+                    book_master_reference = existing_book
+
+                else:
+                    # If ISBN doesn't exist, create a new BookMaster and Book instance
+                    book_master = BookMaster(
+                        title=title,
+                        publisher=publisher,
+                        year=year,
+                        isbn=isbn,
+                        late_fee=0,
+                        location=location,
+                        duration=duration,
+                        image=None,  # No image field here, but you can add if needed
+                        summary=summary,
+                        soft_copy=None,  # No soft copy field here, but you can add if needed
+                        added_by=current_user  # Save the user who added the book
+                    )
+                    book_master.save()
+
+                    for _ in range(copies):  # Save multiple copies
+                        book = Book(
+                            book_master=book_master,
+                            status_id=1,
+                            qr_value='',  
+                            qr_image='',
+                            added_by=current_user  # Save the user who added the book
+                        )
+                        book.save()
+
+                    book_master_reference = book_master
+
+                    # Save authors
+                    for author_name in authors:
+                        if author_name:  # Ensure the author name is not empty
+                            # Create and save the author relationship
+                            book_author = BookAuthor(author=author_name, book_master=book_master_reference)
+                            book_author.save()  # Save each author related to the book
+
+                    # Save categories
+                    is_main_assigned = False  # Track if the main category has been assigned
+                    for category_name in categories:
+                        if category_name:  # Ensure the category name is not empty
+                            # Check if the category already exists in DimCategory
+                            category, created = DimCategory.objects.get_or_create(
+                                category_name=category_name,
+                                defaults={'added_by': current_user}  # Only set added_by if it's a new category
+                            )
+                            # Set is_main=True for the first category
+                            book_category = BookCategory(
+                                book_master=book_master_reference, 
+                                category=category,
+                                is_main=not is_main_assigned  # Set is_main=True for the first iteration only
+                            )
+                            book_category.save()
+                            is_main_assigned = True  # Update the flag after the first category is saved
+
+                # After all books and copies are saved, generate and save QR code
+                for book in Book.objects.filter(book_master=book_master_reference):
+                    book.qr_value = f"QR-{book.book_id}-{title}-{year}-{isbn}"
+                    book.save()
+
+                    # Generate QR code
+                    qr_img = qrcode.make(book.qr_value)
+
+                    # Save the QR code to a BytesIO object
+                    qr_buffer = BytesIO()
+                    qr_img.save(qr_buffer, format='PNG')
+                    qr_buffer.seek(0)
+
+                    # Save the QR code to the user's qr_image field
+                    book.qr_image.save(f'qr_{book.book_id}.png', ContentFile(qr_buffer.read()), save=True)
+
+                print('QR Code saved')
+
+            # Return a JSON response indicating success
+            return JsonResponse({'isSuccess': 'true'})
+
+        except DimCategory.DoesNotExist:
+            return JsonResponse({'isSuccess': 'false', 'message': 'Category does not exist.'})
+
+        except ValidationError as e:
+            return JsonResponse({'isSuccess': 'false', 'message': 'Validation error: ' + str(e)})
+
+        except Exception as e:
+            return JsonResponse({'isSuccess': 'false', 'message': 'An error occurred: ' + str(e)})
+
+    # If not POST, return an error
+    return JsonResponse({'isSuccess': 'false', 'message': 'Invalid request method.'})

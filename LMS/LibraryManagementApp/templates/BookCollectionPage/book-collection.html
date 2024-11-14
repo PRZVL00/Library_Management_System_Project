@@ -300,8 +300,9 @@
             });
         });
 
-        $(document).on('click', '#AddToBag', function () {
-            var book_master_id = $(this).data('id'); // Get the data-id from the button
+        $(document).on('click', '.AddToBag', function () {
+            var button = $(this); // Store a reference to the clicked button
+            var book_master_id = button.data('id'); // Get the data-id from the button
 
             // Make an AJAX request to fetch the book details
             $.ajax({
@@ -313,17 +314,18 @@
                 },
                 success: function (response) {
                     if (response.isSuccess) {
+                        console.log(response.stillAvailable);
                         Swal.fire({
                             icon: "success",
                             title: response.message,
                         }).then((result) => {
                             if (result.isConfirmed || result.isDismissed) {
-                                if (response.stillAvailable == 'false') {
-                                    $('#AddToBag')
-                                        .text('Out of Stock')
-                                        .attr('disabled', true)
-                                    
-                                    UpdateBagNumber()
+                                console.log("SHEESH")
+                                if (response.stillAvailable === false) {
+                                    button.text('Out of Stock')  // Update the button text
+                                        .attr('disabled', true);  // Disable the button
+
+                                    UpdateBagNumber();  // Call the function to update the bag number (if applicable)
                                 }
                             }
                         });
@@ -334,6 +336,7 @@
                 }
             });
         });
+
 
         function UpdateBagNumber(){
             $.ajax({
