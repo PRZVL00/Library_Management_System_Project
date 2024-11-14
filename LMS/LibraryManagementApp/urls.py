@@ -57,6 +57,7 @@ urlpatterns = [
     path('get-third-row/', views.GetThirdRow, name='get-third-row'),
     path('get-current-visitors/', views.GetCurrentVisitors, name='get-current-visitors'),  
     path('get-fourth-row/', views.GetFourthRow, name='get-fourth-row'),
+    path('get-category-filters', views.GetCategoryFilters, name='get-category-filters'),
 
 
 

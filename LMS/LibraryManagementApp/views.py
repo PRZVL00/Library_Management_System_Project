@@ -146,7 +146,17 @@ def BookCollection(request):
   
 @login_required(login_url='login')
 def LoadBooks(request):
-    # Annotate BookMaster objects with the count of associated books with status=1
+    # Get the search term and selected categories from the request
+    search_term = request.GET.get('search', '').strip()
+    selected_categories = request.GET.get('categories', '').split(',')
+
+    print(search_term)
+    print(selected_categories)
+
+    # Filter out empty strings from selected_categories
+    selected_categories = [cat_id for cat_id in selected_categories if cat_id]
+
+    # Start with the base queryset for BookMaster
     bookmasters = BookMaster.objects.annotate(
         available_books=Count(
             'book', 
@@ -156,19 +166,34 @@ def LoadBooks(request):
         is_archived=False  # Filter out archived books
     )
 
+    # If a search term is provided, filter the bookmasters based on relevant fields
+    if search_term:
+        bookmasters = bookmasters.filter(
+            Q(title__icontains=search_term) |
+            Q(isbn__icontains=search_term) |
+            Q(location__icontains=search_term) |
+            Q(summary__icontains=search_term) |
+            Q(year__icontains=search_term) |
+            Q(publisher__icontains=search_term) |
+            Q(bookauthor__author__icontains=search_term)  # Assuming related name is 'bookauthor'
+        ).distinct()
 
-    current_datetime = datetime.now()
-    print("Current datetime (no timezone):", current_datetime)
-    
+    # If categories are selected and valid, filter based on the selected categories
+    if selected_categories:
+        bookmasters = bookmasters.filter(
+            bookcategory__category__category_id__in=[int(cat_id) for cat_id in selected_categories]
+        )
+
     # Pagination
     page_number = request.GET.get('page', 1)
     paginator = Paginator(bookmasters, 12)
-
     page_obj = paginator.get_page(page_number)
     
     # Render only the bookmaster cards HTML
     html = render_to_string('BookCollectionPage/_by-cards.html', {'page_obj': page_obj})
+    
     return JsonResponse({'html': html, 'has_next': page_obj.has_next()})
+
 
 @login_required(login_url='login')
 def BorrowReturn(request):
@@ -1359,3 +1384,9 @@ def GetFourthRow(request):
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({'error': 'Something went wrong'}, status=500)
+        
+@login_required(login_url='login')
+def GetCategoryFilters(request):
+    if request.method == 'GET':
+        category_list = list(DimCategory.objects.values('category_id', 'category_name').distinct())
+        return JsonResponse({'categories': category_list})
