@@ -29,8 +29,9 @@
                     <div class="position-relative me-3">
                         <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
                         <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="bagContent">
-                            
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                            id="bagContent">
+
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     </div>
@@ -40,7 +41,7 @@
             <div class="page-content">
                 <!--Start Your Page Here-->
                 <div class="row mb-3">
-                    <div class="input-group">
+                    <div class="input-group" id="qr-group-input" hidden>
                         <span class="input-group-text" id="basic-addon1" style="align-items: normal;">
                             <i class="bi bi-search"></i>
                         </span>
@@ -51,23 +52,72 @@
                     </div>
                 </div>
                 <div class="row" id="details" hidden>
-                    <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-3 col-xxl-3">
+                    <div class="col-12 col-lg-3">
                         {% include "BorrowReturnPage/_profile.html" %}
                     </div>
-                    <div class="col-12 col-sm-12 col-md-12 col-lg-9 col-xl-9 col-xxl-9">
-                        <div class="card">
-                            <div class="card-content">
-                                {% include "BorrowReturnPage/_reserved-books.html" %}
-                                <hr class="mx-2">
-                                {% include "BorrowReturnPage/_borrowed-books.html" %}
+                    <div class="col-12 col-lg-9">
+                        <!-- Tabs -->
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link active" id="borrow-tab" data-bs-toggle="tab" href="#to-borrow"
+                                    role="tab" aria-controls="to-borrow" aria-selected="true">To Borrow</a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="return-tab" data-bs-toggle="tab" href="#to-return" role="tab"
+                                    aria-controls="to-return" aria-selected="false">To Return</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-2" id="myTabContent">
+                            <div class="tab-pane fade show active" id="to-borrow" role="tabpanel"
+                                aria-labelledby="borrow-tab">
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-outline-primary mx-1"
+                                        id="select-all-to-borrow">Select All</button>
+                                    <button type="button" class="btn btn-primary mx-1"
+                                        id="borrow-selected">Borrow</button>
+                                </div>
+
+                                <table class="table table-striped" id="borrowTable" style="width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-start"></th>
+                                            <th class="text-start">Title</th>
+                                            <th class="text-start">ISBN</th>
+                                            <th class="text-start">Action</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="to-return" role="tabpanel" aria-labelledby="return-tab">
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-outline-primary mx-1"
+                                        id="select-all-to-return">Select All</button>
+                                    <button type="button" class="btn btn-primary mx-1"
+                                        id="return-selected">Return</button>
+                                </div>
+
+                                <table class="table table-striped" id="returnTable" style="width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-start"></th>
+                                            <th class="text-start">Title</th>
+                                            <th class="text-start">ISBN</th>
+                                            <th class="text-start">Action</th>
+                                        </tr>
+                                    </thead>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
+
+
+
+
             </div>
-            {% include "BookCollectionPage/_more-info-books.html" %}
-            {% include "_footer.html" %}
         </div>
+        {% include "BookCollectionPage/_more-info-books.html" %}
+        {% include "_footer.html" %}
     </div>
     {% include "_JSreferences.html" %}
 </body>
@@ -80,47 +130,58 @@
 
     $(document).ready(function () {
         UpdateBagNumber()
-        
-        // Initialize each slider
-        initializeSlider('slider1');
-        initializeSlider('slider2');
 
-        const qrInput = $('#qrInput');
-        let allowOtherInputs = false; // Flag to allow focus on other inputs
+        // QR Code Handling
+        let qrData = '';
 
-        // Focus on the QR input field initially when the page loads
-        qrInput.focus();
-
-        // Refocus the QR input only when allowOtherInputs is false
-        qrInput.on('focusout', function () {
-            if (!allowOtherInputs) {
-                setTimeout(() => qrInput.focus(), 0);
+        document.addEventListener('keypress', function (event) {
+            // Check if Enter key is pressed to submit the QR data
+            if (event.key === 'Enter') {
+                if (qrData) {
+                    console.log(qrData)
+                    $('#qrInput').val(qrData);
+                    LoadProfile()
+                    qrData = ''; // Reset for the next scan
+                }
+            } else {
+                qrData += event.key; // Collect QR code characters
             }
         });
 
-        // If the user clicks into any other input field, temporarily disable QR refocus
-        $('input').on('focus', function () {
-            if (this.id !== 'qrInput') {
-                allowOtherInputs = true;
+        $(document).on('change', 'input[type="checkbox"]', function () {
+            var bookId = $(this).val();
+            var category = $(this).data('category'); // Get the data-category value
+
+            if (category === 'borrow') {
+                if (this.checked) {
+                    // Add the book ID to the ToBorrow array
+                    ToBorrow.push(bookId);
+                } else {
+                    // Remove the book ID from the ToBorrow array
+                    ToBorrow = ToBorrow.filter(function (id) {
+                        return id !== bookId;
+                    });
+                }
+            } else if (category === 'return') {
+                if (this.checked) {
+                    // Add the book ID to the ToReturn array
+                    ToReturn.push(bookId);
+                } else {
+                    // Remove the book ID from the ToReturn array
+                    ToReturn = ToReturn.filter(function (id) {
+                        return id !== bookId;
+                    });
+                }
             }
         });
 
-        // If the user leaves any other input, re-enable QR refocusing
-        $('input').on('focusout', function () {
-            if (this.id !== 'qrInput') {
-                allowOtherInputs = false;
-                setTimeout(() => qrInput.focus(), 0); // Re-enable focus on QR input
-            }
-        });
+        $('#return-tab').on('shown.bs.tab', function () {
+            InitializeToReturnTable()
+        })
 
-        // Refocus after modals close, if using Bootstrap modals
-        $('.modal').on('hidden.bs.modal', function () {
-            allowOtherInputs = false; // Ensure refocus works as expected
-            qrInput.focus();
-        });
 
         $('#searchBTN').click(function () {
-            LoadBooks(); // Call the LoadBooks function
+            LoadProfile(); // Call the LoadProfile function
         });
 
         $(document).on('click', '#MoreInfo', function () {
@@ -168,10 +229,57 @@
             });
         });
 
-        $('#BorrowSelected').click(function () {
+        // Select all/unselect all functionality
+        $('#select-all-to-borrow').click(function () {
+            var checkboxes = $('#borrowTable input[type="checkbox"]');
+            var isChecked = $(this).text() === "Select All"; // Check if "Select All" button is active
+
+            if (isChecked) {
+                // Select all checkboxes
+                checkboxes.prop('checked', true);
+                // Clear the ToBorrow list and add all book IDs
+                ToBorrow = checkboxes.map(function () {
+                    return $(this).val();
+                }).get();
+                $(this).text('Unselect All'); // Change button text to "Unselect All"
+                console.log(ToBorrow);
+            } else {
+                // Unselect all checkboxes
+                checkboxes.prop('checked', false);
+                // Clear the ToBorrow list
+                ToBorrow = [];
+                $(this).text('Select All'); // Change button text back to "Select All"
+            }
+        });
+
+        // Select all/unselect all functionality
+        $('#select-all-to-return').click(function () {
+            var checkboxes = $('#returnTable input[type="checkbox"]');
+            var isChecked = $(this).text() === "Select All"; // Check if "Select All" button is active
+
+            if (isChecked) {
+                // Select all checkboxes
+                checkboxes.prop('checked', true);
+                // Clear the ToBorrow list and add all book IDs
+                ToReturn = checkboxes.map(function () {
+                    return $(this).val();
+                }).get();
+                $(this).text('Unselect All'); // Change button text to "Unselect All"
+                console.log(ToReturn);
+            } else {
+                // Unselect all checkboxes
+                checkboxes.prop('checked', false);
+                // Clear the ToBorrow list
+                ToReturn = [];
+                $(this).text('Select All'); // Change button text back to "Select All"
+            }
+        });
+
+        // Borrow Selected function
+        $('#borrow-selected').click(function () {
             if (ToBorrow.length > 0) {
                 $.ajax({
-                    url: "{% url 'borrow_selected_books' %}", // URL for handling borrowing
+                    url: "{% url 'borrow_selected_books' %}",
                     type: "POST",
                     data: {
                         'to_borrow': JSON.stringify(ToBorrow),
@@ -180,16 +288,15 @@
                     success: function (response) {
                         if (response.success) {
                             alert("Books successfully borrowed!");
-                            // Reset the ToBorrow array and update UI accordingly
+                            // Reset the ToBorrow array and update UI
                             ToBorrow = [];
-                            // Optionally, you can update the UI here (e.g., unselect all books or hide the borrow button)
-                            LoadBooks()
-
+                            $('#select-all-to-borrow').text('Select All'); // Reset the Select All button text
+                            $('#borrowTable input[type="checkbox"]').prop('checked', false); // Uncheck all checkboxes
+                            LoadProfile(); // Reload the profile data
                         } else {
-                            alert("An error occurred while borrowing the books.");
+                            alert(response.message); //
                         }
-
-                        UpdateBagNumber()
+                        UpdateBagNumber(); // Update the bag number
                     },
                     error: function () {
                         alert("Error occurred while processing your request.");
@@ -200,7 +307,7 @@
             }
         });
 
-        $('#ReturnSelected').click(function () {
+        $('#return-selected').click(function () {
             if (ToReturn.length > 0) {
                 $.ajax({
                     url: "{% url 'return_selected_books' %}",  // URL for handling book returns
@@ -216,7 +323,7 @@
                             ToReturn = [];
                             // Optionally, update the UI to reflect the changes
                             // E.g., hide the return button or remove books from the "to return" list
-                            LoadBooks()
+                            LoadProfile()
                         } else {
                             alert("An error occurred while returning the books.");
                         }
@@ -231,78 +338,12 @@
             }
         });
 
-
-        function initializeSlider(sliderId) {
-            var slider = $('#' + sliderId);
-            var cardDeck = slider.find('.card-deck');
-            var totalCards = cardDeck.children('.card').length;
-            var cardWidth = cardDeck.children('.card').outerWidth(true);
-            var currentIndex = 0;
-
-            // Add indicators
-            var indicatorsContainer = slider.find('.indicators');
-            for (var i = 0; i < totalCards; i++) {
-                indicatorsContainer.append('<div class="indicator" data-index="' + i + '"></div>');
-            }
-            updateIndicators();
-
-            slider.find('#nextBtn').click(function () {
-                var numVisible = visibleCards();
-                if (currentIndex < totalCards - numVisible) {
-                    currentIndex++;
-                    updateSlider();
-                }
-            });
-
-            slider.find('#prevBtn').click(function () {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    updateSlider();
-                }
-            });
-
-            slider.find('.indicator').click(function () {
-                currentIndex = $(this).data('index');
-                updateSlider();
-            });
-
-            // Adjust card width on window resize
-            $(window).resize(function () {
-                cardWidth = cardDeck.children('.card').outerWidth(true);
-                updateSlider();
-            });
-
-            function visibleCards() {
-                var viewportWidth = $(window).width();
-                if (viewportWidth < 576) return 1;  // Extra small devices (phones)
-                if (viewportWidth < 768) return 2;  // Small devices (tablets)
-                if (viewportWidth < 992) return 3;  // Medium devices (small desktops)
-                return 5;  // Large devices (desktops and larger)
-            }
-
-            function updateSlider() {
-                var numVisible = visibleCards();
-                cardDeck.css('transform', 'translateX(' + (-currentIndex * cardWidth) + 'px)');
-                updateIndicators();
-                // Disable next button if at the end
-                slider.find('#nextBtn').prop('disabled', currentIndex >= totalCards - numVisible);
-            }
-
-            function updateIndicators() {
-                var numVisible = visibleCards();
-                slider.find('.indicator').removeClass('active');
-                for (var i = currentIndex; i < currentIndex + numVisible; i++) {
-                    slider.find('.indicator').eq(i).addClass('active');
-                }
-            }
-        }
-
-        function LoadBooks() {
+        function LoadProfile() {
             var borrower = $('#qrInput').val();
 
             // Send AJAX request to fetch user and book data
             $.ajax({
-                url: "{% url 'load-book' %}",
+                url: "{% url 'load-profile' %}",
                 type: "POST",
                 data: {
                     'borrower': borrower,
@@ -316,8 +357,10 @@
                     } else {
                         // Update borrower profile
                         updateUserProfile(response.user);
-                        updateBooks(response.reserved_books, response.borrowed_books);
+                        InitializeToBorrowTable(borrower)
+                        InitializeToReturnTable(borrower)
                         $('#details').removeAttr('hidden');
+
                     }
                 },
                 error: function () {
@@ -343,156 +386,132 @@
             userProfile.find('#user-profile-picture').attr('src', user.profile_pic);
         }
 
-        // Function to update books data (reserved and borrowed)
-        function updateBooks(reservedBooks, borrowedBooks) {
-            console.log(reservedBooks)
-            console.log(borrowedBooks)
-            // Update Reserved Books (To Return)
-            var returnBooksContainer = $('#reserved-books-container');
-            returnBooksContainer.empty();
-            reservedBooks.forEach(function (book) {
-                var card = createBookCard(book, 'borrow');
-                returnBooksContainer.append(card);
+        function InitializeToBorrowTable(borrower) {
+            // Check if DataTable is already initialized
+            if ($.fn.dataTable.isDataTable('#borrowTable')) {
+                // If it is, destroy the existing DataTable and reinitialize
+                $('#borrowTable').DataTable().clear().destroy();
+            }
+
+            $('#borrowTable').DataTable({
+                responsive: false,
+                sscrollX: true,  // Enable horizontal scrolling
+                scrollY: '400px', // Set a specific height for vertical scrolling of table data only
+                scrollCollapse: true,
+                pageLength: -1,  // Show all entries by default
+                ajax: {
+                    url: "{% url 'get-to-borrow' %}",
+                    type: 'POST',
+                    data: {
+                        'borrower': borrower,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    dataSrc: function (json) {
+                        if (json.isSuccess === 'true') {
+                            return json.reserved_books;
+                        } else {
+                            alert(json.message);
+                            return [];
+                        }
+                    }
+                },
+                columns: [
+                    {
+                        data: 'reservation_id',  // Reservation ID for checkbox
+                        render: function (data) {
+                            return `<input type="checkbox" value="${data}" data-category="borrow">`;
+                        },
+                        orderable: false
+                    },
+                    { data: 'book__book_master__title' },  // Use the correct field path
+                    { data: 'book__book_master__isbn' },   // Use the correct field path
+                    {
+                        data: 'book__book_master__book_master_id',  // Book Master ID for More Info button
+                        render: function (data) {
+                            return `
+                    <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
+                        <i class="bi bi-info-circle"></i>
+                    </button>`;
+                        },
+                        orderable: false
+                    }
+                ]
             });
+        }
 
-            // Update Borrowed Books (To Borrow)
-            var borrowBooksContainer = $('#borrowed-books-container');
-            borrowBooksContainer.empty();
-            borrowedBooks.forEach(function (book) {
-                var card = createBookCard(book, 'return');
-                borrowBooksContainer.append(card);
+        function InitializeToReturnTable() {
+            var borrower_2 = $('#qrInput').val();
+            // Check if DataTable is already initialized
+            if ($.fn.dataTable.isDataTable('#returnTable')) {
+                // If it is, destroy the existing DataTable and reinitialize
+                $('#returnTable').DataTable().clear().destroy();
+            }
+
+            $('#returnTable').DataTable({
+                responsive: false,
+                scrollX: true,  // Enable horizontal scrolling
+                scrollY: '400px', // Set a specific height for vertical scrolling of table data only
+                scrollCollapse: true,
+                pageLength: -1,  // Show all entries by default
+                ajax: {
+                    url: "{% url 'get-to-return' %}",
+                    type: 'POST',
+                    data: {
+                        'borrower': borrower_2,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    dataSrc: function (json) {
+                        if (json.isSuccess === 'true') {
+                            return json.borrowed_books;
+                        } else {
+                            alert(json.message);
+                            return [];
+                        }
+                    }
+                },
+                columns: [
+                    {
+                        data: 'transaction_detail_id',  // Transaction Detail ID for checkbox
+                        render: function (data) {
+                            return `<input type="checkbox" value="${data}" data-category="return">`;
+                        },
+                        orderable: false
+                    },
+                    { data: 'book__book_master__title' },
+                    { data: 'book__book_master__isbn' },
+                    {
+                        data: 'book__book_master__book_master_id',  // Book Master ID for More Info button
+                        render: function (data) {
+                            return `
+                            <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
+                                <i class="bi bi-info-circle"></i>
+                            </button>`;
+                        },
+                        orderable: false
+                    }
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    var expectedReturnDate = new Date(data.expected_date_return);
+                    var today = new Date();
+
+                    // Highlight row in red if the expected return date is before today
+                    if (expectedReturnDate < today) {
+                        $(row).addClass('bg-danger');  // Add the red background color class
+                    }
+                }
             });
         }
 
-        // Function to create a book card and check for overdue
-        function createBookCard(book, type) {
-            var cardClass = "card mx-1 col-12 col-sm-6 col-md-3 col-lg-4 col-xl-2 col-xxl-2 border border-primary";
-
-            console.log(book.title);
-
-            // Check if the book is overdue (only for borrowed books)
-            if (type === 'return') {
-                var today = new Date();
-                var expectedReturnDate = new Date(book.expected_date_return);
-                if (expectedReturnDate < today) {
-                    cardClass = "card mx-1 col-12 col-sm-6 col-md-3 col-lg-4 col-xl-2 col-xxl-2 border border-danger";
-                }
-            }
-
-            console.log(book.book__book_master__image)
-
-            var mediaUrl = "/media/";  // This would be your base media URL
 
 
-            // Set fallback image URL if the book image URL is empty or none
-            var imageUrl = book.book__book_master__image && book.book__book_master__image.trim() !== ""
-                ? `${mediaUrl}${book.book__book_master__image}`  // Construct the full URL dynamically
-                : "{% static 'assets/static/images/No-Image-Placeholder.svg.png' %}";
 
-            // Conditionally render the button based on 'type'
-            var buttonText = type === 'return' ? "Return" : "Borrow";
-            var dataId = type === 'return' ? book.transaction_detail_id : book.reservation_id;
 
-            return `
-            <div class="${cardClass}" style="min-width: calc((100% / 5) - .5rem); margin-left: 0.25rem; margin-right: 0.25rem; margin-bottom: 0rem;">
-                <div class="card-content">
-                    <div style="display: flex; justify-content: center;">
-                        <img class="card-img-top img-fluid mt-3" src="${imageUrl}" alt="Card image cap" style="width: auto; height: 100px; object-fit: contain;">
-                    </div>                                                                
-                    <div class="card-body">
-                        <h6 class="card-title text-center">${book.book__book_master__title}</h6>
-                        <p class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left" title="ISBN" style="font-size: 12px;">${book.book__book_master__isbn}</p>
-                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1" data-bs-toggle="modal" data-bs-target="#book-info-modal" data-id="${book.book__book_master__book_master_id}" id="MoreInfo">Info</button>
-                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1" data-id="${dataId}" data-type="${type}" id="actionButton">Select</button>
-                    </div>
-                </div>
-            </div>
-            `;
-        }
 
-        // Function to handle selecting a book
-        $(document).on('click', 'button[data-type="return"], button[data-type="borrow"]', function () {
-            const $button = $(this);
-            const dataId = $button.data('id');
-            const type = $button.data('type');
-
-            if (type === 'return') {
-                // Add to ToReturn or remove
-                if (ToReturn.includes(dataId)) {
-                    ToReturn = ToReturn.filter(id => id !== dataId);  // Remove from ToReturn
-                } else {
-                    ToReturn.push(dataId);  // Add to ToReturn
-                }
-            } else {
-                // Add to ToBorrow or remove
-                if (ToBorrow.includes(dataId)) {
-                    ToBorrow = ToBorrow.filter(id => id !== dataId);  // Remove from ToBorrow
-                } else {
-                    ToBorrow.push(dataId);  // Add to ToBorrow
-                }
-            }
-
-            console.log(ToReturn)
-            console.log(ToBorrow)
-
-            // Change button text and style
-            if (ToReturn.includes(dataId) || ToBorrow.includes(dataId)) {
-                $button.text("Selected").addClass('active');
-            } else {
-                $button.text("Select").removeClass('active');
-            }
-        });
-
-        // Function to toggle "Select All" functionality
-        function handleSelectAll(type) {
-            const $allButtons = $(`button[data-type="${type}"]`);
-            let targetArray = type === 'return' ? ToReturn : ToBorrow;
-
-            if (targetArray.length === $allButtons.length) {
-                // All are selected, clear arrays and unselect
-                targetArray = [];
-                $allButtons.each(function () {
-                    $(this).text("Select").removeClass('active');
-                });
-                $(`#selectAll${capitalizeFirstLetter(type)}`).text("Select All");
-            } else {
-                // Select all books
-                targetArray = [];
-                $allButtons.each(function () {
-                    const dataId = $(this).data('id');
-                    targetArray.push(dataId);
-                    $(this).text("Selected").addClass('active');
-                });
-                $(`#selectAll${capitalizeFirstLetter(type)}`).text("Unselect All");
-            }
-
-            if (type === 'return') {
-                ToReturn = targetArray;
-            } else {
-                ToBorrow = targetArray;
-            }
-
-            console.log(ToReturn)
-            console.log(ToBorrow)
-        }
-
-        // Event listener for Select All buttons
-        $('#selectAllReturn').on('click', function () {
-            handleSelectAll('return');
-        });
-
-        $('#selectAllBorrow').on('click', function () {
-            handleSelectAll('borrow');
-        });
-
-        // Utility function to capitalize the first letter
-        function capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
-        }
-
-        function UpdateBagNumber(){
+        function UpdateBagNumber() {
             $.ajax({
-                url: "{% url 'update-bag-number' %}", 
+                url: "{% url 'update-bag-number' %}",
                 type: "GET",
                 success: function (response) {
                     console.log(response.total_reservations);

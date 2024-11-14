@@ -869,7 +869,7 @@ def CancelReservation(request):
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 @login_required(login_url='login')
-def LoadReservedBook(request):
+def LoadProfile(request):
    if request.method == "POST":
         borrower = request.POST.get('borrower')
         print(borrower)
@@ -929,6 +929,85 @@ def LoadReservedBook(request):
             'reserved_books': reserved_books_data,
             'borrowed_books': borrowed_books_data
         })
+   
+@login_required(login_url='login')
+def GetToBorrow(request):
+    if request.method == "POST":
+        borrower = request.POST.get('borrower')
+        print(borrower)
+
+        # Try finding the user by QR or email
+        user = CustomUser.objects.filter(qr_value=borrower).first()
+        if not user:
+            user = CustomUser.objects.filter(username=borrower).first()
+
+        if not user:
+            return JsonResponse({
+                'isSuccess': 'false',
+                'message': 'User not found.'
+            })
+
+        reserved_books = Reservation.objects.filter(
+            reservist=user, is_processed=False, is_canceled=False, is_expired=False
+        ).values(
+            'reservation_id',  # ID for checkbox
+            'book__book_master__title',  # Book title
+            'book__book_master__isbn',  # ISBN
+            'book__book_master__book_master_id',  # Book master ID for More Info button
+        )
+
+        # Format the reserved books
+        reserved_books_data = list(reserved_books)
+
+        # Return only the necessary data for the DataTable
+        return JsonResponse({
+            'isSuccess': 'true',
+            'reserved_books': reserved_books_data
+        })
+
+@login_required(login_url='login')
+def GetToReturn(request):
+   if request.method == "POST":
+        borrower = request.POST.get('borrower')
+        print(borrower)
+        
+        # Try finding the user by QR or email
+        user = CustomUser.objects.filter(qr_value=borrower).first()
+        if not user:
+            user = CustomUser.objects.filter(username=borrower).first()
+        
+        if not user:
+            return JsonResponse({
+                'isSuccess': 'false',
+                'message': 'User not found.'
+            })
+
+        # Get user's borrowed books (only non-returned books)
+        borrowed_books = TransactionDetail.objects.filter(user=user, is_returned=False).values(
+            'transaction_detail_id',
+            'book__book_master__book_master_id', 
+            'book__book_master__title', 
+            'book__book_master__isbn', 
+            'book__book_master__image', 
+            'expected_date_return'
+        )
+        
+        # Format the borrowed books
+        borrowed_books_data = list(borrowed_books)
+
+        # Return user data and book details
+        return JsonResponse({
+            'isSuccess': 'true',
+            'user': {
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'cellphone_number': user.cellphone_number,
+                'email': user.email,
+                'profile_pic': user.image.url,
+            },
+            'borrowed_books': borrowed_books_data
+        })
+
 
 @login_required(login_url='login')
 def BorrowSelectedBooks(request):
