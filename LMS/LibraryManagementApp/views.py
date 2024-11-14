@@ -302,7 +302,7 @@ def RegisterBook(request):
         isbn = request.POST.get('isbn')  # Ensure to include the ISBN field
         authors = [author for author in request.POST.getlist('author[]') if author]  # Filters out empty or null authors
         location = request.POST.get('location')
-        duration = (lambda x: -1 if not x else x)(request.POST.get('duration'))
+        duration = request.POST.get('duration')
         summary = request.POST.get('summary')
         categories = request.POST.getlist('categories')  # Handles multiple categories
         copies = int(request.POST.get('copies', 1))  # Ensure copies is an integer, default to 1 if not provided
@@ -313,6 +313,9 @@ def RegisterBook(request):
 
         if not summary:
             summary = "No summary available"
+
+        if not location:
+            location = "Unknown"
 
         current_user = request.user
 
@@ -468,13 +471,12 @@ def GetBooks(request):
         if caller == 'Management':
             bookList = list(
                 BookMaster.objects.filter(is_archived=False).annotate(
-                    has_available_books=Case(
-                        When(book__status=1, then=True),
-                        default=False,
+                    has_invalid_books=Case(
+                        When(book__status__in=[1, 2], then=False),
+                        default=True,
                         output_field=BooleanField()
                     )
                 ).values(
-
                     'book_master_id',
                     'title',
                     'publisher',
@@ -482,9 +484,8 @@ def GetBooks(request):
                     'isbn',
                     'location',
                     'late_fee',
-                    'has_available_books',
+                    'has_invalid_books',  # Add this field to the response
                 ).distinct()
-              
             )
         else:
             # Get only books with at least one related Book with status 1
@@ -492,13 +493,12 @@ def GetBooks(request):
                 BookMaster.objects.filter(
                     Q(is_archived=False)
                 ).annotate(
-                    has_available_books=Case(
-                        When(book__status=1, then=True),
-                        default=False,
+                    has_invalid_books=Case(
+                        When(book__status__in=[1, 2], then=False),
+                        default=True,
                         output_field=BooleanField()
                     )
                 ).values(
-
                     'book_master_id',
                     'title',
                     'publisher',
@@ -506,9 +506,8 @@ def GetBooks(request):
                     'isbn',
                     'location',
                     'late_fee',
-                    'has_available_books',
+                    'has_invalid_books',  # Add this field to the response
                 ).distinct()
-
             )
         
         formatted_books = [
@@ -520,13 +519,13 @@ def GetBooks(request):
                 'isbn': book['isbn'],
                 'location': book['location'],
                 'late_fee': book['late_fee'],
-                'has_available_books': book['has_available_books'],
-
+                'has_invalid_books': book['has_invalid_books'],  # Add this field to the formatted books
             }
             for book in bookList
         ]
 
         return JsonResponse({'books': formatted_books})
+
     
 @login_required(login_url='login')
 def GetBookMasterBooks(request):
@@ -712,14 +711,22 @@ def RemoveBook(request):
         book_master_id = request.POST.get('book_master_id')
 
         try:
-            book = BookMaster.objects.get(book_master_id=book_master_id)
-            book.is_archived = True
-            book.save()
+            book_master = BookMaster.objects.get(book_master_id=book_master_id)
+
+            # Check if any related books have a status other than 1 or 2
+            invalid_books = book_master.book_set.filter(~Q(status__in=[1, 2])).exists()
+
+            if invalid_books:
+                return JsonResponse({'isSuccess': False, 'message': 'Cannot delete book master. Some related books have invalid status.'})
+
+            # Proceed with archiving the book master
+            book_master.is_archived = True
+            book_master.save()
 
             return JsonResponse({'isSuccess': True})
 
-        except Book.DoesNotExist:
-            return JsonResponse({'isSuccess': False, 'message': 'Book not found.'})
+        except BookMaster.DoesNotExist:
+            return JsonResponse({'isSuccess': False, 'message': 'Book master not found.'})
         except Exception as e:
             return JsonResponse({'isSuccess': False, 'message': str(e)})
 

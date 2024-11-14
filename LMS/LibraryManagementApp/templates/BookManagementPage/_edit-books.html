@@ -17,34 +17,41 @@
                         <div class="row">
                             <!-- Image Upload - Full Row -->
                             <input type="number" id="bookMasterID" name="bookMasterID" hidden>
-                            <div class="col-12 mb-3">
+
+                            <div class="col-12 col-lg-12 col-md-12 col-sm-12 mb-3">
                                 <label for="imageUpload" class="form-label">Upload Image</label>
                                 <input type="file" class="image-resize-filepond form-control" id="imageUpload"
-                                    placeholder="Upload Image" name="bookPic" required>
+                                    placeholder="Upload Image" name="bookPic" accept="image/*">
                             </div>
 
                             <!-- Title - Full Row -->
-                            <div class="col-8 mb-3">
+                            <div class="col-12 col-lg-8 col-md-6 col-sm-12 mb-3">
                                 <label for="bookTitle" class="form-label">Title of the Book</label>
                                 <input type="text" class="form-control" id="bookTitle"
                                     placeholder="Enter the title of the book" name="bookTitle" required>
                             </div>
-                            <div class="col-4 mb-3">
+                            <div class="col-12 col-lg-4 col-md-6 col-sm-12 mb-3">
                                 <label for="isbn" class="form-label">ISBN</label>
-                                <input type="text" class="form-control" id="isbn"
-                                    placeholder="Enter the isbn of the book" name="isbn" required disabled>
+                                <div id="isbnContainer" class="row">
+                                    <div class="input-group col-12 mb-2">
+                                        <button class="btn btn-primary" type="button" id="generate-isbn"><span
+                                                class="bi bi-shuffle"></span></button>
+                                        <input type="text" class="form-control" id="isbn"
+                                            placeholder="Enter the isbn of the book" name="isbn" required>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Publisher (3/4) and Year (1/4) -->
-                            <div class="col-md-9 mb-3">
+                            <div class="col-lg-9 col-md-9 col-sm-12 col-12  mb-3">
                                 <label for="publisher" class="form-label">Publisher</label>
                                 <input type="text" class="form-control" id="publisher" placeholder="Enter the publisher"
                                     name="publisher" required>
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-lg-3 col-md-3 col-sm-12 col-12 mb-3">
                                 <label for="year" class="form-label">Year</label>
                                 <input type="number" class="form-control" id="year" placeholder="Enter the year"
-                                    name="year" required>
+                                    name="year" min="1" value="1" required>
                             </div>
 
                             <!-- Author(s) - Full Row with Dynamic Adjustment -->
@@ -60,40 +67,44 @@
                             </div>
 
                             <!-- Location (1/4), Status (1/4), Borrowing Duration (1/4), Fine (1/4) -->
-                            <div class="col-md-4 mb-3">
+                            <div class="col-lg-3 col-md-3 col-sm-12 col-12 mb-3">
                                 <label for="location" class="form-label">Location</label>
                                 <input type="text" class="form-control" id="location" placeholder="Enter location"
-                                    name="location">
+                                    name="location" required>
                             </div>
                             <!-- <div class="col-md-3 mb-3">
                                 <label for="status" class="form-label">Status</label>
-                                <select class="form-select" required id="status" name="status">
+                                <select class="form-select" id="status" required name="status">
+                                    <option disabled selected hidden value="0">Status</option>
+                                    <option value="1">Available</option>
+                                    <option value="2">Under Maintenance</option>
                                 </select>
                             </div> -->
-                            <div class="col-md-4 mb-3">
+
+                            <div class="col-lg-4 col-md-4 col-sm-12 col-12 mb-3">
                                 <label for="borrowingDuration" class="form-label">Borrowing Duration (Days)</label>
                                 <input type="number" class="form-control" id="borrowingDuration"
-                                    placeholder="Enter duration in days" name="duration">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="fine" class="form-label">Fine per Late Day</label>
-                                <input type="number" step="0.01" class="form-control" id="fine"
-                                    placeholder="Enter fine amount" required name="fine">
+                                    placeholder="Enter duration in days" name="duration" min="1" value="1">
                             </div>
 
+                            <!-- <div class="col-md-3 mb-3">
+                                <label for="fine" class="form-label">Fine per Late Day</label>
+                                <input type="number" step="0.01" class="form-control" id="fine"
+                                    placeholder="Enter fine amount" name="fine" min="0">
+                            </div> -->
+
                             <!-- File Upload for Digital Copy - Full Row -->
-                            <div class="col-12 mb-3">
+                            <div class="col-lg-5 col-md-5 col-sm-12 col-12 mb-3">
                                 <label for="fileUpload" class="form-label">Digital Copy</label>
 
                                 <!-- Check if the book already has a soft copy -->
-                                <input class="form-control" type="file" id="fileUpload" name="softcopy">
+                                <input class="form-control" type="file" id="fileUpload" name="softcopy" accept="application/pdf">
 
                                 <!-- Display a link to the current digital copy -->
                                 <div id="currentFile" class="mt-2">
                                     <!-- This will be populated by JavaScript with the current file link -->
                                 </div>
                             </div>
-
 
                             <!-- Categories and Add New Category Button -->
                             <div class="row mb-3">
@@ -115,7 +126,7 @@
                             <div class="col-12 mb-3">
                                 <label for="summary" class="form-label">Summary</label>
                                 <textarea class="form-control" id="summary" placeholder="Enter a summary" rows="5"
-                                    required name="summary"></textarea>
+                                    name="summary"></textarea>
                             </div>
                         </div>
                     </form>

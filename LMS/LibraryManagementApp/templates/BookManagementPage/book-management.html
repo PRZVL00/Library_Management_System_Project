@@ -30,8 +30,9 @@
                     <div class="position-relative me-3">
                         <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
                         <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="bagContent">
-                            
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                            id="bagContent">
+
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     </div>
@@ -105,22 +106,25 @@
                 {
                     data: 'book_master_id',
                     render: function (data, type, row) {
+                        const disableRemove = row.has_invalid_books ? 'disabled' : '';  // Check if book has invalid statuses
+
                         return `<button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
-                                <i class="bi bi-info-circle"></i>
-                            </button>
-                            <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#edit-modal" data-id="${data}" id="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm" data-id="${data}" id='removeBook'>
-                                <i class="bi bi-trash"></i>
-                            </button>`;
+                        data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
+                        <i class="bi bi-info-circle"></i>
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#edit-modal" data-id="${data}" id="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" data-id="${data}" id="removeBook" ${disableRemove}>
+                        <i class="bi bi-trash"></i>
+                    </button>`;
                     },
                     className: 'text-center'
                 }
             ]
         });
+
 
         // Register FilePond plugins
         FilePond.registerPlugin(
@@ -250,7 +254,7 @@
             BookMasterID = $(this).data('id');
         });
 
-        $('#edit-modal').on('shown.bs.modal', function() {
+        $('#edit-modal').on('shown.bs.modal', function () {
             InitializeDatatable();
         });
 
@@ -545,7 +549,7 @@
                 columns: [
                     { data: 'book_qr_value' },
                     { data: 'title' },
-                    { data: 'isbn', className: 'text-start' },  
+                    { data: 'isbn', className: 'text-start' },
                     {
                         data: 'status',
                         render: function (data, type, row) {
@@ -561,8 +565,8 @@
                                         <option disabled hidden value="0">Status</option>
                                         <option value="1" ${selectedStatus1}>Available</option>
                                         <option value="2" ${selectedStatus2}>Under Maintenance</option>
-                                        <option value="3" ${selectedStatus3}>Reserved</option>
-                                        <option value="4" ${selectedStatus4}>Borrowed</option>
+                                        <option value="3" ${selectedStatus3} disabled hidden>Reserved</option>
+                                        <option value="4" ${selectedStatus4} disabled hidden>Borrowed</option>
 
 
                                     </select>`;
@@ -570,7 +574,7 @@
                         },
                         className: 'text-center'
                     }
-                    
+
 
                 ]
             });
@@ -581,9 +585,9 @@
             });
         }
 
-        function UpdateBagNumber(){
+        function UpdateBagNumber() {
             $.ajax({
-                url: "{% url 'update-bag-number' %}", 
+                url: "{% url 'update-bag-number' %}",
                 type: "GET",
                 success: function (response) {
                     console.log(response.total_reservations);
