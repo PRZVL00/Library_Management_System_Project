@@ -27,11 +27,11 @@
                             Info</button>
 
                         <!-- Add to Shelf button - disabled if no available books -->
-                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1" id="AddToBag"
-                                data-id="{{ book.book_master_id }}"
-                                {% if book.available_books == 0 %} disabled {% endif %}>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1 AddToBag" data-id="{{ book.book_master_id }}" 
+                             {% if book.available_books == 0 %} disabled {% endif %}>
                             {% if book.available_books == 0 %} Out of Stock {% else %} Add to Bag {% endif %}
                         </button>
+
 
                     </div>
                 </div>
