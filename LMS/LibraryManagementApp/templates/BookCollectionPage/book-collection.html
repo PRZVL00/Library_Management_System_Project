@@ -82,6 +82,45 @@
 
         UpdateBagNumber()
 
+        $('#searchButton').on('click', function () {
+            loadBooks(1); 
+        });
+
+
+        // Load categories via AJAX when the collapse button is clicked
+        $('#toggleCategories').on('click', function () {
+            if ($('#collapseExample').hasClass('show')) {
+                return; // Don't reload if already loaded
+            }
+
+            $.ajax({
+                url: "{% url 'get-category-filters' %}",
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    let categoriesHtml = '';
+                    response.categories.forEach(function (category) {
+                        categoriesHtml += `
+                        <div class="form-check col-12 col-md-4 col-lg-3">
+                            <input class="form-check-input" type="checkbox" value="${category.category_id}" id="category${category.category_id}">
+                            <label class="form-check-label" for="category${category.category_id}">
+                                ${category.category_name}
+                            </label>
+                        </div>`;
+                    });
+                    $('#categoriesContainer').html(categoriesHtml);
+                },
+                error: function (error) {
+                    console.log("Error loading categories:", error);
+                }
+            });
+        });
+
+        $('#clear-filters').click(function () {
+            // Uncheck all checkboxes
+            $('#categoriesContainer input[type="checkbox"]').prop('checked', false);
+        });
+
         // Event listener for when the "Table" tab is clicked
         $('#by-table-tab').on('shown.bs.tab', function () {
             // Check if the DataTable has already been initialized
@@ -136,10 +175,21 @@
         });
 
         function loadBooks(pageNumber) {
+            // Get the search term and selected categories
+            const searchTerm = $('input[type="text"]').val();  // Get the search term from the input field
+            const selectedCategories = [];
+
+            // Get selected categories
+            $('#categoriesContainer input[type="checkbox"]:checked').each(function () {
+                selectedCategories.push($(this).val());
+            });
+
             $.ajax({
                 url: "{% url 'load-books' %}",
                 data: {
-                    page: pageNumber
+                    page: pageNumber,
+                    search: searchTerm,
+                    categories: selectedCategories.join(',')  // Pass selected categories as a comma-separated string
                 },
                 dataType: 'json',
                 success: function (data) {
@@ -154,7 +204,8 @@
             });
         }
 
-        // Initial load of books
+
+         // Initial load of books
         loadBooks(1);  // Load the first page of books
 
         // Function to update pagination controls
