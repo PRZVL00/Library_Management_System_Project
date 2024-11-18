@@ -42,7 +42,8 @@
             <div class="page-content mb-3">
                 <div class="container">
                     <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#uploadModal">
                             Upload Excel File
                         </button>
                     </div>
@@ -239,7 +240,7 @@
                 return;
             }
 
-            // AJAX request
+            // AJAX request to check ISBN
             $.ajax({
                 url: '{% url "check-ISBN" %}', // URL of the Django view
                 type: 'POST',
@@ -255,9 +256,44 @@
                             title: "ISBN",
                             text: response.message,
                             showCancelButton: true,
+                            confirmButtonText: "OK",
+                            cancelButtonText: "Cancel"
                         }).then((result) => {
-                            if (result.isDismissed) {
-                                $('#isbn').val('')
+                            if (result.isConfirmed) {
+                                // Call to add a book copy
+                                $.ajax({
+                                    url: '{% url "add-book-copy" %}', // URL of the add book copy view
+                                    type: 'POST',
+                                    data: {
+                                        'isbn': isbn,
+                                        'csrfmiddlewaretoken': '{{ csrf_token }}', // Django CSRF token
+                                    },
+                                    success: function (addResponse) {
+                                        if (addResponse.isSuccess == 'true') {
+                                            Swal.fire({
+                                                icon: "success",
+                                                title: "Success",
+                                                text: addResponse.message,
+                                            });
+                                            $('#isbn').val('');
+
+                                        } else {
+                                            Swal.fire({
+                                                icon: "error",
+                                                title: "Error",
+                                                text: addResponse.message,
+                                            });
+                                            $('#isbn').val('');
+
+                                        }
+                                    },
+                                    error: function (xhr, status, error) {
+                                        console.error('AJAX error:', error);
+                                    }
+                                });
+                            } else {
+                                // Clear the ISBN field if cancelled
+                                $('#isbn').val('');
                             }
                         });
                     }
@@ -267,6 +303,7 @@
                 }
             });
         });
+
 
         $('#addAuthorBtn').on('click', function () {
             const newAuthorField = `
@@ -448,28 +485,44 @@
             });
         });
 
-            $('#excel-upload-form').on('submit', function (e) {
-                e.preventDefault();
-                let formData = new FormData(this);
+        $('#excel-upload-form').on('submit', function (e) {
+            $('#uploadModal').modal('hide');
 
-                $.ajax({
-                    url: '{% url "batch-upload" %}', // replace with your URL
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    success: function (response) {
-                        alert(response.message);
-                        // handle response
-                    },
-                    error: function (response) {
-                        alert('Error uploading file');
-                        // handle error
-                    }
-                });
+            Swal.fire({
+                title: 'Uploading',
+                html: 'Please wait...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading(); // Shows the loading spinner
+                }
+            });
+            e.preventDefault();
+            let formData = new FormData(this);
+
+            $.ajax({
+                url: '{% url "batch-upload" %}', // replace with your URL
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Upload Complete',
+                        text: 'Your file was successfully uploaded.',
+                        confirmButtonText: 'OK'
+                    });
+
+                    // handle response
+                },
+                error: function (response) {
+                    alert('Error uploading file');
+                    // handle error
+                }
+            });
         });
 
 

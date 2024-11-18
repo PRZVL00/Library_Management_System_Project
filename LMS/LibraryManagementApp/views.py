@@ -25,6 +25,8 @@ from datetime import timedelta
 import json
 from django.core.exceptions import ObjectDoesNotExist
 import pandas as pd
+from django.db.models.functions import TruncDate
+from django.utils.timezone import make_aware
 
 
 def Login(request):
@@ -425,6 +427,53 @@ def CheckISBN(request):
 
         except:
             pass
+
+@login_required(login_url='login')
+def AddBookCopy(request):
+    if request.method == 'POST':
+        isbn = request.POST.get('isbn')  # Retrieve ISBN from the POST request
+        current_user = request.user  # Get the logged-in user
+
+        try:
+            # Check if a BookMaster with the given ISBN exists and is not archived
+            book_master = BookMaster.objects.filter(Q(isbn=isbn) & Q(is_archived=False)).first()
+
+            if not book_master:
+                return JsonResponse({'isSuccess': 'false', 'message': 'Book with the provided ISBN does not exist.'})
+
+            # Create a new Book instance linked to the existing BookMaster
+            book = Book(
+                book_master=book_master,
+                status_id=1,  # Set an initial status, e.g., available
+                qr_value='',  # Will be updated later
+                qr_image='',  # Will be updated later
+                added_by=current_user  # Track which user added the book copy
+            )
+            book.save()
+
+            # Generate and assign QR codes for the new Book
+            book.qr_value = f"QR-{book.book_id}-{book_master.title}-{book_master.year}-{isbn}"
+            book.save()
+
+            # Generate QR code
+            qr_img = qrcode.make(book.qr_value)
+
+            # Save the QR code to a BytesIO object
+            qr_buffer = BytesIO()
+            qr_img.save(qr_buffer, format='PNG')
+            qr_buffer.seek(0)
+
+            # Save the QR code to the book's qr_image field
+            book.qr_image.save(f'qr_{book.book_id}.png', ContentFile(qr_buffer.read()), save=True)
+
+            return JsonResponse({'isSuccess': 'true', 'message': 'Book copy added successfully.'})
+
+        except Exception as e:
+            return JsonResponse({'isSuccess': 'false', 'message': f'An error occurred: {str(e)}'})
+
+    # If not POST, return an error
+    return JsonResponse({'isSuccess': 'false', 'message': 'Invalid request method.'})
+
 
 @login_required(login_url='login')
 def AddCategory(request):
@@ -1270,6 +1319,13 @@ def GetSecondRow(request):
         today = datetime.now()
 
         # Initialize empty lists for data
+        labels = []@login_required(login_url='login')
+def GetSecondRow(request):
+    if request.method == 'POST':
+        time_range = request.POST.get('time_range')
+        today = datetime.now()
+
+        # Initialize empty lists for data
         labels = []
         borrowed_data = []
         returned_data = []
@@ -1281,48 +1337,65 @@ def GetSecondRow(request):
                 start_date = None
                 end_date = None
                 period_label = ""
+                borrowed_count = 0
+                returned_count = 0
 
                 if time_range == 'daily':
                     start_date = today - timedelta(days=i)
-                    # Set start_date to midnight (beginning of the day)
                     start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-                    # Set end_date to the last second of the day
                     end_date = start_date.replace(hour=23, minute=59, second=59, microsecond=999999)
-                    period_label = start_date.strftime("%b %d")  # Format label as 'Feb 01'
+                    period_label = start_date.strftime("%b %d")
                     labels.append(period_label)
 
+                    borrowed_count = TransactionDetail.objects.filter(
+                        date_borrowed__date=start_date.date(),
+                        is_returned=False
+                    ).count()
+                    returned_count = TransactionDetail.objects.filter(
+                        actual_date_return__date=start_date.date(),
+                        is_returned=True
+                    ).count()
+
                 elif time_range == 'weekly':
-                    # For weekly, reset the time to midnight for both start and end
                     week_start_date = today - timedelta(weeks=i, days=today.weekday())
                     week_end_date = week_start_date + timedelta(days=6)
-                    # Set the time of the week start date to midnight and week end date to 23:59:59
                     start_date = week_start_date.replace(hour=0, minute=0, second=0, microsecond=0)
                     end_date = week_end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
                     period_label = f"Week {today.isocalendar()[1] - i}"
                     labels.append(period_label)
 
+                    borrowed_count = TransactionDetail.objects.filter(
+                        date_borrowed__date__gte=start_date.date(),
+                        date_borrowed__date__lte=end_date.date(),
+                        is_returned=False
+                    ).count()
+                    returned_count = TransactionDetail.objects.filter(
+                        actual_date_return__date__gte=start_date.date(),
+                        actual_date_return__date__lte=end_date.date(),
+                        is_returned=True
+                    ).count()
+
                 elif time_range == 'monthly':
-                    # For monthly, reset time to midnight for both start and end
                     first_day_of_month = today.replace(day=1) - timedelta(days=i * 30)
                     last_day_of_month = (first_day_of_month.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
-                    # Set the time of both start and end date to midnight and 23:59:59 respectively
                     start_date = first_day_of_month.replace(hour=0, minute=0, second=0, microsecond=0)
                     end_date = last_day_of_month.replace(hour=23, minute=59, second=59, microsecond=999999)
-                    period_label = first_day_of_month.strftime("%b %Y")  # Format label as 'Feb 2024'
+                    period_label = first_day_of_month.strftime("%b %Y")
                     labels.append(period_label)
 
-                # Fetch borrowed and returned counts for the date range
-                borrowed_count = TransactionDetail.objects.filter(
-                    date_borrowed__range=[start_date, end_date], is_returned=False
-                ).count()
-                returned_count = TransactionDetail.objects.filter(
-                    actual_date_return__range=[start_date, end_date], is_returned=True
-                ).count()
+                    borrowed_count = TransactionDetail.objects.filter(
+                        date_borrowed__date__gte=start_date.date(),
+                        date_borrowed__date__lte=end_date.date(),
+                        is_returned=False
+                    ).count()
+                    returned_count = TransactionDetail.objects.filter(
+                        actual_date_return__date__gte=start_date.date(),
+                        actual_date_return__date__lte=end_date.date(),
+                        is_returned=True
+                    ).count()
 
                 borrowed_data.append(borrowed_count)
                 returned_data.append(returned_count)
-
-                # Calculate date range (for tooltip display)
                 date_ranges.append(f"{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
 
             # Reverse the data to maintain chronological order
@@ -1331,17 +1404,23 @@ def GetSecondRow(request):
             returned_data.reverse()
             date_ranges.reverse()
 
+            print(labels)
+            print(borrowed_data)
+            print(returned_data)
+            print(date_ranges)
+
             return JsonResponse({
                 'labels': labels,
                 'borrowed_data': borrowed_data,
                 'returned_data': returned_data,
-                'date_ranges': date_ranges,  # Send date ranges for tooltips
+                'date_ranges': date_ranges,
                 'current_year': year
             })
 
         except Exception as e:
             print(f"Error: {e}")
             return JsonResponse({'error': 'Something went wrong'}, status=500)
+
         
 def GetThirdRow(request):
     try:
@@ -1350,6 +1429,8 @@ def GetThirdRow(request):
             .values('category__category_name') \
             .annotate(book_count=Count('book_master')) \
             .order_by('-book_count')[:5]
+        
+        print(categories)
 
         # Extract category names and counts
         category_names = [category['category__category_name'] for category in categories]
