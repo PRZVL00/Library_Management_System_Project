@@ -40,16 +40,25 @@
             <!--Main Page-->
             <div class="page-content">
                 <!--Start Your Page Here-->
-                <div class="row mb-3">
-                    <div class="input-group" id="qr-group-input" hidden>
-                        <span class="input-group-text" id="basic-addon1" style="align-items: normal;">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" class="form-control"
-                            placeholder="Scan/Enter borrower's QR Code or email address" aria-label="Book's Name"
-                            aria-describedby="button-addon2" id="qrInput">
-                        <button class="btn btn-sm btn-outline-primary" type="button" id="searchBTN">Search</button>
+                <div class="row mb-3" id="message-box">
+                    <div class="col-12 text-center">
+                        <p>Please scan the borrower's QR code or click the button below to enter the borrower's email
+                            address:</p>
+                        <button class="btn btn-primary" id="show-qr-input-btn">Enter Borrower's Email</button>
                     </div>
+                </div>
+                <div class="row mb-3">
+                    <form id="qr-form" hidden>
+                        <div class="input-group" id="qr-group-input">
+                            <span class="input-group-text" id="basic-addon1" style="align-items: normal;">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control"
+                                placeholder="Scan/Enter borrower's QR Code or email address" aria-label="Book's Name"
+                                aria-describedby="button-addon2" id="qrInput" required>
+                            <button class="btn btn-sm btn-outline-primary" type="submit" id="searchBTN">Search</button>
+                        </div>
+                    </form>
                 </div>
                 <div class="row" id="details" hidden>
                     <div class="col-12 col-lg-3">
@@ -110,10 +119,6 @@
                         </div>
                     </div>
                 </div>
-
-
-
-
             </div>
         </div>
         {% include "BookCollectionPage/_more-info-books.html" %}
@@ -148,6 +153,11 @@
             }
         });
 
+        $('#show-qr-input-btn').click(function() {
+            $('#qr-form').removeAttr('hidden');
+            $('#message-box').attr('hidden', true);
+        });
+
         $(document).on('change', 'input[type="checkbox"]', function () {
             var bookId = $(this).val();
             var category = $(this).data('category'); // Get the data-category value
@@ -180,8 +190,9 @@
         })
 
 
-        $('#searchBTN').click(function () {
-            LoadProfile(); // Call the LoadProfile function
+        $('#qr-form').submit(function(event) {
+            event.preventDefault();  // Prevent default form submission
+            LoadProfile();           
         });
 
         $(document).on('click', '#MoreInfo', function () {
@@ -341,6 +352,14 @@
         function LoadProfile() {
             var borrower = $('#qrInput').val();
 
+            if (!borrower) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Email address is required.",
+                });
+            }
+
             // Send AJAX request to fetch user and book data
             $.ajax({
                 url: "{% url 'load-profile' %}",
@@ -353,7 +372,11 @@
                     console.log(response);
                     if (response.isSuccess === 'false') {
                         // If user not found
-                        alert(response.message);
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: response.message,
+                        });
                     } else {
                         // Update borrower profile
                         updateUserProfile(response.user);
