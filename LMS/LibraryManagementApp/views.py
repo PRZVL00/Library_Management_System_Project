@@ -93,9 +93,12 @@ def RegisterUser(request):
             return JsonResponse({'isSuccess': 'false', 'message': 'All fields must be provided'})
 
         # Check if the email (username) already exists
-        if CustomUser.objects.filter(email=email).exists():
+        if CustomUser.objects.filter(Q(email=email) & Q(is_active=True)).exists():
             return JsonResponse({'isSuccess': 'false', 'message': 'Email already in use'})
-
+        
+        if CustomUser.objects.filter(Q(email=email) & Q(is_active=False)).exists():
+            return JsonResponse({'isSuccess': 'false', 'message': 'This email is already registered but inactive. Please proceed to the librarian to activate the account.'})
+        
         try:
             # Create the user profile
             user_profile = CustomUser.objects.create(
@@ -651,8 +654,9 @@ def GetAccounts(request):
             'cellphone_number', 
             'email',
             'is_active'
-        ))
+        ).order_by('-is_active'))  # Inactive accounts will appear last
         return JsonResponse({'accounts': accountList})
+
 
 @login_required(login_url='login')
 def UpdateStatus(request):
@@ -1749,3 +1753,29 @@ def BatchUpload(request):
 
     # If not POST, return an error
     return JsonResponse({'isSuccess': 'false', 'message': 'Invalid request method.'})
+
+@login_required  # Ensure the user is logged in
+def ArchiveUser(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        
+        # Check if the logged-in user is trying to delete their own account
+        if str(user_id) == str(request.user.id):  # Compare the IDs as strings
+            return JsonResponse({'status': 'error', 'message': 'You cannot delete the account you are currently using.'})
+
+        try:
+            # Find the user by id
+            user = CustomUser.objects.get(id=user_id)
+            
+            # Toggle the is_active status
+            user.is_active = not user.is_active 
+            user.save()
+
+            # Return a success response
+            return JsonResponse({'status': 'success', 'message': 'User archived successfully'})
+        
+        except CustomUser.DoesNotExist:
+            # Return an error response if the user does not exist
+            return JsonResponse({'status': 'error', 'message': 'User not found'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
