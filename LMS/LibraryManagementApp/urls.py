@@ -62,6 +62,7 @@ urlpatterns = [
     path('get-to-borrow', views.GetToBorrow, name='get-to-borrow'),
     path('get-to-return', views.GetToReturn, name='get-to-return'),
     path('add-book-copy/', views.AddBookCopy, name='add-book-copy'),
+    path('archive-user/', views.ArchiveUser, name='archive-user'),
 
 
 

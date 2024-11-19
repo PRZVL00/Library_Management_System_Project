@@ -66,6 +66,7 @@
 
 <script>
     $(document).ready(function () {
+        UpdateBagNumber();
         $("#accounts").DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
                 'rt' +
@@ -87,12 +88,16 @@
                 {
                     data: 'id',
                     render: function (data, type, row) {
+                        var buttonClass = row.is_active ? 'btn-outline-success' : 'btn-outline-danger';  // Green for active, red for inactive
+                        var buttonIcon = row.is_active ? 'bi-dot' : 'bi-trash';  // Dot icon for active, trash for archived
+                        var buttonText = row.is_active ? 'Active' : 'Archived'; // Text to display based on status
+
                         return `<button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
                                             data-bs-target="#account-edit-modal" data-id="${data}" id="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="btn btn-outline-danger btn-sm" data-id="${data}" id='removeBook'>
-                                            <i class="bi bi-trash"></i>
+                                        <button class="btn ${buttonClass} btn-sm" data-id="${data}" id="Archive">
+                                            <i class="bi ${buttonIcon}"></i> ${buttonText}
                                         </button>`;
                     }, className: 'text-center'
                 }
@@ -221,6 +226,79 @@
             });
         });
 
+        $(document).on('click', '#Archive', function () {
+            var userId = $(this).data('id');
+            var button = $(this);  // The clicked button
+            var isActive = button.find('i').hasClass('bi-dot'); // Check if the account is active based on the icon
+
+            // Set the appropriate confirmation message based on the account's current state
+            var actionMessage = isActive ? 'Are you sure you want to archive this account?' : 'Are you sure you want to reactivate this account?';
+            var actionConfirmText = isActive ? 'Archive' : 'Reactivate';
+            
+            // Show SweetAlert confirmation dialog
+            Swal.fire({
+                title: 'Confirm Action',
+                text: actionMessage,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: actionConfirmText,
+                cancelButtonText: 'Cancel',
+                reverseButtons: true  // Reverse buttons so cancel is on the left
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with the AJAX request if confirmed
+                    $.ajax({
+                        url: '/archive-user/',  // URL for the Django view
+                        type: 'POST',
+                        data: {
+                            'user_id': userId,
+                            'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val(),
+                        },
+                        success: function (response) {
+                            if (response.status === 'success') {
+                                // Toggle the button's appearance based on the updated status
+                                if (response.is_active) {
+                                    button.removeClass('btn-outline-danger').addClass('btn-outline-success');
+                                    button.find('i').removeClass('bi-trash').addClass('bi-dot');
+                                    button.text('Active');
+                                } else {
+                                    button.removeClass('btn-outline-success').addClass('btn-outline-danger');
+                                    button.find('i').removeClass('bi-dot').addClass('bi-trash');
+                                    button.text('Archived');
+                                }
+
+                                // Reload the table data to reflect the changes
+                                $("#accounts").DataTable().ajax.reload(null, false); // Keep the current page
+
+                                // Success Swal
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success',
+                                    text: isActive ? 'Account has been archived.' : 'Account has been reactivated.',
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.message
+                                });
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Something went wrong. Please try again later.'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+
+
+
         function UpdateBagNumber() {
             $.ajax({
                 url: "{% url 'update-bag-number' %}",
@@ -234,12 +312,6 @@
                 }
             });
         }
-
-    });
-</script>
-
-
-	
 
     });
 </script>

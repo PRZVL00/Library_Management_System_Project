@@ -192,7 +192,7 @@
 
         $('#qr-form').submit(function(event) {
             event.preventDefault();  // Prevent default form submission
-            LoadProfile();           
+            LoadProfile();
         });
 
         $(document).on('click', '#MoreInfo', function () {
@@ -298,14 +298,22 @@
                     },
                     success: function (response) {
                         if (response.success) {
-                            alert("Books successfully borrowed!");
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: 'Books successfully borrowed!',
+                            });
                             // Reset the ToBorrow array and update UI
                             ToBorrow = [];
                             $('#select-all-to-borrow').text('Select All'); // Reset the Select All button text
                             $('#borrowTable input[type="checkbox"]').prop('checked', false); // Uncheck all checkboxes
                             LoadProfile(); // Reload the profile data
                         } else {
-                            alert(response.message); //
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'error',
+                                text: response.message,
+                            });
                         }
                         UpdateBagNumber(); // Update the bag number
                     },
@@ -329,14 +337,22 @@
                     },
                     success: function (response) {
                         if (response.success) {
-                            alert("Books successfully returned!");
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: 'Books successfully returned!',
+                            });
                             // Reset the ToReturn array and update UI accordingly
                             ToReturn = [];
-                            // Optionally, update the UI to reflect the changes
-                            // E.g., hide the return button or remove books from the "to return" list
+                            $('#select-all-to-return').text('Select All'); // Reset the Select All button text
+                            $('#returnTable input[type="checkbox"]').prop('checked', false); // Uncheck all checkboxes
                             LoadProfile()
                         } else {
-                            alert("An error occurred while returning the books.");
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'error',
+                                text: response.message,
+                            });
                         }
                         UpdateBagNumber()
                     },
@@ -383,6 +399,7 @@
                         InitializeToBorrowTable(borrower)
                         InitializeToReturnTable(borrower)
                         $('#details').removeAttr('hidden');
+                        $('#message-box').attr('hidden', true);           
 
                     }
                 },
