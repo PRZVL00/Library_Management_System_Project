@@ -1149,26 +1149,87 @@ def ReturnSelectedBooks(request):
             # Log the exception or handle errors as needed
             return JsonResponse({'success': False, 'message': str(e)})
 
-@login_required(login_url='login')
 def GetTransaction(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    specific_date = request.GET.get('specific_date')
+    date_count = int(request.GET.get('date_count', 0))
+
+    print(start_date, end_date, specific_date, date_count)
+
+    # Query to get transactions with the number of books
     transactions = TransactionMaster.objects.annotate(number_of_books=Count('transactiondetail')).select_related('user', 'approver')
+
+    # Debugging: print the incoming parameters to the console
+    print(f"Start Date: {start_date}, End Date: {end_date}, Specific Date: {specific_date}, Date Count: {date_count}")
+
+    # Apply the filters based on the date_count
+    if date_count == 2 and start_date and end_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        transactions = transactions.filter(
+            transaction_date__date__gte=start_date,
+            transaction_date__date__lte=end_date
+        )
+        print(f"Filtering by date range: {start_date} to {end_date}")
+    elif date_count == 1 and specific_date:
+        specific_date = datetime.strptime(specific_date, '%Y-%m-%d').date()
+        transactions = transactions.filter(
+            transaction_date__date=specific_date
+        )
+        print(f"Filtering by specific date: {specific_date}")
+
+    # Debugging: Print out the number of transactions after filtering
+    print(f"Filtered transactions count: {transactions.count()}")
+
+    # Prepare the data for the response
     data = [
         {
             'transaction_date': transaction.transaction_date.strftime('%Y-%m-%d %H:%M:%S'),
             'borrower': transaction.user.username,
             'number_of_books': transaction.number_of_books,
-            'approver': transaction.approver.first_name + ' ' + transaction.approver.last_name,
+            'approver': f"{transaction.approver.first_name} {transaction.approver.last_name}",
         }
         for transaction in transactions
     ]
+    
     return JsonResponse(data, safe=False)
 
 @login_required(login_url='login')
 def GetTransactionDetail(request):
-    transaction_details = TransactionDetail.objects.select_related('transaction_master', 'book', 'user', 'approver', 'book__book_master', 'book__status')
-    
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    specific_date = request.GET.get('specific_date')
+    date_count = int(request.GET.get('date_count', 0))
+
+    print(f"Start Date: {start_date}, End Date: {end_date}, Specific Date: {specific_date}, Date Count: {date_count}")
+
+    transaction_details = TransactionDetail.objects.select_related(
+        'transaction_master', 'book', 'user', 'approver', 'book__book_master', 'book__status'
+    )
+
+    # Apply the filters based on the date_count
+    if date_count == 2 and start_date and end_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        transaction_details = transaction_details.filter(
+            transaction_master__transaction_date__date__gte=start_date,
+            transaction_master__transaction_date__date__lte=end_date
+        )
+        print(f"Filtering by date range: {start_date} to {end_date}")
+    elif date_count == 1 and specific_date:
+        specific_date = datetime.strptime(specific_date, '%Y-%m-%d').date()
+        transaction_details = transaction_details.filter(
+            transaction_master__transaction_date__date=specific_date
+        )
+        print(f"Filtering by specific date: {specific_date}")
+
+    # Debugging: Print out the number of transaction details after filtering
+    print(f"Filtered transaction details count: {transaction_details.count()}")
+
     data = [
-        {   'transaction_date': detail.transaction_master.transaction_date.strftime('%Y-%m-%d'),
+        {
+            'transaction_date': detail.transaction_master.transaction_date.strftime('%Y-%m-%d'),
             'book_title': detail.book.book_master.title,
             'isbn': detail.book.book_master.isbn,
             'date_borrowed': detail.date_borrowed.strftime('%Y-%m-%d %H:%M:%S'),
@@ -1180,14 +1241,14 @@ def GetTransactionDetail(request):
             'borrower': detail.user.first_name + ' ' + detail.user.last_name,
             'approver': detail.approver.first_name + ' ' + detail.approver.last_name,
             'fine_status': (
-                'No Fine' if not detail.is_late else 
-                'Paid' if detail.is_paid else 
+                'No Fine' if not detail.is_late else
+                'Paid' if detail.is_paid else
                 'Not Paid'
-            )  # New field with condition for "No Fine" if not late
+            )
         }
         for detail in transaction_details
     ]
-    
+
     return JsonResponse(data, safe=False)
 
 @login_required(login_url='login')

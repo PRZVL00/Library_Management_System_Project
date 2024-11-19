@@ -1,16 +1,25 @@
 {% load static %}
-<div class="table-responsive mt-3">
-    <!-- Modal for edit profile will be used here but with some changes -->
-    <!-- Buttons for each input field will be disabled and also the input fields -->
-    <!-- Reset Password will be remove and save buttons and cancel will be replaced as close -->
-    <table class="table table-striped w-100 nowrap" id="transactionMaster">
-        <thead>
-            <tr>
-                <th class="text-start">Date</th>
-                <th class="text-start">Borrower</th>
-                <th class="text-start">No. of books</th>
-                <th class="text-start">Approver</th>
-            </tr>
-        </thead>
-    </table>
+<div class="card">
+    <div class="card-body">
+        <div class="row justify-content-center">
+            <input type="text" id="master-range-picker" class="form-control w-25 text-center" placeholder="Select Date">
+        </div>
+        <div class="row">
+            <div class="table-responsive mt-3">
+                <!-- Modal for edit profile will be used here but with some changes -->
+                <!-- Buttons for each input field will be disabled and also the input fields -->
+                <!-- Reset Password will be remove and save buttons and cancel will be replaced as close -->
+                <table class="table table-striped w-100 nowrap" id="transactionMaster">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Date</th>
+                            <th class="text-start">Borrower</th>
+                            <th class="text-start">No. of books</th>
+                            <th class="text-start">Approver</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
