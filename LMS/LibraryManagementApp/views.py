@@ -27,6 +27,11 @@ from django.core.exceptions import ObjectDoesNotExist
 import pandas as pd
 from django.db.models.functions import TruncDate
 from django.utils.timezone import make_aware
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.core.files.base import ContentFile
+from io import BytesIO
 
 
 def Login(request):
@@ -126,6 +131,34 @@ def RegisterUser(request):
 
             # Save the QR code to the user's qr_image field
             user_profile.qr_image.save(f'qr_{user_profile.id}.png', ContentFile(qr_buffer.read()), save=True)
+
+            # Send welcome email with QR code
+            subject = "Welcome to the School Library"
+            context = {
+                'username': user_profile.username,
+                'first_name': user_profile.first_name,
+                'last_name': user_profile.last_name,
+            }
+            html_message = render_to_string('Email/welcomeUser.html', context)
+            plain_message = strip_tags(html_message)  # Fallback to plain text
+            from_email = 'no-reply@pnhslibrarymanagemensystem.site'  # Replace with your sender email
+            recipient_list = [user_profile.email]
+
+            # Prepare email with attachment
+            email_message = EmailMultiAlternatives(
+                subject=subject,
+                body=plain_message,
+                from_email=from_email,
+                to=recipient_list,
+            )
+            email_message.attach_alternative(html_message, "text/html")
+
+            # Attach the QR image
+            qr_buffer.seek(0)  # Reset buffer pointer
+            email_message.attach(f'QR_{user_profile.id}.png', qr_buffer.read(), 'image/png')
+
+            # Send email
+            email_message.send()
 
             # Send JSON response for AJAX success
             return JsonResponse({'isSuccess': 'true', 'message': 'User registered successfully!'})

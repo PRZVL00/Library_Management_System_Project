@@ -141,6 +141,17 @@
 
          var formData = new FormData(this);
 
+         Swal.fire({
+            title: 'Loading...',
+            text: 'Please wait a moment',
+            allowOutsideClick: false,
+            didOpen: () => {
+               Swal.showLoading();
+            }
+         });
+
+         $('#signup').prop('disabled', true); // Disable the button
+
          $.ajax({
             url: "{% url 'register-user' %}",  // URL defined in urls.py
             type: 'POST',
@@ -151,6 +162,8 @@
                'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token
             },
             success: function (response) {
+               Swal.close();
+               $('#signup').prop('disabled', false); // Disable the button
                if (response.isSuccess == 'true') {
                   Swal.fire({
                      icon: "success",
@@ -179,7 +192,9 @@
 
             },
             error: function (xhr, status, error) {
-               alert("An error occurred: " + error);  // Notify error
+               Swal.close();
+               $('#signup').prop('disabled', false); // Disable the button
+               console.log("An error occurred: " + error);  // Notify error
             }
          });
       });
