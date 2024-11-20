@@ -163,6 +163,12 @@
                     $('#contact_number').val(response.cellphone_number);
                     $('#email').val(response.email);
 
+                    if(response.is_staff){
+                        $('#position').val('1');
+                    }else{
+                        $('#position').val('0');
+                    }
+
                     // Open the modal after the form is populated
                     $('#account-edit-modal').modal('show');
                 },
@@ -170,6 +176,13 @@
                     console.error('Error fetching account info:', error);
                 }
             });
+        });
+
+        $('#contact_number').on('keypress', function (event) {
+            // Allow only numbers (ASCII codes 48-57 are for digits 0-9)
+            if (event.which < 48 || event.which > 57) {
+                event.preventDefault(); // Prevent the character from being entered
+            }
         });
 
         $('#save-button').click(function () {

@@ -123,7 +123,6 @@
                 $('#logs').DataTable().ajax.reload();
             } else {
                 $('#logs').DataTable({
-                    serverSide: true,
                     ajax: {
                         url: "{% url 'get-log' %}",
                         type: 'GET',

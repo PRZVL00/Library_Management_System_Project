@@ -35,13 +35,23 @@
                             </div>
 
                             <!-- ID Number and Contact Number -->
-                            <div class="col-6 mb-3">
-                                <label for="id_number" class="form-label">ID number</label>
-                                <input type="text" class="form-control form-control-l" placeholder="Id Number" name="id_number" id="id_number" required>
-                            </div>
-                            <div class="col-6 mb-3">
+                            
+                            <div class="col-12 mb-3">
                                 <label for="contact_number" class="form-label">Contact Number</label>
                                 <input type="text" class="form-control form-control-l" placeholder="Contact Number" name="contact_number" id="contact_number" required>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label for="id_number" class="form-label">ID number</label>
+                                <input type="text" class="form-control form-control-l" placeholder="Id Number" name="id_number" id="id_number"  maxlength="11" required>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label for="position" class="form-label">Position</label>
+                                <select class="form-select" id="position" required name="position">
+                                    <option value="0">Student/Teacher</option>
+                                    <option value="1">Admin</option>
+                                </select>
                             </div>
 
                             <div class="col-12 mb-3">

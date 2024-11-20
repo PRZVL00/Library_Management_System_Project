@@ -198,7 +198,6 @@
                 table1.ajax.reload();
             } else {
                 table1 = $('#transactionMaster').DataTable({
-                    serverSide: true,
                     ajax: {
                         url: '{% url "get-transaction" %}',
                         type: 'GET',
@@ -233,7 +232,6 @@
                 table2.ajax.reload();
             } else {
                 table2 = $('#transactionDetail').DataTable({
-                    serverSide: true,
                     ajax: {
                         url: '{% url "get-transaction-detail" %}',
                         type: 'GET',
