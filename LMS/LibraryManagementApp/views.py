@@ -1304,27 +1304,26 @@ def CreateLog(request):
         try:
             qr_value = request.POST.get('qr_value')
 
-            # Retrieve the user based on the provided QR value
+            # Check if the QR value exists
             user = CustomUser.objects.filter(qr_value=qr_value).first()
+            if not user:
+                return JsonResponse({'success': False, 'message': 'Invalid QR code. Please try again.'})
 
-            if user:
-                # Retrieve the latest log for the user
-                latest_log = Logbook.objects.filter(user=user).order_by('-time_in').first()
+            # Retrieve the latest log for the user
+            latest_log = Logbook.objects.filter(user=user).order_by('-time_in').first()
 
-                # If there's an existing log and the time_out is empty, fill it
-                if latest_log and latest_log.time_out is None:
-                    latest_log.time_out = timezone.now()
-                    latest_log.save()
-                else:
-                    # Otherwise, create a new log entry with time_in
-                    Logbook.objects.create(
-                        user=user,
-                        time_in=timezone.now()
-                    )
-            
-            return JsonResponse({'success': True})
+            if latest_log and latest_log.time_out is None:
+                # User is logging out
+                latest_log.time_out = timezone.now()
+                latest_log.save()
+                return JsonResponse({'success': True, 'message': 'Thank you!'})
+            else:
+                # User is logging in
+                Logbook.objects.create(user=user, time_in=timezone.now())
+                return JsonResponse({'success': True, 'message': 'Welcome!'})
+
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+            return JsonResponse({'success': False, 'message': f'An error occurred: {str(e)}'})
 
 @login_required(login_url='login')
 def GetLog(request):
