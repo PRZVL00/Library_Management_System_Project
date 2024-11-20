@@ -276,7 +276,7 @@ def LogbookPage(request):
     if request.user.is_staff or  request.user.is_superuser:
         return render(request, 'LogbookPage/logbook.html', {})
     else:
-        return redirect('book-collection')
+        return render(request, 'LogbookPage/logbook.html', {})
 
 @login_required(login_url='login')
 def Profile(request):
@@ -799,6 +799,7 @@ def GetAccountInfo(request):
             'id_number': account.id_number,
             'cellphone_number': account.cellphone_number,
             'image_url': account.image.url,
+            'is_staff': account.is_staff
         }
 
         return JsonResponse(data)
@@ -820,6 +821,11 @@ def UpdateAccount(request):
         account.cellphone_number = request.POST.get('contact_number')
         account.email = request.POST.get('email')
 
+        if request.POST.get('position') == "0":
+            account.is_staff = False
+        else:
+            account.is_staff = True
+
         print(request.FILES.get('profile_picture'))
 
         # Handle image upload if provided
@@ -838,7 +844,7 @@ def TransactionHistory(request):
     if request.user.is_staff or request.user.is_superuser:
         return render(request, 'TransactionHistoryPage/transaction-history.html', {})
     else:
-        return redirect('book-collection')
+        return render(request, 'TransactionHistoryPage/transaction-history.html', {})
 
 @login_required(login_url='login')
 def UpdateBagNumber(request):
@@ -1162,7 +1168,10 @@ def GetTransaction(request):
     print(start_date, end_date, specific_date, date_count)
 
     # Query to get transactions with the number of books
-    transactions = TransactionMaster.objects.annotate(number_of_books=Count('transactiondetail')).select_related('user', 'approver')
+    if request.user.is_staff or  request.user.is_superuser:
+        transactions = TransactionMaster.objects.annotate(number_of_books=Count('transactiondetail')).select_related('user', 'approver')
+    else:
+        transactions = TransactionMaster.objects.annotate(number_of_books=Count('transactiondetail')).select_related('user', 'approver').filter(user = request.user)
 
     # Debugging: print the incoming parameters to the console
     print(f"Start Date: {start_date}, End Date: {end_date}, Specific Date: {specific_date}, Date Count: {date_count}")
@@ -1208,9 +1217,12 @@ def GetTransactionDetail(request):
 
     print(f"Start Date: {start_date}, End Date: {end_date}, Specific Date: {specific_date}, Date Count: {date_count}")
 
-    transaction_details = TransactionDetail.objects.select_related(
-        'transaction_master', 'book', 'user', 'approver', 'book__book_master', 'book__status'
-    )
+    if request.user.is_staff or  request.user.is_superuser:
+        transaction_details = TransactionDetail.objects.select_related(
+                'transaction_master', 'book', 'user', 'approver', 'book__book_master', 'book__status')
+    else:
+        transaction_details = TransactionDetail.objects.select_related(
+                'transaction_master', 'book', 'user', 'approver', 'book__book_master', 'book__status').filter(user = request.user)
 
     # Apply the filters based on the date_count
     if date_count == 2 and start_date and end_date:
@@ -1333,8 +1345,12 @@ def GetLog(request):
     date_count = int(request.GET.get('date_count', 0))
 
     print(start_date, end_date, specific_date, date_count)
+    
+    if request.user.is_staff or  request.user.is_superuser:
+        logs = Logbook.objects.all()
+    else:
+        logs = Logbook.objects.filter(user = request.user)
 
-    logs = Logbook.objects.all()
 
     # Filtering based on date inputs
     if date_count == 2 and start_date and end_date:
