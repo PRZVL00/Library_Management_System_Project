@@ -40,55 +40,75 @@
 
     {% include "_JSreferences.html" %}
 
-    <script>
-        // Digital clock function
-        function updateClock() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('clock').innerText = `${hours}:${minutes}`;
-        }
-
-        // Update clock every minute
-        setInterval(updateClock, 60000);
-        updateClock(); // Initial call to display the time immediately
-
-        // QR Code Handling
-        let qrData = '';
-
-        document.addEventListener('keypress', function(event) {
-            // Check if Enter key is pressed to submit the QR data
-            if (event.key === 'Enter') {
-                if (qrData) {
-                    console.log(qrData)
-                    sendQRData(qrData); // Send the collected QR data
-                    qrData = ''; // Reset for the next scan
-                }
-            } else {
-                qrData += event.key; // Collect QR code characters
-            }
-        });
-
-        // AJAX function to send QR data to server
-        function sendQRData(qrValue) {
-            $.ajax({
-                url: '{% url "create-log" %}', // Replace with your Django view URL name
-                type: 'POST',
-                data: {
-                    'qr_value': qrValue,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}' // CSRF token for Django
-                },
-                success: function(response) {
-                    console.log('QR code successfully sent:', response);
-                    // Optionally handle the response, such as displaying a success message
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error sending QR code:', error);
-                    // Optionally handle the error
-                }
-            });
-        }
-    </script>
+    
 </body>
 
 </html>
+<script>
+    // Digital clock function
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('clock').innerText = `${hours}:${minutes}`;
+    }
+
+    // Update clock every minute
+    setInterval(updateClock, 60000);
+    updateClock(); // Initial call to display the time immediately
+
+    // QR Code Handling
+    let qrData = '';
+
+    document.addEventListener('keypress', function(event) {
+        // Check if Enter key is pressed to submit the QR data
+        if (event.key === 'Enter') {
+            if (qrData) {
+                console.log(qrData)
+                sendQRData(qrData); // Send the collected QR data
+                qrData = ''; // Reset for the next scan
+            }
+        } else {
+            qrData += event.key; // Collect QR code characters
+        }
+    });
+
+    function sendQRData(qrValue) {
+        $.ajax({
+            url: '{% url "create-log" %}', // Replace with your Django view URL name
+            type: 'POST',
+            data: {
+                'qr_value': qrValue,
+                'csrfmiddlewaretoken': '{{ csrf_token }}' // CSRF token for Django
+            },
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        title: response.message,
+                        icon: "success",
+                        timer: 3000, // 3 seconds
+                        showConfirmButton: false // There won't be any confirm button
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Error",
+                        text: response.message,
+                        icon: "error",
+                        timer: 3000, // 3 seconds
+                        showConfirmButton: false // There won't be any confirm button
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    title: "Error",
+                    text: "An unexpected error occurred. Please try again.",
+                    icon: "error",
+                    timer: 3000, // 3 seconds
+                    showConfirmButton: false // There won't be any confirm button
+                });
+                console.error('Error sending QR code:', error);
+            }
+        });
+    }
+</script>
