@@ -130,3 +130,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'pnhslibrarymanagemensystem.site'  # Use the SMTP server address from cPanel.
+EMAIL_PORT = 465                    # Typically 465 for SSL or 587 for TLS.
+EMAIL_USE_TLS = False               # False for SSL, True for TLS.
+EMAIL_USE_SSL = True                # True for SSL (mutually exclusive with TLS).
+EMAIL_HOST_USER = 'no-reply@pnhslibrarymanagemensystem.site'  # Your email address.
+EMAIL_HOST_PASSWORD = 'NpQ=3]V5^}(f0sKo'     # The password for the email account.
+DEFAULT_FROM_EMAIL = 'no-reply@pnhslibrarymanagemensystem.site'
+
+
