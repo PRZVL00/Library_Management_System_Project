@@ -1328,28 +1328,36 @@ def CreateLog(request):
 
 @login_required(login_url='login')
 def GetLog(request):
-    if request.method == 'GET':
-        try:
-            logs = Logbook.objects.all()  # Retrieve all log entries
-            data = [
-                {
-                    'user': log.user.first_name + " " + log.user.last_name,
-                    'id_number': log.user.id_number,
-                    'email': log.user.email,
-                    'time_in': log.time_in.strftime('%Y-%m-%d %H:%M:%S') if log.time_in else 'Not In',
-                    'time_out': log.time_out.strftime('%Y-%m-%d %H:%M:%S') if log.time_out else 'Not Out'
-                }
-                for log in logs  # Iterate through all logs
-            ]
-            
-            # Ensure data is always an array, even if empty
-            return JsonResponse(data, safe=False) if data else JsonResponse([], safe=False)
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    specific_date = request.GET.get('specific_date')
+    date_count = int(request.GET.get('date_count', 0))
 
-        except ObjectDoesNotExist:
-            return JsonResponse({'error': 'Logbook records not found'}, status=404)
+    print(start_date, end_date, specific_date, date_count)
 
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+    logs = Logbook.objects.all()
+
+    # Filtering based on date inputs
+    if date_count == 2 and start_date and end_date:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        logs = logs.filter(time_in__date__gte=start_date, time_in__date__lte=end_date)
+    elif date_count == 1 and specific_date:
+        specific_date = datetime.strptime(specific_date, '%Y-%m-%d').date()
+        logs = logs.filter(time_in__date=specific_date)
+
+    data = [
+        {
+            'user': f"{log.user.first_name} {log.user.last_name}",
+            'id_number': log.user.id_number,
+            'email': log.user.email,
+            'time_in': log.time_in.strftime('%Y-%m-%d %H:%M:%S') if log.time_in else 'Not In',
+            'time_out': log.time_out.strftime('%Y-%m-%d %H:%M:%S') if log.time_out else 'Not Out'
+        }
+        for log in logs
+    ]
+
+    return JsonResponse(data, safe=False)
 
 @login_required(login_url='login')
 def GetFirstRow(request):
