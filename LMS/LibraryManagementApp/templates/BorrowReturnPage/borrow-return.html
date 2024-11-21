@@ -153,7 +153,7 @@
             }
         });
 
-        $('#show-qr-input-btn').click(function() {
+        $('#show-qr-input-btn').click(function () {
             $('#qr-form').removeAttr('hidden');
             $('#message-box').attr('hidden', true);
         });
@@ -190,7 +190,7 @@
         })
 
 
-        $('#qr-form').submit(function(event) {
+        $('#qr-form').submit(function (event) {
             event.preventDefault();  // Prevent default form submission
             LoadProfile();
         });
@@ -289,6 +289,16 @@
         // Borrow Selected function
         $('#borrow-selected').click(function () {
             if (ToBorrow.length > 0) {
+                Swal.fire({
+                    title: 'Loading...',
+                    text: 'Please wait a moment',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $('#borrow-selected').prop('disabled', true); // Disable the button
                 $.ajax({
                     url: "{% url 'borrow_selected_books' %}",
                     type: "POST",
@@ -297,6 +307,8 @@
                         'csrfmiddlewaretoken': '{{ csrf_token }}'
                     },
                     success: function (response) {
+                        Swal.close()
+                        $('#borrow-selected').prop('disabled', false); // Disable the button
                         if (response.success) {
                             Swal.fire({
                                 icon: 'success',
@@ -318,15 +330,37 @@
                         UpdateBagNumber(); // Update the bag number
                     },
                     error: function () {
-                        alert("Error occurred while processing your request.");
+                        Swal.close();
+                        $('#borrow-selected').prop('disabled', false); // Disable the button
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'error',
+                            text: "Error occurred while processing your request.",
+                        });
                     }
                 });
             } else {
-                alert("No books selected for borrowing.");
+                Swal.close();
+                $('#borrow-selected').prop('disabled', false); // Disable the button
+                Swal.fire({
+                    icon: 'error',
+                    title: 'error',
+                    text: "No books selected for borrowing.",
+                });
             }
         });
 
         $('#return-selected').click(function () {
+            Swal.fire({
+                title: 'Loading...',
+                text: 'Please wait a moment',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $('#return-selected').prop('disabled', true); // Disable the button
             if (ToReturn.length > 0) {
                 $.ajax({
                     url: "{% url 'return_selected_books' %}",  // URL for handling book returns
@@ -336,6 +370,8 @@
                         'csrfmiddlewaretoken': '{{ csrf_token }}'  // CSRF token for security
                     },
                     success: function (response) {
+                        Swal.close()
+                        $('#return-selected').prop('disabled', false); // Disable the button
                         if (response.success) {
                             Swal.fire({
                                 icon: 'success',
@@ -357,11 +393,23 @@
                         UpdateBagNumber()
                     },
                     error: function () {
-                        alert("Error occurred while processing your request.");
+                        Swal.close()
+                        $('#return-selected').prop('disabled', false); // Disable the button
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'error',
+                            text: "Error occurred while processing your request.",
+                        });
                     }
                 });
             } else {
-                alert("No books selected for return.");
+                Swal.close()
+                $('#return-selected').prop('disabled', false); // Disable the button
+                Swal.fire({
+                    icon: 'error',
+                    title: 'error',
+                    text: "No books selected for return.",
+                });
             }
         });
 
@@ -399,7 +447,7 @@
                         InitializeToBorrowTable(borrower)
                         InitializeToReturnTable(borrower)
                         $('#details').removeAttr('hidden');
-                        $('#message-box').attr('hidden', true);           
+                        $('#message-box').attr('hidden', true);
 
                     }
                 },

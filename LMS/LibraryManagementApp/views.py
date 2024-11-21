@@ -1104,54 +1104,85 @@ def GetToReturn(request):
 @login_required(login_url='login')
 def BorrowSelectedBooks(request):
     if request.method == "POST":
-        # Get the list of books to borrow (passed as JSON)
+        # Get the list of books to borrow
         to_borrow = request.POST.get('to_borrow')
         
         if to_borrow:
-            to_borrow = json.loads(to_borrow)  # Convert JSON string to Python list
+            to_borrow = json.loads(to_borrow)
 
             try:
-                # List to store transaction details
                 transaction_details = []
+                email_content = {}
+                processed_by = f"{request.user.first_name} {request.user.last_name}"  # Name of the approver
                 
-                # Iterate over the selected books to borrow
                 for reservation_id in to_borrow:
-                    # Find the reservation
+                    # Fetch the reservation
                     reservation = Reservation.objects.get(reservation_id=reservation_id, is_processed=False)
                     
-                    # Ensure that the reservist is not None (i.e., someone made the reservation)
                     if not reservation.reservist:
                         return JsonResponse({'success': False, 'message': f'Reservation {reservation_id} does not have a reservist.'})
                     
-                    # Create a TransactionMaster record for the reservist (borrower)
+                    # Create a transaction master record
                     transaction_master = TransactionMaster.objects.create(
-                        user=reservation.reservist,  # Use the reservist as the borrower
-                        approver=request.user,  # You can change approver logic as needed
+                        user=reservation.reservist,
+                        approver=request.user,
                         transaction_date=timezone.now()
                     )
 
-                    # Set reservation as processed
+                    # Mark reservation as processed
                     reservation.is_processed = True
                     reservation.save()
 
-                    # Get the corresponding book and update its status
+                    # Update the book's status
                     book = reservation.book
-                    book.status = DimStatus.objects.get(status_name='Borrowed')  # Update the book status to "Borrowed"
+                    book.status = DimStatus.objects.get(status_name='Borrowed')
                     book.save()
 
-                    # Create a transaction detail for each borrowed book
+                    # Calculate due date
+                    due_date = timezone.now() + timezone.timedelta(days=book.book_master.duration)
+
+                    # Create a transaction detail
                     transaction_detail = TransactionDetail.objects.create(
                         transaction_master=transaction_master,
                         book=book,
                         date_borrowed=timezone.now(),
-                        expected_date_return=timezone.now() + timezone.timedelta(days=book.book_master.duration),
-                        user=reservation.reservist,  # Borrower is the reservist
-                        approver=request.user  # Approver can be different if necessary
+                        expected_date_return=due_date,
+                        user=reservation.reservist,
+                        approver=request.user
                     )
 
-                    transaction_details.append(transaction_detail)
+                    # Collect transaction details for the email
+                    transaction_details.append({
+                        'book_title': book.book_master.title,
+                        'due_date': due_date.strftime('%Y-%m-%d'),
+                    })
 
-                # Return success response
+                    email_content = {
+                        'first_name': reservation.reservist.first_name,
+                        'last_name': reservation.reservist.last_name,
+                        'transaction_id': transaction_master.transaction_master_id,
+                        'transaction_date': datetime.now().strftime('%Y-%m-%d'),
+                        'books': transaction_details,
+                        'processed_by': processed_by,
+                        'current_year': timezone.now().year,
+                    }
+
+                # Prepare and send email
+                subject = f"Library Borrowing Receipt - Transaction #{transaction_master.transaction_master_id}"
+                to_email = reservation.reservist.email  # Ensure the user has a valid email address
+
+                # Render HTML email content
+                html_content = render_to_string('Email/borrowingReceipt.html', email_content)
+
+                email = EmailMultiAlternatives(
+                    subject=subject,
+                    body='',  # Plain text is empty since we're using HTML
+                    from_email='no-reply@pnhslibrarymanagemensystem.site',
+                    to=[to_email]
+                )
+                email.attach_alternative(html_content, "text/html")
+                email.send()
+
                 return JsonResponse({'success': True, 'transaction_master_id': transaction_master.transaction_master_id})
 
             except Reservation.DoesNotExist:
@@ -1160,37 +1191,71 @@ def BorrowSelectedBooks(request):
             return JsonResponse({'success': False, 'message': 'No books selected.'})
 
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
-
+    
 @login_required(login_url='login')
 def ReturnSelectedBooks(request):
     if request.method == "POST":
         try:
-            # Get the list of transaction detail IDs that the user wants to return
+            # Get the list of transaction detail IDs to return
             to_return = request.POST.get('to_return')
             to_return = json.loads(to_return)
 
             # Query the TransactionDetail objects by IDs in to_return
             transaction_details = TransactionDetail.objects.filter(transaction_detail_id__in=to_return)
 
-            # Loop through each transaction detail and update the book's status and transaction detail status
+            returned_books = []
+            processed_by = f"{request.user.first_name} {request.user.last_name}"  # Name of the approver
+
             for transaction_detail in transaction_details:
-                # Get the related book and update its status to "Available"
+                # Update the book's status to "Available"
                 book = transaction_detail.book
-                available_status = DimStatus.objects.get(status_name="Available")  # Assuming "Available" is a valid status
-                book.status = available_status  # Update the book's status to available
+                available_status = DimStatus.objects.get(status_name="Available")
+                book.status = available_status
                 book.save()
 
                 # Mark the transaction as returned
                 transaction_detail.is_returned = True
-                transaction_detail.actual_date_return = transaction_detail.expected_date_return  # Or you can set the actual return date to now
+                transaction_detail.actual_date_return = timezone.now()  # Set the actual return date
                 transaction_detail.save()
 
-            return JsonResponse({
-                'success': True,
-            })
+                # Collect returned book details for email
+                returned_books.append({
+                    'book_title': book.book_master.title,   
+                    'actual_date_return': transaction_detail.actual_date_return.strftime('%Y-%m-%d'),
+                })
+
+            # Prepare email content
+            user = transaction_details.first().user  # Assume all transactions belong to the same user
+            email_content = {
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'processed_by': processed_by,
+                'transaction_date': timezone.now().strftime('%Y-%m-%d'),
+                'returned_books': returned_books,
+                'current_year': timezone.now().year,
+            }
+
+            # Prepare and send email
+            subject = "Library Return Receipt"
+            to_email = user.email  # Ensure the user has a valid email address
+
+            # Render HTML email content
+            html_content = render_to_string('Email/returnReceipt.html', email_content)
+
+            email = EmailMultiAlternatives(
+                subject=subject,
+                body='',  # Plain text is empty since we're using HTML
+                from_email='no-reply@pnhslibrarymanagemensystem.site',
+                to=[to_email]
+            )
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+
+            return JsonResponse({'success': True})
         except Exception as e:
-            # Log the exception or handle errors as needed
             return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 def GetTransaction(request):
     start_date = request.GET.get('start_date')
