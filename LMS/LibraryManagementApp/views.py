@@ -1900,3 +1900,155 @@ def ArchiveUser(request):
             return JsonResponse({'status': 'error', 'message': 'User not found'})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
+#----------------------------------------------------------------#
+
+
+def send_library_report():
+    # Collect data
+    users_not_clocked_out = get_users_not_clocked_out()
+    expired_reservations = get_expired_reservations()
+    late_book_returns = get_late_book_returns()
+
+    # Prepare context for the email template
+    context = {
+        'current_year': timezone.now().year,
+        'users_not_clocked_out': users_not_clocked_out,
+        'expired_reservations': expired_reservations,
+        'late_book_returns': late_book_returns
+    }
+
+    # Render the email body using the template
+    html_content = render_to_string('Email/automatedEmail.html', context)
+
+    # Send email
+    subject = 'Library System Notification'
+    recipient_list = ['sheikjosiahbautista@gmail.com']  # Add your admin's email here
+
+    # Create the email message with both plain text and HTML content
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body='',  # Empty body as we're using HTML
+        from_email='no-reply@pnhslibrarymanagemensystem.site',
+        to=recipient_list
+    )
+    email.attach_alternative(html_content, "text/html")
+    email.send()
+
+
+def send_expiration_email(user_name, user_email, book_title, reservation_end_date):
+    subject = f"Your Reservation for {book_title} Has Expired"
+    html_content = render_to_string(
+        'Email/expiredReservation.html', {
+            'user_name': user_name,
+            'book_title': book_title,
+            'reservation_end_date': reservation_end_date,
+            'current_year': timezone.now().year
+        }
+    )
+
+    # Create the email message with both plain text and HTML content
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body='',  # Empty body as we're using HTML
+        from_email='no-reply@pnhslibrarymanagemensystem.site',
+        to=[user_email]
+    )
+    email.attach_alternative(html_content, "text/html")
+    email.send()
+
+
+
+def send_late_return_email(user_name, user_email, book_title, due_date):
+    subject = f"Late Return Notice for {book_title}"
+    html_content = render_to_string(
+        'Email/lateBook.html', {
+            'user_name': user_name,
+            'book_title': book_title,
+            'due_date': due_date,
+            'current_year': timezone.now().year
+        }
+    )
+
+    # Create the email message with both plain text and HTML content
+    email = EmailMultiAlternatives(
+        subject=subject,
+        body='',  # Empty body as we're using HTML
+        from_email='no-reply@pnhslibrarymanagemensystem.site',
+        to=[user_email]
+    )
+    email.attach_alternative(html_content, "text/html")
+    email.send()
+
+def get_users_not_clocked_out():
+    # Logic to retrieve users who haven't clocked out (based on your model's logic)
+    not_clocked_out_users = Logbook.objects.filter(time_out__isnull=True)
+    user_info = []
+    
+    # Define the default value for time_out
+    default_time_out = datetime(1900, 1, 1, 0, 0, 0)
+
+    for user in not_clocked_out_users:
+        # Update the time_out for users who haven't clocked out
+        user.time_out = default_time_out
+        user.save()
+
+        user_info.append({
+            'name': user.user.full_name,
+            'contact': user.user.cellphone_number,
+            'email': user.user.email
+        })
+    
+    return user_info
+
+def get_expired_reservations():
+    # Logic to find expired reservations
+    expired_reservations = Reservation.objects.filter(date_reserved__lt=timezone.now(), is_processed=False, is_expired=False)
+    reservation_info = []
+    
+    # Get the status object for 'Available'
+    available_status = DimStatus.objects.get(status_name='Available')
+
+    for reservation in expired_reservations:
+        # Send email to the reservist
+        send_expiration_email(
+            user_name=reservation.user.first_name + ' ' + reservation.user.last_name,
+            user_email=reservation.user.email,
+            book_title=reservation.book.book_master.title,
+            reservation_end_date=reservation.date_reserved
+        )
+        
+        # Update the status of the reserved book to 'Available'
+        reservation.book.status = available_status
+        reservation.book.save()
+        
+        reservation_info.append({
+            'title': reservation.book.book_master.title,
+            'user_name': reservation.user.first_name + ' ' + reservation.user.last_name,
+            'user_email': reservation.user.email
+        })
+        
+    return reservation_info
+
+def get_late_book_returns():
+    # Logic to find overdue book returns
+    late_books = TransactionDetail.objects.filter(expected_date_return__lt=timezone.now(), is_returned=False, is_late=False)
+    late_book_info = []
+    
+    for transaction in late_books:
+        # Send email to the borrower
+        send_late_return_email(
+            user_name=transaction.user.first_name + ' ' + transaction.user.last_name,
+            user_email=transaction.user.email,
+            book_title=transaction.book.book_master.title,
+            due_date=transaction.expected_date_return
+        )
+        
+        late_book_info.append({
+            'book_title': transaction.book.book_master.title,
+            'user_name': transaction.user.first_name + ' ' + transaction.user.last_name,
+            'user_email': transaction.user.email
+        })
+        
+    return late_book_info
