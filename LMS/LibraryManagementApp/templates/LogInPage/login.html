@@ -28,17 +28,14 @@
                      </div>
                   </div>
                   <div class="form-group position-relative has-icon-left mb-4">
-                     <input type="password" class="form-control form-control-l" placeholder="Password" id="password"
-                        name="password">
+                     <input type="password" class="form-control form-control-l" placeholder="Password" id="password" name="password">
                      <div class="form-control-icon">
                         <i class="bi bi-shield-lock"></i>
                      </div>
-                  </div>
-                  <div class="form-check form-check-lg d-flex align-items-end">
-                     <input class="form-check-input me-2" type="checkbox" value="" id="flexCheckDefault">
-                     <label class="form-check-label text-gray-600" for="flexCheckDefault">
-                        Keep me logged in
-                     </label>
+                     <!-- Show/Hide password toggle with eye icons -->
+                     <div class="position-absolute" style="right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                        <i class="bi bi-eye-slash" id="togglePassword"></i>
+                     </div>
                   </div>
                   <button class="btn btn-primary btn-block btn-l shadow-lg mt-5" id='login' type='submit'>Log
                      in</button>
@@ -65,6 +62,18 @@
 
 <script>
    $(document).ready(function () {
+      $('#togglePassword').click(function () {
+         var passwordField = $('#password');
+         var icon = $(this);
+
+         if (passwordField.attr('type') === 'password') {
+            passwordField.attr('type', 'text'); // Show the password
+            icon.removeClass('bi-eye-slash').addClass('bi-eye'); // Change to open eye icon
+         } else {
+            passwordField.attr('type', 'password'); // Hide the password
+            icon.removeClass('bi-eye').addClass('bi-eye-slash'); // Change to closed eye icon
+         }
+      });
       $('#loginForm').submit(function (e) {
          e.preventDefault();
 
