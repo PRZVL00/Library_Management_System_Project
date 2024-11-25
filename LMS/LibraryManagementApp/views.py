@@ -32,6 +32,23 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.core.files.base import ContentFile
 from io import BytesIO
+from django.shortcuts import render, redirect
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.models import User
+from django.template.loader import render_to_string
+from django.shortcuts import render
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth import get_user_model
+
 
 
 def Login(request):
@@ -63,11 +80,90 @@ def VerifyLogin(request):
 def Forgotpassword(request):
     return render(request, 'ForgotpasswordPage/ForgotpasswordPage.html', {})
 
+def ResetPasswordRequest(request):
+    if request.method == "POST":
+        username_or_email = request.POST.get("email")
+        print(username_or_email)
+        try:
+            user = CustomUser.objects.get(email=username_or_email)
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            reset_link = request.build_absolute_uri(f"ResetPassword/{uid}/{token}/")
+            
+            # Send the reset email
+            subject = "Password Reset Request"
+            email_template = "Email/resetPassword.html"
+            context = {"reset_link": reset_link, "first_name": user.first_name, "last_name": user.last_name}
+            html_message = render_to_string(email_template, context)
+            plain_message = strip_tags(html_message)  # Create plain text version
+            
+            # Use EmailMultiAlternatives to send both HTML and plain text versions
+            email_message = EmailMultiAlternatives(
+                subject=subject,
+                body=plain_message,
+                from_email="no-reply@pnhslibrarymanagemensystem.site",
+                to=[user.email],
+            )
+            email_message.attach_alternative(html_message, "text/html")
+            
+            # Send the email
+            email_message.send()
+
+            return JsonResponse({"message": "Password reset email has been sent."})
+        except CustomUser.DoesNotExist:
+            return JsonResponse({"error": "User not found."}, status=404)
+    return JsonResponse({"error": "Invalid request method."}, status=400)
+
+def ChangePassword(request):
+    if request.method == "POST":
+        uidb64 = request.POST.get('uidb64')
+        token = request.POST.get('token')
+        password = request.POST.get('password')
+        
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = CustomUser.objects.get(pk=uid)
+            
+            if default_token_generator.check_token(user, token):
+                # Hash the new password and save it
+                user.password = make_password(password)
+                user.save()
+
+                return JsonResponse({"message": "Password has been reset successfully!"})
+            else:
+                return JsonResponse({"error": "Invalid or expired token."}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": "An error occurred. Please try again."}, status=400)
+
+    return JsonResponse({"error": "Invalid request method."}, status=400)
+
 def ResetPassAuth(request):
     return render(request, 'ForgotpasswordPage/ResetPassAuthPage/ResetPassAuth.html', {})
 
-def ResetPassword(request):
-    return render(request, 'ForgotpasswordPage/ResetPassAuthPage/ResetPasswordPage/ResetPassword.html', {})
+def ResetPassword(request, uidb64, token):
+    is_valid = True
+    error_message = ""
+
+    try:
+        # Decode the user ID
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = get_user_model().objects.get(pk=uid)
+        
+        # Verify the token
+        if not default_token_generator.check_token(user, token):
+            is_valid = False
+            error_message = 'Invalid or expired token.'
+        
+    except Exception as e:
+        is_valid = False
+        error_message = 'Invalid link or user not found.'
+
+    return render(request, 'ForgotpasswordPage/ResetPassword.html', {
+        'uidb64': uidb64,
+        'token': token,
+        'is_valid': is_valid,
+        'error_message': error_message
+    })
 
 def ResetPassSucc(request):
     return render(request, 'ForgotpasswordPage/ResetPassAuthPage/ResetPasswordPage/ResetPassSuccPage/ResetPassSucc.html', {})
@@ -679,17 +775,21 @@ def GetBookInfo(request):
 @login_required(login_url='login')
 def GetAccounts(request):
     if request.method == 'GET':
-        accountList = list(CustomUser.objects.select_related('status').values(
-            'id',
-            'first_name',
-            'last_name', 
-            'id_number', 
-            'cellphone_number', 
-            'email',
-            'is_active'
-        ).order_by('-is_active'))  # Inactive accounts will appear last
+        # Exclude the current user
+        accountList = list(CustomUser.objects
+                           .exclude(id=request.user.id)  # Exclude the logged-in user
+                           .select_related('status')
+                           .values(
+                               'id',
+                               'first_name',
+                               'last_name', 
+                               'id_number', 
+                               'cellphone_number', 
+                               'email',
+                               'is_active'
+                           )
+                           .order_by('-is_active'))  # Inactive accounts will appear last
         return JsonResponse({'accounts': accountList})
-
 
 @login_required(login_url='login')
 def UpdateStatus(request):
