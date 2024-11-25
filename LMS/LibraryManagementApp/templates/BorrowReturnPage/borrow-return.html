@@ -138,25 +138,34 @@
 
         // QR Code Handling
         let qrData = '';
+        let handleKeypress; // Reference for the event listener
 
-        document.addEventListener('keypress', function (event) {
+        // Define the event listener function
+        handleKeypress = function (event) {
             // Check if Enter key is pressed to submit the QR data
             if (event.key === 'Enter') {
                 if (qrData) {
-                    console.log(qrData)
+                    console.log(qrData);
                     $('#qrInput').val(qrData);
-                    LoadProfile()
+                    LoadProfile();
                     qrData = ''; // Reset for the next scan
                 }
             } else {
                 qrData += event.key; // Collect QR code characters
             }
-        });
+        };
+
+        // Attach the event listener
+        document.addEventListener('keypress', handleKeypress);
 
         $('#show-qr-input-btn').click(function () {
             $('#qr-form').removeAttr('hidden');
             $('#message-box').attr('hidden', true);
+
+            // Remove the keypress event listener when the form is shown
+            document.removeEventListener('keypress', handleKeypress);
         });
+
 
         $(document).on('change', 'input[type="checkbox"]', function () {
             var bookId = $(this).val();

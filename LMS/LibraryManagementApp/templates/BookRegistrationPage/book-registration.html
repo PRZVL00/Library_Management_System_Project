@@ -500,7 +500,7 @@
             let formData = new FormData(this);
 
             $.ajax({
-                url: '{% url "batch-upload" %}', // replace with your URL
+                url: '{% url "batch-upload" %}', // Replace with your URL
                 type: 'POST',
                 data: formData,
                 processData: false,
@@ -509,18 +509,23 @@
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
                 success: function (response) {
+                    Swal.close();
                     Swal.fire({
                         icon: 'success',
                         title: 'Upload Complete',
                         text: 'Your file was successfully uploaded.',
                         confirmButtonText: 'OK'
                     });
-
-                    // handle response
                 },
                 error: function (response) {
-                    alert('Error uploading file');
-                    // handle error
+                    Swal.close();
+                    let message = response.responseJSON ? response.responseJSON.message : 'Error uploading file';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Upload Failed',
+                        text: message,
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         });
