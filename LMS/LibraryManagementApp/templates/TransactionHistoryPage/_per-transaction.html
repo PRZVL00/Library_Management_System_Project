@@ -1,66 +1,25 @@
 {% load static %}
-<div class="table-responsive mt-3">
-    <!-- Modal for edit profile will be used here but with some changes -->
-    <!-- Buttons for each input field will be disabled and also the input fields -->
-    <!-- Reset Password will be remove and save buttons and cancel will be replaced as close -->
-    <table class="table table-striped w-100 nowrap" id="logs">
-        <thead>
-            <tr>
-                <th class="text-start">Date</th>
-                <th class="text-start">Code</th>
-                <th class="text-start">Transaction</th>
-                <th class="text-start">Member</th>
-                <th class="text-start">No. of books</th>
-                <th class="text-start">Staff</th>
-                <th class="text-start">Remark</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="text-start">2024-08-30</td>
-                <td class="text-start">TXN001</td>
-                <td class="text-start">Borrow</td>
-                <td class="text-start">John Doe</td>
-                <td class="text-start">3</td>
-                <td class="text-start">Jane Smith</td>
-                <td class="text-start">First-time borrower</td>
-            </tr>
-            <tr>
-                <td class="text-start">2024-08-29</td>
-                <td class="text-start">TXN002</td>
-                <td class="text-start">Return</td>
-                <td class="text-start">Mary Johnson</td>
-                <td class="text-start">2</td>
-                <td class="text-start">Michael Brown</td>
-                <td class="text-start">Returned on time</td>
-            </tr>
-            <tr>
-                <td class="text-start">2024-08-28</td>
-                <td class="text-start">TXN003</td>
-                <td class="text-start">Borrow</td>
-                <td class="text-start">James Williams</td>
-                <td class="text-start">1</td>
-                <td class="text-start">Emily Davis</td>
-                <td class="text-start">Requested extension</td>
-            </tr>
-            <tr>
-                <td class="text-start">2024-08-27</td>
-                <td class="text-start">TXN004</td>
-                <td class="text-start">Return</td>
-                <td class="text-start">Patricia Miller</td>
-                <td class="text-start">4</td>
-                <td class="text-start">Robert Wilson</td>
-                <td class="text-start">Late return, fine applied</td>
-            </tr>
-            <tr>
-                <td class="text-start">2024-08-26</td>
-                <td class="text-start">TXN005</td>
-                <td class="text-start">Borrow</td>
-                <td class="text-start">Linda Martinez</td>
-                <td class="text-start">5</td>
-                <td class="text-start">Barbara Anderson</td>
-                <td class="text-start">Regular borrower</td>
-            </tr>
-        </tbody>
-    </table>
+<div class="card">
+    <div class="card-body">
+        <div class="row justify-content-center">
+            <input type="text" id="master-range-picker" class="form-control w-25 text-center" placeholder="Select Date">
+        </div>
+        <div class="row">
+            <div class="table-responsive mt-3">
+                <!-- Modal for edit profile will be used here but with some changes -->
+                <!-- Buttons for each input field will be disabled and also the input fields -->
+                <!-- Reset Password will be remove and save buttons and cancel will be replaced as close -->
+                <table class="table table-striped w-100 nowrap" id="transactionMaster">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Date</th>
+                            <th class="text-start">Borrower</th>
+                            <th class="text-start">No. of books</th>
+                            <th class="text-start">Approver</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>

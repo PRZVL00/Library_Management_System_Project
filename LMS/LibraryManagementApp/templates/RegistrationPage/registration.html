@@ -54,7 +54,7 @@
                   </div>
                   <div class="form-group position-relative has-icon-left mb-1">
                      <input type="text" class="form-control form-control-l" placeholder="Phone Number"
-                        name="phoneNumber" required>
+                        name="phoneNumber" required id="contact_number" maxlength="11">
                      <div class="form-control-icon">
                         <i class="bi bi-telephone"></i>
                      </div>
@@ -136,10 +136,28 @@
          storeAsFile: true
       });
 
+      $('#contact_number').on('keypress', function (event) {
+            // Allow only numbers (ASCII codes 48-57 are for digits 0-9)
+            if (event.which < 48 || event.which > 57) {
+                event.preventDefault(); // Prevent the character from being entered
+            }
+        });
+
       $('#registrationForm').submit(function (e) {
          e.preventDefault();
 
          var formData = new FormData(this);
+
+         Swal.fire({
+            title: 'Loading...',
+            text: 'Please wait a moment',
+            allowOutsideClick: false,
+            didOpen: () => {
+               Swal.showLoading();
+            }
+         });
+
+         $('#signup').prop('disabled', true); // Disable the button
 
          $.ajax({
             url: "{% url 'register-user' %}",  // URL defined in urls.py
@@ -151,6 +169,8 @@
                'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token
             },
             success: function (response) {
+               Swal.close();
+               $('#signup').prop('disabled', false); // Disable the button
                if (response.isSuccess == 'true') {
                   Swal.fire({
                      icon: "success",
@@ -179,7 +199,9 @@
 
             },
             error: function (xhr, status, error) {
-               alert("An error occurred: " + error);  // Notify error
+               Swal.close();
+               $('#signup').prop('disabled', false); // Disable the button
+               console.log("An error occurred: " + error);  // Notify error
             }
          });
       });

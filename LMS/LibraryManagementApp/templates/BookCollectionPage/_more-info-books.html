@@ -26,7 +26,7 @@
                         <h5 id="book-year">Year: 20XX</h5>
                         <h5 id="book-isbn">ISBN: 20XX</h5>
                         <h5 id="book-location">Location: Rack 3</h5>
-                        <h5 id="book-late-fee">Late fee: ₱50</h5>
+                        <h5 id="book-late-fee" hidden>Late fee: ₱50</h5>
                       
                         <figure>
                             <figcaption>
@@ -43,7 +43,7 @@
                         <img
                             id="book-image"
                             class="card-img-top img-fluid"
-                            src="{% static 'assets/static/images/BookSample.png' %}"
+                            src="{% static 'assets/static/images/No-Image-Placeholder.svg.png' %}"
                             alt="Book Image"
                             style="width: auto; height: auto; object-fit: contain;" />
                     </div>
@@ -63,13 +63,6 @@
                     data-bs-dismiss="modal">
                     <i class="bx bx-x d-block d-sm-none"></i>
                     <span class="d-none d-sm-block">Close</span>
-                </button>
-                <button
-                    type="button"
-                    class="btn btn-primary ms-1"
-                    data-bs-dismiss="modal">
-                    <i class="bx bx-check d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Add to Shelf</span>
                 </button>
             </div>
         </div>

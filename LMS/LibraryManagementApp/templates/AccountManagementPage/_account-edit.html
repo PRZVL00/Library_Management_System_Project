@@ -1,7 +1,7 @@
 {% load static %}
-<div class="modal fade" id="account-edit-modal" tabindex="-1" role="dialog" aria-labelledby="book-info"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-centered modal-dialog-scrollable" role="document">
+<div class="modal fade" id="account-edit-modal" tabindex="-1" role="dialog" aria-labelledby="account-info" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable"
+        role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <p class="modal-title" id="book-info">Account Edit </p>
@@ -10,71 +10,60 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-7 col-sm-7 col-md-7 col-lg-7 col-xl-7">
-                        <form action="POST" id="account-edit-form">
-                            <!--First Name Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="text" class="form-control" placeholder="First Name"
-                                    aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                    id="fname-input">
-                                <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                        class="bi bi-pen"></span></button>
+                <div class="container">
+                    <form id="accountEditForm" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+
+                            <!-- account ID -->
+                             <input type="text" id="account_id" name="account_id" hidden>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="profile_picture" class="form-label">Profile Picture</label>
+                                <input type="file" class="image-resize-filepond form-control" id="profile_picture"
+                                    placeholder="Upload Image" name="profile_picture" required>
+                            </div>
+                            
+                            <!-- fields for first name and last name -->
+                            <div class="col-12 mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control form-control-l" placeholder="First Name" name="first_name" id="first_name" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control form-control-l" placeholder="Last Name" name="last_name" id="last_name" required>
                             </div>
 
-                            <!--Last Name Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="text" class="form-control" placeholder="Last Name"
-                                    aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                    id="lname-input">
-                                <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                        class="bi bi-pen"></span></button>
+                            <!-- ID Number and Contact Number -->
+                            
+                            <div class="col-12 mb-3">
+                                <label for="contact_number" class="form-label">Contact Number</label>
+                                <input type="text" class="form-control form-control-l" placeholder="Contact Number" name="contact_number" id="contact_number" required>
                             </div>
 
-                            <!--Student ID # Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="text" class="form-control" placeholder="Student ID #"
-                                    aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                    id="studentID-input">
-                                <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                        class="bi bi-pen"></span></button>
+                            <div class="col-6 mb-3">
+                                <label for="id_number" class="form-label">ID number</label>
+                                <input type="text" class="form-control form-control-l" placeholder="Id Number" name="id_number" id="id_number"  maxlength="11" required>
                             </div>
 
-                            <!--Contact Number Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="text" class="form-control" placeholder="Contact Number"
-                                    aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                    id="cnum-input">
-                                <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                        class="bi bi-pen"></span></button>
-                            </div>
-
-                            <!--Email Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <input type="email" class="form-control" placeholder="Email"
-                                    aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                    id="email-input">
-                                <button class="btn btn-primary" type="button" id="button-addon1" disabled><span
-                                        class="bi bi-pen"></span></button>
-                            </div>
-
-                            <!--Status Field-->
-                            <div class="input-group input-group-sm mb-3">
-                                <select class="form-select" id="inputGroupSelect01">
-                                    <option selected>Choose...</option>
-                                    <option value="1">One</option>
-                                    <option value="2">Two</option>
-                                    <option value="3">Three</option>
+                            <div class="col-6 mb-3">
+                                <label for="position" class="form-label">Position</label>
+                                <select class="form-select" id="position" required name="position">
+                                    <option value="0">Student/Teacher</option>
+                                    <option value="1">Admin</option>
                                 </select>
                             </div>
+
+                            <div class="col-12 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control form-control-l" placeholder="Email" name="email" id="email" required>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control form-control-l" placeholder="New Password" name="password" id="password" required>
+                            </div>
                         </form>
-                        <button class="btn btn-sm btn-outline-danger w-100">Reset Password</button>
-                    </div>
-                    <div
-                        class="col-5 col-sm-5 col-md-5 col-lg-5 col-xl-5 d-flex flex-column align-items-center text-center">
-                        <img src="{% static 'assets/static/images/faces/2.jpg' %}" class="rounded-circle mb-3"
-                            alt="User Profile Picture" style="width: 150px; height: 150px;">
-                        <span class="badge bg-success">Active</span>
                     </div>
                 </div>
             </div>

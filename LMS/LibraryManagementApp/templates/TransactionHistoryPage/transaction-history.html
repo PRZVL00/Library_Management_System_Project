@@ -30,8 +30,9 @@
                     <div class="position-relative me-3">
                         <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
                         <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                            id="bagContent">
+
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     </div>
@@ -72,29 +73,190 @@
 <script>
     let table1;
     let table2;
+
     $(document).ready(function () {
-        // Initialize the first table on page load
-        table1 = $('#logs').DataTable({
-            dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
-                'rt' +
-                '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
-            buttons: ['copy', 'excel', 'pdf'],
-            scrollX: true
-        });
+        let table2Initialized = false;
+        let detail_datePickerInstance = null;
+        let master_startDate;
+        let master_endDate;
+        let master_specificDate;
+        let master_dateCount;
+        let detail_startDate;
+        let detail_endDate;
+        let detail_specificDate;
+        let detail_dateCount;
 
-        $("#logs").css("overflow-x", "auto");
-
-        table1.columns.adjust().draw();
-
-        let table2Initialized = false; // Flag to check if table2 has been initialized
+        UpdateBagNumber()
+        InitializeMasterDatePicker()
 
         // Event listener for tab switch
         $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (event) {
-            let target = $(event.target).attr("href"); // Get the target tab
+            InitializeDetailDatePicker()
+        });
 
-            if (target === '#per-book' && !table2Initialized) {
-                // Initialize the second table when the second tab is shown for the first time
-                table2 = $('#logs2').DataTable({
+        function InitializeMasterDatePicker() {
+            $('#master-range-picker').flatpickr({
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                defaultDate: [
+                    new Date(new Date().setDate(new Date().getDate() - 30)), // 30 days ago
+                    new Date() // today
+                ],
+                onReady: function (selectedDates, dateStr, instance) {
+                    if (selectedDates.length === 2) {
+                        if (selectedDates[0].toLocaleDateString() === selectedDates[1].toLocaleDateString()) {
+                            master_startDate = null;
+                            master_endDate = null;
+                            master_specificDate = selectedDates[0].toLocaleDateString('en-CA');
+                            master_dateCount = 1;
+                        } else {
+                            // If the dates are different, treat as a date range
+                            master_startDate = selectedDates[0].toLocaleDateString('en-CA');
+                            master_endDate = selectedDates[1].toLocaleDateString('en-CA');
+                            master_specificDate = null;
+                            master_dateCount = 2;
+                        }
+                    } 
+                    InitializeMasterTable(master_startDate, master_endDate, master_specificDate, master_dateCount);
+                },
+                onClose: function (selectedDates, dateStr, instance) {
+                    console.log(selectedDates)
+                    if (selectedDates.length === 2) {
+                        if (selectedDates[0].toLocaleDateString() === selectedDates[1].toLocaleDateString()) {
+                            master_startDate = null;
+                            master_endDate = null;
+                            master_specificDate = selectedDates[0].toLocaleDateString('en-CA');
+                            master_dateCount = 1;
+                        } else {
+                            // If the dates are different, treat as a date range
+                            master_startDate = selectedDates[0].toLocaleDateString('en-CA');
+                            master_endDate = selectedDates[1].toLocaleDateString('en-CA');
+                            master_specificDate = null;
+                            master_dateCount = 2;
+                        }
+                    } 
+                    InitializeMasterTable(master_startDate, master_endDate, master_specificDate, master_dateCount);
+                }
+            });
+        }
+
+        function InitializeDetailDatePicker() {
+            if (detail_datePickerInstance) {
+                console.log("Flatpickr is already initialized, triggering onReady...");
+                detail_datePickerInstance.config.onReady([], '', detail_datePickerInstance);
+            } else {
+                console.log("Initializing Flatpickr...");
+                detail_datePickerInstance = $('#detail-range-picker').flatpickr({
+                    mode: 'range',
+                    dateFormat: 'Y-m-d',
+                    defaultDate: [
+                        new Date(new Date().setDate(new Date().getDate() - 30)), // 30 days ago
+                        new Date() // today
+                    ],
+                    onReady: function (selectedDates, dateStr, instance) {
+                        if (selectedDates.length === 2) {
+                            if (selectedDates[0].toLocaleDateString() === selectedDates[1].toLocaleDateString()) {
+                                detail_startDate = null;
+                                detail_endDate = null;
+                                detail_specificDate = selectedDates[0].toLocaleDateString('en-CA');
+                                detail_dateCount = 1;
+                            } else {
+                                // If the dates are different, treat as a date range
+                                detail_startDate = selectedDates[0].toLocaleDateString('en-CA');
+                                detail_endDate = selectedDates[1].toLocaleDateString('en-CA');
+                                detail_specificDate = null;
+                                detail_dateCount = 2;
+                            }
+                        }
+                        InitializeDetailTable(detail_startDate, detail_endDate, detail_specificDate, detail_dateCount);
+                    },
+                    onClose: function (selectedDates, dateStr, instance) {
+                        console.log(selectedDates)
+                        if (selectedDates.length === 2) {
+                            if (selectedDates[0].toLocaleDateString() === selectedDates[1].toLocaleDateString()) {
+                                detail_startDate = null;
+                                detail_endDate = null;
+                                detail_specificDate = selectedDates[0].toLocaleDateString('en-CA');
+                                detail_dateCount = 1;
+                            } else {
+                                // If the dates are different, treat as a date range
+                                detail_startDate = selectedDates[0].toLocaleDateString('en-CA');
+                                detail_endDate = selectedDates[1].toLocaleDateString('en-CA');
+                                detail_specificDate = null;
+                                detail_dateCount = 2;
+                            }
+                        }
+                        InitializeDetailTable(detail_startDate, detail_endDate, detail_specificDate, detail_dateCount);
+                    }
+                });
+            }
+        }
+
+        function InitializeMasterTable(startTime, endTime, specificDate, dateCount) {
+            if (table1) {
+                // Table is already initialized, just reload the data
+                table1.ajax.reload();
+            } else {
+                table1 = $('#transactionMaster').DataTable({
+                    ajax: {
+                        url: '{% url "get-transaction" %}',
+                        type: 'GET',
+                        data: function (d) {
+                            d.start_date = master_startDate;
+                            d.end_date = master_endDate;
+                            d.specific_date = master_specificDate;
+                            d.date_count = master_dateCount;
+                        },
+                        dataSrc: ''
+                    },
+                    columns: [
+                        { data: 'transaction_date', className: 'text-start' },
+                        { data: 'borrower', className: 'text-start' },
+                        { data: 'number_of_books', className: 'text-start' },
+                        { data: 'approver', className: 'text-start' }
+                    ],
+                    dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
+                        'rt' +
+                        '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
+                    buttons: ['copy', 'excel', 'pdf'],
+                    scrollX: true
+                });
+
+                $("#logs").css("overflow-x", "auto");
+                table1.columns.adjust().draw();
+            }
+        }
+
+        function InitializeDetailTable(startTime, endTime, specificDate, dateCount) {
+            if (table2) {
+                table2.ajax.reload();
+            } else {
+                table2 = $('#transactionDetail').DataTable({
+                    ajax: {
+                        url: '{% url "get-transaction-detail" %}',
+                        type: 'GET',
+                        data: function (d) {
+                            d.start_date = detail_startDate;
+                            d.end_date = detail_endDate;
+                            d.specific_date = detail_specificDate;
+                            d.date_count = detail_dateCount;
+                        },
+                        dataSrc: ''
+                    },
+                    columns: [
+                        { data: 'transaction_date', className: 'text-start' },
+                        { data: 'book_title', className: 'text-start' },
+                        { data: 'isbn', className: 'text-start' },
+                        { data: 'date_borrowed', className: 'text-start' },
+                        { data: 'due_date', className: 'text-start' },
+                        { data: 'date_returned', className: 'text-start' },
+                        { data: 'status', className: 'text-start' },
+                        { data: 'is_late', className: 'text-start' },
+                        { data: 'fine', className: 'text-start' },
+                        { data: 'fine_status', className: 'text-start' },
+                        { data: 'borrower', className: 'text-start' },
+                        { data: 'approver', className: 'text-start' }
+                    ],
                     dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
                         'rt' +
                         '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
@@ -103,14 +265,23 @@
                 });
 
                 $("#logs2").css("overflow-x", "auto");
-
-                table2.columns.adjust().draw();
-                table2Initialized = true; // Mark as initialized
-            } else if (target === '#per-book' && table2Initialized) {
-                // Adjust columns if already initialized
                 table2.columns.adjust().draw();
             }
-        });
+        }
+
+        function UpdateBagNumber() {
+            $.ajax({
+                url: "{% url 'update-bag-number' %}",
+                type: "GET",
+                success: function (response) {
+                    console.log(response.total_reservations);
+                    $('.notification-dot').text(response.total_reservations);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
     });
 
 </script>

@@ -29,8 +29,8 @@
                     <div class="position-relative me-3">
                         <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
                         <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="bagContent">
+                            
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     </div>
@@ -80,43 +80,131 @@
 
         let tableInitialized = false;
 
+        UpdateBagNumber()
+
+        $('#searchButton').on('click', function () {
+            loadBooks(1); 
+        });
+
+
+        // Load categories via AJAX when the collapse button is clicked
+        $('#toggleCategories').on('click', function () {
+            if ($('#collapseExample').hasClass('show')) {
+                return; // Don't reload if already loaded
+            }
+
+            $.ajax({
+                url: "{% url 'get-category-filters' %}",
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    let categoriesHtml = '';
+                    response.categories.forEach(function (category) {
+                        categoriesHtml += `
+                        <div class="form-check col-12 col-md-4 col-lg-3">
+                            <input class="form-check-input" type="checkbox" value="${category.category_id}" id="category${category.category_id}">
+                            <label class="form-check-label" for="category${category.category_id}">
+                                ${category.category_name}
+                            </label>
+                        </div>`;
+                    });
+                    $('#categoriesContainer').html(categoriesHtml);
+                },
+                error: function (error) {
+                    console.log("Error loading categories:", error);
+                }
+            });
+        });
+
+        $('#clear-filters').click(function () {
+            // Uncheck all checkboxes
+            $('#categoriesContainer input[type="checkbox"]').prop('checked', false);
+        });
+
         // Event listener for when the "Table" tab is clicked
         $('#by-table-tab').on('shown.bs.tab', function () {
             // Check if the DataTable has already been initialized
             if (!tableInitialized) {
-                $('#book-table').DataTable({
+                $('#bookTable').DataTable({
                     dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
                         'rt' +
                         '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
                     buttons: ['copy', 'excel', 'pdf'],
                     responsive: false,
-                    scrollX: true
+                    scrollX: true,
+                    ajax: {
+                        url: "{% url 'get-books' %}",
+                        type: 'GET',
+                        data: function (d) {
+                            d.caller = "Others";  // Add this line to pass the caller parameter
+                        },
+                        dataSrc: 'books'
+                    },
+                    columns: [
+                        { data: 'title' },
+                        { data: 'year', className: 'text-start' },
+                        { data: 'isbn', className: 'text-start' },
+                        { data: 'location' },
+                        { data: 'late_fee', className: 'text-start' },
+                        {
+                            data: 'book_master_id',
+                            render: function (data, type, row) {
+                                const infoButton = `<button class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#book-info-modal" data-id="${data}" id="MoreInfo">
+                                <i class="bi bi-info-circle"></i>
+                            </button>`;
+                                const addToShelfButton = !row.has_invalid_books
+                                    ? `<button class="btn btn-outline-primary btn-sm AddToBag" data-id="${data}" data-trigger="table">
+                            <i class="bi bi-backpack"></i>
+                        </button>`
+                                    : `<button class="btn btn-outline-secondary btn-sm" disabled>
+                            <i class="bi bi-backpack"></i> Out of Stock
+                        </button>`;
+
+                                return `${infoButton} ${addToShelfButton}`;
+                            },
+                            className: 'text-center'
+                        }
+                    ]
+
+
                 });
-                // Mark the DataTable as initialized
                 tableInitialized = true;
             }
         });
 
         function loadBooks(pageNumber) {
+            // Get the search term and selected categories
+            const searchTerm = $('input[type="text"]').val();  // Get the search term from the input field
+            const selectedCategories = [];
+
+            // Get selected categories
+            $('#categoriesContainer input[type="checkbox"]:checked').each(function () {
+                selectedCategories.push($(this).val());
+            });
+
             $.ajax({
                 url: "{% url 'load-books' %}",
                 data: {
-                    page: pageNumber
+                    page: pageNumber,
+                    search: searchTerm,
+                    categories: selectedCategories.join(',')  // Pass selected categories as a comma-separated string
                 },
                 dataType: 'json',
-                success: function(data) {
+                success: function (data) {
                     // Update the book cards with the new HTML
                     $('#books').html(data.html);
                     // Update pagination controls
                     updatePagination(pageNumber, data.has_next);
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error("AJAX Error: " + status + error);
                 }
             });
         }
 
-        // Initial load of books
+
+         // Initial load of books
         loadBooks(1);  // Load the first page of books
 
         // Function to update pagination controls
@@ -127,13 +215,148 @@
             pagination.append(`<button class="btn btn-primary" id="next" ${hasNext ? '' : 'disabled'}>Next</button>`);
 
             // Previous button event
-            $('#prev').off('click').on('click', function() {
+            $('#prev').off('click').on('click', function () {
                 loadBooks(currentPage - 1);
             });
 
             // Next button event
-            $('#next').off('click').on('click', function() {
+            $('#next').off('click').on('click', function () {
                 loadBooks(currentPage + 1);
+            });
+        }
+
+        function GetCategory() {
+            $.ajax({
+                url: "{% url 'get-categories' %}",
+                type: 'GET',
+                success: function (response) {
+                    const categories = response.categories;
+
+                    // Clear existing Choices.js options
+                    categoriesChoice.clearChoices();
+
+                    // Add new options to Choices.js
+                    categoriesChoice.setChoices(
+                        categories.map(category => ({
+                            value: category.category_id,
+                            label: category.category_name,
+                            selected: false,
+                            disabled: false,
+                        })),
+                        'value',
+                        'label',
+                        false
+                    );
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        }
+
+        $(document).on('click', '#MoreInfo', function () {
+            var dataId = $(this).data('id'); // Get the data-id from the button
+
+            // Make an AJAX request to fetch the book details
+            $.ajax({
+                url: '/get-book-info/', // Replace with your actual URL for fetching book details
+                type: 'GET',
+                data: {
+                    'id': dataId
+                },
+                success: function (response) {
+                    // Populate the modal fields with data from the response
+                    $('#book-info').text(response.title);
+                    $('#book-year').text('Year: ' + response.year);
+                    $('#book-isbn').text('ISBN: ' + response.isbn);
+                    $('#book-location').text('Location: ' + response.location);
+                    $('#book-late-fee').text('Late fee: ₱' + response.late_fee);
+
+                    // Update authors list
+                    var authorsHtml = '';
+                    response.authors.forEach(function (author) {
+                        authorsHtml += `<li>${author}</li>`;
+                    });
+                    $('#book-authors').html(authorsHtml);
+
+                    // Update book image
+                    if (response.image_url) {
+                        $('#book-image').attr('src', response.image_url);
+                    } else {
+
+                        $('#book-image').attr('src', "{% static 'assets/static/images/No-Image-Placeholder.svg.png' %}");
+                    }
+
+                    // Update summary
+                    $('#book-summary').text(response.summary);
+
+                    // Show the modal
+                    $('#book-info-modal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        });
+
+        $(document).on('click', '.AddToBag', function () {
+            var button = $(this); // Store a reference to the clicked button
+            var book_master_id = button.data('id'); // Get the data-id from the button
+            var trigger = button.data('trigger') || "card"; // If no 'data-trigger', use "card" as default
+
+            // Make an AJAX request to fetch the book details
+            $.ajax({
+                url: "{% url 'reserve-book' %}", // Django URL
+                type: "POST",
+                data: {
+                    'book_master_id': book_master_id,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.isSuccess) {
+                        console.log(response.stillAvailable);
+                        Swal.fire({
+                            icon: "success",
+                            title: response.message,
+                        }).then((result) => {
+                            if (result.isConfirmed || result.isDismissed) {
+                                console.log("SHEESH")
+                                if (response.stillAvailable === false) {
+                                    if(trigger == "card"){
+                                        button.text('Out of Stock')  // Update the button text
+                                        .attr('disabled', true);  // Disable the button
+                                    }
+                                    else {
+                                        var table = $('#bookTable').DataTable(); // Get the DataTable instance
+                                        table.ajax.reload(null, false);  // Reload the table data, keeping the current pagination and search state
+                                    }
+                                    
+
+                                }
+                            }
+                        });
+                    }
+                    UpdateBagNumber();  // Call the function to update the bag number (if applicable)
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        });
+
+
+        function UpdateBagNumber(){
+            $.ajax({
+                url: "{% url 'update-bag-number' %}", 
+                type: "GET",
+                success: function (response) {
+                    console.log(response.total_reservations);
+                    $('.notification-dot').text(response.total_reservations);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
             });
         }
 

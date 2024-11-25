@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-+$1bc!+m(*a7+&+dnlc*+b7qwu_rm$h$_0&hri3j&i+c23p)8b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -112,21 +112,32 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Manila'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-MEDIA_URL = '/media/'
+MEDIA_URL = '/media/'   
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'pnhslibrarymanagemensystem.site'  # Use the SMTP server address from cPanel.
+EMAIL_PORT = 465                    # Typically 465 for SSL or 587 for TLS.
+EMAIL_USE_TLS = False               # False for SSL, True for TLS.
+EMAIL_USE_SSL = True                # True for SSL (mutually exclusive with TLS).
+EMAIL_HOST_USER = 'no-reply@pnhslibrarymanagemensystem.site'  # Your email address.
+EMAIL_HOST_PASSWORD = 'NpQ=3]V5^}(f0sKo'     # The password for the email account.
+DEFAULT_FROM_EMAIL = 'no-reply@pnhslibrarymanagemensystem.site'
+
+

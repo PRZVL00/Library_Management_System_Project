@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.signals import post_migrate
+from django.dispatch import receiver
 
 
 class CustomUser(AbstractUser):
@@ -21,41 +23,59 @@ class DimStatus(models.Model):
 
     def __str__(self):
         return self.status_name
-
+    
+@receiver(post_migrate)
+def create_default_statuses(sender, **kwargs):
+    if sender.name == 'LibraryManagementApp':
+        default_statuses = ["Available","Under Maintenance", "Reserved", "Borrowed", ]
+        for status_name in default_statuses:
+            DimStatus.objects.get_or_create(status_name=status_name)
 
 class DimCategory(models.Model):
     category_id = models.AutoField(primary_key=True)
     category_name = models.CharField(max_length=255)
+    added_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True) 
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.category_name
 
-
-class Book(models.Model):
-    book_id = models.AutoField(primary_key=True)
+class BookMaster(models.Model):
+    book_master_id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255)
     year = models.PositiveIntegerField()
     publisher = models.CharField(max_length=255)
     isbn = models.CharField(max_length=255, unique=True)
-    status = models.ForeignKey(DimStatus, on_delete=models.CASCADE)
     late_fee = models.DecimalField(max_digits=10, decimal_places=2)
     duration = models.IntegerField()
-    location = models.CharField(max_length=255)
-    qr_value = models.CharField(max_length=255)
-    qr_image = models.ImageField(upload_to='book_qr/')
     image = models.ImageField(upload_to='book_images/')
     summary = models.TextField()
+    location = models.CharField(max_length=255)
     soft_copy = models.FileField(upload_to='soft_copies/', null=True, blank=True)
+    is_archived = models.BooleanField(default=False)
+    added_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True) 
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
 
 
+class Book(models.Model):
+    book_id = models.AutoField(primary_key=True)
+    book_master = models.ForeignKey(BookMaster, on_delete=models.CASCADE)
+    status = models.ForeignKey(DimStatus, on_delete=models.CASCADE)
+    qr_value = models.CharField(max_length=255)
+    qr_image = models.ImageField(upload_to='book_qr/')
+    added_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True) 
+    date_added = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.book_id
+
+
 class BookCategory(models.Model):
     book_category_id = models.AutoField(primary_key=True)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    book_master = models.ForeignKey(BookMaster, on_delete=models.CASCADE)
     category = models.ForeignKey(DimCategory, on_delete=models.CASCADE)
     is_main = models.BooleanField(default=False)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -66,17 +86,31 @@ class BookCategory(models.Model):
 class BookAuthor(models.Model):
     book_author_id = models.AutoField(primary_key=True)
     author = models.CharField(max_length=255)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    book_master = models.ForeignKey(BookMaster, on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'{self.book.title} - {self.author}'
+    
+class Reservation(models.Model):
+    reservation_id = models.AutoField(primary_key=True)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    reservist = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    date_reserved = models.DateTimeField()
+    expiration_date = models.DateTimeField()
+    is_processed = models.BooleanField(default=False)
+    is_canceled = models.BooleanField(default=False)
+    is_expired = models.BooleanField(default=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Transaction Detail {self.transaction_detail_id}'
 
 
 class TransactionMaster(models.Model):
     transaction_master_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    approver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='approver')
+    approver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='T_approver')
     transaction_date = models.DateTimeField()
     date_created = models.DateTimeField(auto_now_add=True)
 
@@ -96,6 +130,8 @@ class TransactionDetail(models.Model):
     is_late = models.BooleanField(default=False)
     is_paid = models.BooleanField(default=False)
     return_id = models.CharField(max_length=255, null=True, blank=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    approver = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='approver')
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

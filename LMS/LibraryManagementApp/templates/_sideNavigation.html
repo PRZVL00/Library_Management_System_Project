@@ -40,7 +40,8 @@
             </div>
         </div>
         <div class="sidebar-menu">
-            <ul class="menu">
+            <ul class="menu">                
+                {% if user.is_staff %}
                 <li class="sidebar-title">Dashboard</li>
                 <li class="sidebar-item {% if request.path == '/dashboard/' %}active{% endif %}">
                     <a href={% url "dashboard" %} class='sidebar-link'>
@@ -48,6 +49,7 @@
                     <span>Dashboard</span>
                     </a>
                 </li>
+                {% endif %}
 
                 <li class="sidebar-title">Books</li>
                 <li class="sidebar-item {% if request.path == '/book-collection/' %}active{% endif %}">
@@ -56,32 +58,42 @@
                     <span>Book Collection</span>
                     </a>
                 </li>
-                <li class="sidebar-item {% if request.path == '/book-registration/' %}active{% endif %}">
-                    <a href={% url "book-registration" %} class='sidebar-link'>
-                    <i class="bi bi-grid-fill"></i>
-                    <span>Book Registration</span>
-                    </a>
-                </li>
-                <li class="sidebar-item {% if request.path == '/book-management/' %}active{% endif %}">
-                    <a href={% url "book-management" %} class='sidebar-link'>
-                    <i class="bi bi-grid-fill"></i>
-                    <span>Book Management</span>
-                    </a>
-                </li>
+
+                {% if user.is_staff %}
+                    <li class="sidebar-item {% if request.path == '/book-registration/' %}active{% endif %}">
+                        <a href={% url "book-registration" %} class='sidebar-link'>
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Book Registration</span>
+                        </a>
+                    </li>
+                
+                    <li class="sidebar-item {% if request.path == '/book-management/' %}active{% endif %}">
+                        <a href={% url "book-management" %} class='sidebar-link'>
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Book Management</span>
+                        </a>
+                    </li>
+                {% endif %}
 
                 <li class="sidebar-title">Book Transaction</li>
-                <li class="sidebar-item {% if request.path == '/borrow-return/' %}active{% endif %}">
-                    <a href={% url "borrow-return" %} class='sidebar-link'>
-                    <i class="bi bi-grid-fill"></i>
-                    <span>Borrow and Return</span>
-                    </a>
-                </li>   
                 <li class="sidebar-item {% if request.path == '/bag/' %}active{% endif %}">
                     <a href={% url "bag" %} class='sidebar-link'>
                     <i class="bi bi-grid-fill"></i>
                     <span>Bag</span>
                     </a>
                 </li>
+
+                {% if user.is_staff %}
+                <li class="sidebar-item {% if request.path == '/borrow-return/' %}active{% endif %}">
+                    <a href={% url "borrow-return" %} class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Borrow and Return</span>
+                    </a>
+                </li>   
+                
+                {% endif %}
+                
+                
                 <li class="sidebar-item {% if request.path == '/transaction-history/' %}active{% endif %}">
                     <a href={% url "transaction-history" %} class='sidebar-link'>
                     <i class="bi bi-grid-fill"></i>
@@ -90,12 +102,14 @@
                 </li>
 
                 <li class="sidebar-title">Account</li>
+                {% if user.is_staff %}
                 <li class="sidebar-item {% if request.path == '/account-management/' %}active{% endif %}">
                     <a href={% url "account-management" %} class='sidebar-link'>
                     <i class="bi bi-grid-fill"></i>
                     <span>Account Management</span>
                     </a>
                 </li>
+                {% endif %}
                 <li class="sidebar-item {% if request.path == '/Profile/' %} active {% endif %}">
                     <a href={% url "profile" %} class='sidebar-link'>
                     <i class="bi bi-grid-fill"></i>
@@ -110,6 +124,14 @@
                     <span>Log Book</span>
                     </a>
                 </li>
+                {% if user.is_staff %}
+                <li class="sidebar-item {% if request.path == '/in-out/' %}active{% endif %}">
+                    <a href={% url "in-out" %} class='sidebar-link'>
+                    <i class="bi bi-grid-fill"></i>
+                    <span>In/Out</span>
+                    </a>
+                </li>
+                {% endif %}                
             </ul>
         </div>
     </div>

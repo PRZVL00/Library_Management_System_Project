@@ -30,8 +30,8 @@
                     <div class="position-relative me-3">
                         <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
                         <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="bagContent">
+                            
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     </div>
@@ -43,9 +43,9 @@
                 <div class="row">
                     {% include "DashboardPage/_data-summary.html" %}
                 </div>
-                <div class="row">
+                <!-- <div class="row">
                     {% include "DashboardPage/_data-barchart.html" %}
-                </div>
+                </div> -->
                 <div class="row">
                     {% include "DashboardPage/_data-piechart.html" %}
                 </div>
@@ -65,11 +65,54 @@
 </html>
 
 <script>
+    let bar;
     $(document).ready(function () {
+        UpdateBagNumber()
         // Get Bootstrap primary and secondary colors from CSS variables
         const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-primary').trim();
         const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-secondary').trim();
         const successColor = getComputedStyle(document.documentElement).getPropertyValue('--bs-success').trim();
+
+        GetFirstRowData()
+
+        // Set the default chart to 'daily'
+        // GetSecondRowData('daily');
+
+        GetThirdRowData()
+
+        GetFourthRowData('daily');
+
+        // Event listeners for time range buttons
+        $('#daily').click(function () {
+            $(this).addClass('active').siblings().removeClass('active');
+            GetSecondRowData('daily');
+        });
+
+        $('#weekly').click(function () {
+            $(this).addClass('active').siblings().removeClass('active');
+            GetSecondRowData('weekly');
+        });
+
+        $('#monthly').click(function () {
+            $(this).addClass('active').siblings().removeClass('active');
+            GetSecondRowData('monthly');
+        });
+
+        // Event listeners for time range buttons(Line)
+        $('#daily-line').click(function () {
+            $(this).addClass('active').siblings().removeClass('active');
+            GetFourthRowData('daily');
+        });
+
+        $('#weekly-line').click(function () {
+            $(this).addClass('active').siblings().removeClass('active');
+            GetFourthRowData('weekly');
+        });
+
+        $('#monthly-line').click(function () {
+            $(this).addClass('active').siblings().removeClass('active');
+            GetFourthRowData('monthly');
+        });
 
         // Add click event listener to the buttons in the button group
         $('#barchart-toolbar .btn').on('click', function () {
@@ -83,88 +126,6 @@
             console.log($(this).text());
         });
 
-        // Bar Chart Options
-        var barOptions = {
-            series: [
-                {
-                    name: "Borrowed",
-                    data: [44, 55, 57, 56, 61, 58, 63, 60, 66],
-                },
-                {
-                    name: "Returned",
-                    data: [76, 85, 101, 98, 87, 105, 91, 114, 94],
-                },
-            ],
-            chart: {
-                type: "bar",
-                height: 350,
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    columnWidth: "55%",
-                    endingShape: "rounded",
-                },
-            },
-            colors: [primaryColor, secondaryColor], // Apply primary and secondary colors
-            dataLabels: {
-                enabled: false,
-            },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ["transparent"],
-            },
-            xaxis: {
-                categories: ["Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"],
-            },
-            yaxis: {
-                title: {
-                    text: "Books",
-                },
-            },
-            fill: {
-                opacity: 1,
-            },
-            tooltip: {
-                y: {
-                    formatter: function (val) {
-                        return val + " Books";
-                    },
-                },
-            },
-        };
-
-        var bar = new ApexCharts(document.querySelector("#bar"), barOptions);
-        bar.render(); // Render the bar chart
-
-        // Pie Chart
-        var options = {
-            series: [44, 35, 23, 15, 6],
-            chart: {
-                width: 400,
-                type: 'pie',
-            },
-            labels: ['Mathematics', 'Mystery', 'Science', 'Thesis', 'Others'],
-            legend: {
-                position: 'bottom' // Set the legend position to bottom
-            },
-            responsive: [{
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 200
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }]
-        };
-
-        var chart = new ApexCharts(document.querySelector("#pie"), options);
-        chart.render();
-
         // Add click event listener to the buttons in the button group
         $('#linechart-toolbar .btn').on('click', function () {
             // Remove the 'active' class from all buttons
@@ -177,43 +138,261 @@
             console.log($(this).text());
         });
 
-        // Line Chart Options
-        var options = {
-          series: [{
-            name: "Users: ",
-            data: [10, 41, 35, 51, 49, 62, 69, 91, 148]
-        }],
-          chart: {
-          height: 350,
-          type: 'line',
-          zoom: {
-            enabled: false
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          curve: 'straight'
-        },
-        grid: {
-          row: {
-            colors: [secondaryColor, 'transparent'], // takes an array which will be repeated on columns
-            opacity: 0.5
-          },
-        },
-        xaxis: {
-          categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-        }
-        };
-
-        var chart = new ApexCharts(document.querySelector("#line"), options);
-        chart.render();
-
         // DataTable initialization
         $('#logs').DataTable({
-            responsive: false,
-            scrollX: true
+            responsive: true,
+            scrollX: true,
+            ajax: {
+                url: '/get-current-visitors/',  // Endpoint to fetch current users
+                type: 'GET',
+                dataSrc: ''  // The data will be returned as an array of objects directly
+            },
+            columns: [
+                { data: 'full_name', title: 'Name', className: 'text-start' },   // Full name of the user
+                { data: 'id_number', title: 'ID', className: 'text-start' },     // ID from id_number field in database
+                { data: 'username', title: 'Username', className: 'text-start' }, // Username of the user
+                { data: 'time_in', title: 'Time In', className: 'text-start' }   // Time the user logged in
+            ],
+            columnDefs: [
+                {
+                    targets: [3],  // If time_in is null, replace with 'N/A'
+                    render: function (data, type, row) {
+                        return data ? data : 'N/A';
+                    }
+                }
+            ]
         });
+
+        function GetFirstRowData() {
+            $.ajax({
+                url: "{% url 'get-first-row' %}",
+                type: 'GET',
+                success: function (response) {
+                    $('#totalBooks').text(response.total_books);
+                    $('#totalBorrowed').text(response.total_borrowed);
+                    $('#totalLate').text(response.total_late);
+                    $('#totalUsers').text(response.active_users);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+
+        function GetSecondRowData(timeRange) {
+            $.ajax({
+                url: "{% url 'get-second-row' %}",
+                type: 'POST',
+                data: {
+                    'time_range': timeRange,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.error) {
+                        console.error(response.error);
+                        return;
+                    }
+
+                    // Update the chart with the new data
+                    var barOptions = {
+                        series: [
+                            {
+                                name: "Borrowed",
+                                data: response.borrowed_data,
+                            },
+                            {
+                                name: "Returned",
+                                data: response.returned_data,
+                            },
+                        ],
+                        chart: {
+                            type: "bar",
+                            height: 350,
+                        },
+                        plotOptions: {
+                            bar: {
+                                horizontal: false,
+                                columnWidth: "55%",
+                                endingShape: "rounded",
+                            },
+                        },
+                        colors: ['#FF5733', '#33C3FF'], // Update with your colors
+                        dataLabels: {
+                            enabled: false,
+                        },
+                        stroke: {
+                            show: true,
+                            width: 2,
+                            colors: ["transparent"],
+                        },
+                        xaxis: {
+                            categories: response.labels,
+                        },
+                        yaxis: {
+                            title: {
+                                text: "Books",
+                            },
+                        },
+                        fill: {
+                            opacity: 1,
+                        },
+                        tooltip: {
+                            y: {
+                                formatter: function (val, opts) {
+                                    var label = opts.w.globals.labels[opts.dataPointIndex];
+                                    var dateRange = response.date_ranges[opts.dataPointIndex]; // Use date ranges directly from the response
+                                    return dateRange + ": " + val + " Books";
+                                },
+                            },
+                        },
+                    };
+
+                    // Destroy the existing chart and create a new one with updated data
+                    if (bar) {
+                        bar.destroy();
+                    }
+
+                    bar = new ApexCharts(document.querySelector("#bar"), barOptions);
+                    bar.render(); // Render the updated chart
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+
+        function GetThirdRowData() {
+            $.ajax({
+                url: '{% url "get-third-row" %}',  // URL for the view (ensure it's correct)
+                type: 'GET',
+                success: function (response) {
+                    if (response.error) {
+                        console.error('Error: ' + response.error);
+                        return;
+                    }
+
+                    // Extract category names and book counts
+                    var categories = response.category_names;
+                    var counts = response.book_counts;
+
+                    // Pie chart options
+                    var options = {
+                        series: counts,
+                        chart: {
+                            width: 400,
+                            type: 'pie',
+                        },
+                        labels: categories,
+                        legend: {
+                            position: 'bottom' // Set the legend position to bottom
+                        },
+                        responsive: [{
+                            breakpoint: 480,
+                            options: {
+                                chart: {
+                                    width: 200
+                                },
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }]
+                    };
+
+                    // Create the chart
+                    var chart = new ApexCharts(document.querySelector("#pie"), options);
+                    chart.render();
+                },
+                error: function (xhr, status, error) {
+                    console.error('AJAX error: ' + status + ' - ' + error);
+                }
+            });
+        }
+
+        let lineChart; // Declare it globally to access it outside the function
+
+        function GetFourthRowData(timeRange) {
+            $.ajax({
+                url: "{% url 'get-fourth-row' %}",  // Add the correct URL pattern in your Django URL configuration
+                type: 'POST',
+                data: {
+                    'time_range': timeRange,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.error) {
+                        console.error(response.error);
+                        return;
+                    }
+
+                    // Update the chart with the new data
+                    var lineOptions = {
+                        series: [{
+                            name: "People Entered",
+                            data: response.entered_data,
+                        }],
+                        chart: {
+                            type: 'line',
+                            height: 350,
+                        },
+                        xaxis: {
+                            categories: response.labels,  // Date labels
+                        },
+                        yaxis: {
+                            title: {
+                                text: "People",
+                            },
+                        },
+                        dataLabels: {
+                            enabled: false,
+                        },
+                        stroke: {
+                            curve: 'smooth'
+                        },
+                        tooltip: {
+                            y: {
+                                formatter: function (val) {
+                                    return val + " People";
+                                }
+                            }
+                        },
+                        grid: {
+                            row: {
+                                colors: ['#f3f3f3', 'transparent'], // Set alternating row colors
+                                opacity: 0.5
+                            },
+                        },
+                    };
+
+                    // Destroy the existing chart and create a new one with updated data
+                    if (lineChart) {
+                        lineChart.destroy();  // Ensure that the previous chart is destroyed
+                    }
+
+                    // Initialize the new chart
+                    lineChart = new ApexCharts(document.querySelector("#line"), lineOptions);
+                    lineChart.render();  // Render the updated chart
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+
+        function UpdateBagNumber(){
+            $.ajax({
+                url: "{% url 'update-bag-number' %}", 
+                type: "GET",
+                success: function (response) {
+                    console.log(response.total_reservations);
+                    $('.notification-dot').text(response.total_reservations);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+
+
     });
 </script>

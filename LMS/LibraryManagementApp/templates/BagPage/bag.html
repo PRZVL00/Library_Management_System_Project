@@ -30,8 +30,8 @@
                     <div class="position-relative me-3">
                         <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
                         <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="bagContent">
+                            
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     </div>
@@ -41,43 +41,17 @@
             <div class="page-content">
                 <!--Start Your Page Here-->
                 <div class="table-responsive">
-                    <h3>HELLO WORLD</h3>
-                    <h1>HELLO WORLD!</h1>
-                    <!-- Modal for more info of books will be reused with some changes -->
-                    <!-- Buttons like add to bag will be remove -->
+
                     <table class="table table-striped" id="reserved-books">
                         <thead>
                             <tr>
                                 <th>Book Title</th>
                                 <th>Reservation Date</th>
-                                <th>Return Date</th>
                                 <th>Borrow Duration</th>
                                 <th>Late Fee</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td><a href="javascript: void(0)" data-bs-toggle="modal" data-bs-target="#book-info-modal">Book 1</a></td>
-                                <td>08-14-2024 01:15</td>
-                                <td>08-19-2024 01:15</td>
-                                <td>5 days</td>
-                                <td>P 50.00</td>
-                            </tr>
-                            <tr>
-                                <td><a href="javascript: void(0)" data-bs-toggle="modal" data-bs-target="#book-info-modal">Book 2</a></td>
-                                <td>08-14-2024 01:15</td>
-                                <td>08-19-2024 01:15</td>
-                                <td>5 days</td>
-                                <td>P 50.00</td>
-                            </tr>
-                            <tr>
-                                <td><a href="javascript: void(0)" data-bs-toggle="modal" data-bs-target="#book-info-modal">Book 3</a></td>
-                                <td>08-14-2024 01:15</td>
-                                <td>08-19-2024 01:15</td>
-                                <td>5 days</td>
-                                <td>P 50.00</td>
-                            </tr>
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -93,15 +67,103 @@
 
 <script>
     $(document).ready(function () {
+        UpdateBagNumber()
         $('#reserved-books').DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
-                 'rt' +
-                 '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
+                'rt' +
+                '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
             buttons: ['copy', 'excel', 'pdf'],
             responsive: false,
-            scrollX: true
+            scrollX: true,
+            ajax: {
+                url: "{% url 'get-reserved' %}",
+                type: 'GET',
+                dataSrc: 'reserved'
+            },
+            columns: [
+                { data: 'book_title' },  // Ensure this matches the key in the response
+                { data: 'reservation_date', className: 'text-start' },
+                { data: 'borrow_duration', className: 'text-start' },
+                { data: 'late_fee', className: 'text-start' },
+                {
+                    data: 'reservation_id',  // Ensure this matches the key in the response
+                    render: function (data, type, row) {
+                        return `<button class="btn btn-outline-danger btn-sm" data-id="${data}" id="removeReservation">
+                            <i class="bi bi-trash"></i>
+                        </button>`;
+                    },
+                    className: 'text-center'
+                }
+            ]
         });
+
+        $(document).on('click', '#removeReservation', function () {
+            const reservation_id = $(this).data('id'); // Get book_master_id from button data-id attribute
+
+            // Use SweetAlert2 for confirmation
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to cancel this reservation.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, cancel it!',
+                cancelButtonText: 'No, keep it',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with the cancellation if confirmed
+                    $.ajax({
+                        url: '{% url "cancel-reservation" %}',  // URL to handle the cancellation
+                        type: 'POST',
+                        data: {
+                            'reservation_id': reservation_id,  // Passing the book_master_id
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'  // CSRF token for security
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                // Success: Show success message and reload the DataTable
+                                Swal.fire(
+                                    'Canceled!',
+                                    'The reservation has been canceled.',
+                                    'success'
+                                );
+                                $('#reserved-books').DataTable().ajax.reload();  // Reload DataTable to reflect changes
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an error canceling the reservation. Please try again.',
+                                    'error'
+                                );
+                            }
+
+                            UpdateBagNumber()
+                        },
+                        error: function () {
+                            // Handle any AJAX errors
+                            Swal.fire(
+                                'Error!',
+                                'An error occurred. Please try again later.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+
+
+        function UpdateBagNumber() {
+            $.ajax({
+                url: "{% url 'update-bag-number' %}",
+                type: "GET",
+                success: function (response) {
+                    console.log(response.total_reservations);
+                    $('.notification-dot').text(response.total_reservations);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
     });
 </script>
-
-

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Borrowing Receipt</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #004080;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .body {
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .footer {
+            background-color: #f1f1f1;
+            color: #555555;
+            text-align: center;
+            font-size: 12px;
+            padding: 10px;
+        }
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #004080;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #003366;
+        }
+        .table-container {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>Library Borrowing Receipt</h1>
+        </div>
+
+        <!-- Body Section -->
+        <div class="body">
+            <p>Dear {{ first_name }} {{ last_name }},</p>
+            <p>Thank you for using the Paliparan National High School Library System. Here are the details of your recent borrowing transaction:</p>
+
+            <p>
+                <strong>Processed By:</strong> {{ processed_by }}<br>
+                <strong>Transaction Date:</strong> {{ transaction_date }}
+            </p>
+
+            <div class="table-container">
+                <h3>Borrowed Books</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Book Title</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in books %}
+                        <tr>
+                            <td>{{ book.book_title }}</td>
+                            <td>{{ book.due_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p>Please ensure to return the books on or before the due dates to avoid penalties. If you have any questions, feel free to contact us.</p>
+
+            <p style="text-align: center;">
+                <a href="pnhslibrarymanagemensystem.site" class="button">Visit the Library Portal</a>
+            </p>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="footer">
+            <p>School Library | Contact us at <a href="mailto: contact-us@pnhslibrarymanagemensystem.site">contact-us@pnhslibrarymanagemensystem.site</a></p>
+            <p>© {{ current_year }} School Library. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+	

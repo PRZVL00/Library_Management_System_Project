@@ -20,97 +20,287 @@
                 <a href="#" class="burger-btn d-block d-xl-none">
                     <i class="bi bi-justify fs-3"></i>
                 </a>
+                <h3>Profile</h3>
             </header>
-            <div class="page-heading row">
-                <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
-                    <h3>Profile</h3>
+
+            <!--Main Page-->
+            <div class="page-content">
+                <div class="row align-items-start" style="display: flex;">
+                    <!-- Left Profile Section -->
+                    <div class="col-lg-4 col-md-6 col-sm-12 text-center mb-3 d-flex">
+                        <div class="card w-100 d-flex h-100">
+                            <div class="card-body d-flex flex-column align-items-center">
+                                <img src="{% static 'assets/static/images/faces/2.jpg' %}" class="rounded-circle"
+                                    alt="User Profile Picture" style="width: 157px; height: 157px;">
+                                <div class="mt-2 mb-2">
+                                    <button id="edit-profile-btn" class="btn btn-sm btn-primary">Edit Profile</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personal Information Section -->
+                    <div class="col-lg-4 col-md-6 col-sm-12 text-center mb-3 d-flex">
+                        <div class="card w-100 d-flex h-100">
+                            <div class="card-body d-flex flex-column text-start">
+                                <h3>Personal Information</h3>
+                                <p><strong>Name:</strong> <span id="profile-first-name">John Doe</span></p>
+                                <p><strong>Student ID:</strong> <span id="profile-student-id">123456</span></p>
+                                <p><strong>Contact:</strong> <span id="profile-contact">+123456789</span></p>
+                                <p><strong>Email:</strong> <span id="profile-email">johndoe@example.com</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QR Code Section -->
+                    <div class="col-lg-4 col-md-6 col-sm-12 text-center mb-3 d-flex">
+                        <div class="card p-3 w-100 d-flex h-100">
+                            <h5>User QR Code</h5>
+                            <img src="{% static 'assets/static/images/qr-sample.png' %}" alt="User QR Code"
+                                class="w-50 mx-auto d-block mb-3">
+                        </div>
+                    </div>
                 </div>
-                <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-end align-items-center">
-                    <!-- Icon with notification dot -->
-                    <div class="position-relative me-3">
-                        <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
-                        <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
-                            <span class="visually-hidden">unread messages</span>
-                        </span>
+
+                <div class="row">
+                    <!-- Borrowed Books Table -->
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Borrowed Books</h5>
+                            </div>
+                            <div class="card-body table-responsive">
+                                <table id="borrowed-books-table" class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-start">Transaction Date</th>
+                                            <th class="text-start">Book Title</th>
+                                            <th class="text-start">Date Borrowed</th>
+                                            <th class="text-start">Due Date</th>
+                                            <th class="text-start">Status</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <!--Main Page-->
-            <div class="page-content">
-                <div class="row align-items-center">
-                    <div class="col-12 col-sm-12 col-md-12 col-lg-3 col-xl-3">
-                        <div class="row justify-content-center text-center">
-                            <div class="col-auto">
-                                <img src="{% static 'assets/static/images/faces/2.jpg' %}" class="rounded-circle mb-3"
-                                    alt="User Profile Picture" style="width: 150px; height: 150px;">
-                                <span class="badge bg-success text-truncate d-block mx-auto mb-3" style="max-width: 100px;">Active</span>
-                            </div>
-                            <form action="POST" id="account-edit-form" class="col-12">
-                                <!--First Name Field-->
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="text" class="form-control" placeholder="First Name"
-                                        aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                        id="fname-input">
-                                    <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                            class="bi bi-pen"></span></button>
-                                </div>
-                    
-                                <!--Last Name Field-->
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="text" class="form-control" placeholder="Last Name"
-                                        aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                        id="lname-input">
-                                    <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                            class="bi bi-pen"></span></button>
-                                </div>
-                    
-                                <!--Student ID # Field-->
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="text" class="form-control" placeholder="Student ID #"
-                                        aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                        id="studentID-input">
-                                    <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                            class="bi bi-pen"></span></button>
-                                </div>
-                    
-                                <!--Contact Number Field-->
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="text" class="form-control" placeholder="Contact Number"
-                                        aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                        id="cnum-input">
-                                    <button class="btn btn-primary" type="button" id="button-addon1"><span
-                                            class="bi bi-pen"></span></button>
-                                </div>
-                    
-                                <!--Email Field-->
-                                <div class="input-group input-group-sm mb-3">
-                                    <input type="email" class="form-control" placeholder="Email"
-                                        aria-label="Example text with button addon" aria-describedby="button-addon1"
-                                        id="email-input">
-                                    <button class="btn btn-primary" type="button" id="button-addon1" disabled><span
-                                            class="bi bi-pen"></span></button>
-                                </div>
-                            </form>
-                            <button class="btn btn-sm btn-outline-primary w-100">Change Password</button>
-                        </div>
-                    </div>
-                    <div class="col-12 col-sm-12 col-md-12 col-lg-9 col-xl-9">
-                        <div class="card">
-                            <div class="card-content">
-                                {% include "BorrowReturnPage/_reserved-books.html" %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>            
         </div>
+        {% include "AccountManagementPage/_account-edit.html" %}
         {% include "_footer.html" %}
-    </div>
     </div>
     {% include "_JSreferences.html" %}
 </body>
 
 </html>
+
+
+<script>
+    $(document).ready(function () {
+        UpdateBagNumber()
+        GetProfile();
+
+        // Register FilePond plugins
+        FilePond.registerPlugin(
+            FilePondPluginImagePreview,
+            FilePondPluginImageCrop,
+            FilePondPluginImageExifOrientation,
+            FilePondPluginImageFilter,
+            FilePondPluginImageResize,
+            FilePondPluginFileValidateSize,
+            FilePondPluginFileValidateType
+        );
+
+        // Initialize FilePond
+        const pond = FilePond.create(document.querySelector(".image-resize-filepond"), {
+            credits: null,
+            allowImagePreview: true,
+            allowImageFilter: false,
+            allowImageExifOrientation: false,
+            allowImageCrop: false,
+            allowImageResize: true,
+            imageResizeTargetWidth: 200,
+            imageResizeTargetHeight: 200,
+            imageResizeMode: "cover",
+            imageResizeUpscale: true,
+            acceptedFileTypes: ["image/png", "image/jpg", "image/jpeg"],
+            fileValidateTypeDetectType: (source, type) =>
+                new Promise((resolve, reject) => {
+                    // Do custom type detection here and return with promise
+                    resolve(type);
+                }),
+            storeAsFile: true
+        });
+        
+        
+
+
+        $('#borrowed-books-table').DataTable({
+            dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
+                'rt' +
+                '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
+            buttons: ['copy', 'excel', 'pdf'],
+            responsive: false,
+            scrollX: true,
+            ajax: {
+                url: "{% url 'get-user-transaction' %}",
+                type: 'GET',
+                dataSrc: function (json) {
+                    json.forEach(function (row) {
+                        // Adjust status text dynamically if needed
+                        if (row.status === "Late") {
+                            row.status = "<span class='badge bg-danger'>Late</span>";
+                        } else {
+                            row.status = "<span class='badge bg-success'>On Time</span>";
+                        }
+                    });
+                    return json;
+                }
+            },
+            columns: [
+                { data: 'transaction_date', className: 'text-start'},
+                { data: 'book_title', className: 'text-start' },
+                { data: 'date_borrowed', className: 'text-start' },
+                { data: 'due_date', className: 'text-start' },
+                { data: 'status', className: 'text-start' }
+            ]
+        });
+
+
+        // Toggle profile edit form
+        $('#edit-profile-btn').on('click', function () {
+            let user_id = $(this).data('id');
+            console.log(user_id); 
+
+            // First AJAX request to get the book details
+            $.ajax({
+                url: '/get-account-info/',  // Adjust this URL if needed
+                type: 'GET',
+                data: {
+                    'id': user_id
+                },
+                success: function (response) {
+                    pond.addFile(response.image_url).then(file => {
+                        console.log('File has been loaded', file);
+                    }).catch(error => {
+                        console.error('Error loading file:', error);
+                    });
+
+                    console.log(response)
+
+                    $('#account_id').val(response.account_id)
+                    $('#first_name').val(response.first_name);
+                    $('#last_name').val(response.last_name);
+                    $('#id_number').val(response.id_number);
+                    $('#contact_number').val(response.cellphone_number);
+                    $('#email').val(response.email);
+
+                    // Open the modal after the form is populated
+                    $('#account-edit-modal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching account info:', error);
+                }
+            });
+        });
+
+        $('#save-button').click(function () {
+            $('#accountEditForm').submit();
+        });
+
+        $('#accountEditForm').submit(function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: "{% url 'update-account' %}",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.isSuccess == 'true') {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Account updated successfully",
+                        })
+
+                        $('#accountEditForm').find('input[type="text"], input[type="number"], input[type="file"]').val('');
+                        $('#accountEditForm').find('textarea').val('');
+                        $('#accountEditForm').find('select').prop('selectedIndex', 0);
+
+                        pond.removeFiles();
+
+                        GetProfile()
+
+                    } else {
+                        Toastify({
+                            text: response.message,
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "#dc3545",
+                            },
+                            stopOnFocus: true,
+                        }).showToast();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
+        function GetProfile() {
+            $.ajax({
+                url: "{% url 'get-user-profile' %}",
+                type: 'GET',
+                success: function (response) {
+                    if (!response.error) {
+                        console.log('Response ID:', response.id);  // Log the response.id to verify it
+                        $('#edit-profile-btn').attr('data-id', response.id);
+                        $('#profile-first-name').text(response.name);
+                        $('#profile-student-id').text(response.student_id);
+                        $('#profile-contact').text(response.contact);
+                        $('#profile-email').text(response.email);
+
+                        // Update profile and QR images
+                        if (response.image_url) {
+                            $('img[alt="User Profile Picture"]').attr('src', response.image_url);
+                        }
+                        if (response.qr_image_url) {
+                            $('img[alt="User QR Code"]').attr('src', response.qr_image_url);
+                        }
+                    } else {
+                        console.error(response.error);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+
+        function UpdateBagNumber(){
+            $.ajax({
+                url: "{% url 'update-bag-number' %}", 
+                type: "GET",
+                success: function (response) {
+                    console.log(response.total_reservations);
+                    $('.notification-dot').text(response.total_reservations);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+
+    });
+</script>

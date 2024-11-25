@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library System Notification - Expired Reservations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #004080;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .body {
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .footer {
+            background-color: #f1f1f1;
+            color: #555555;
+            text-align: center;
+            font-size: 12px;
+            padding: 10px;
+        }
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #004080;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #003366;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>Paliparan National High School Library System Notification</h1>
+        </div>
+
+        <!-- Body Section -->
+        <div class="body">
+            <p>Dear Admin,</p>
+            <p>This is an automated notification regarding expired reservations in the library system:</p>
+            
+            <h3>Expired Reservations:</h3>
+            <p>The following reservations have expired:</p>
+            <ul>
+                <!-- Loop through expired reservations dynamically -->
+                <li>{{ reservation_title_1 }} - Reserved by {{ user_name_1 }} (Email: {{ user_email_1 }})</li>
+                <li>{{ reservation_title_2 }} - Reserved by {{ user_name_2 }} (Email: {{ user_email_2 }})</li>
+                <!-- Add more as needed -->
+            </ul>
+
+            <p>If you need further information, feel free to reach out.</p>
+
+            <p style="text-align: center;">
+                <a href="https://pnhslibrarymanagemensystem.site"><button class="button">Visit the Library Portal</button></a>
+            </p>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="footer">
+            <p>School Library | Contact us at <a href="mailto: contact-us@pnhslibrarymanagemensystem.site">contact-us@pnhslibrarymanagemensystem.site</a></p>
+            <p>© {{ current_year }} School Library. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

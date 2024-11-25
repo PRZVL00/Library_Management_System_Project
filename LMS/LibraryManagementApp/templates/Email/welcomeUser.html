@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to the School Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #004080;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .body {
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .footer {
+            background-color: #f1f1f1;
+            color: #555555;
+            text-align: center;
+            font-size: 12px;
+            padding: 10px;
+        }
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #004080;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #003366;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>Welcome to the Paliparan National High School Library System</h1>
+        </div>
+
+        <!-- Body Section -->
+        <div class="body">
+            <p>Dear {{ first_name }} {{ last_name }},</p>
+            <p>Welcome to the School Library! Your account has been successfully created. Here are your login details:</p>
+            <p>
+                <strong>Username:</strong> {{ username }}<br>
+                <strong>Email:</strong> {{ username }}
+            </p>
+            <p>Your QR code is attached to this email. This code will be required for accessing certain library services, including borrowing and returning books.</p>
+            <p>We look forward to seeing you at the library soon!</p>
+
+            <p style="text-align: center;">
+                <a href="pnhslibrarymanagemensystem.site" class="button">Visit the Library Portal</a>
+            </p>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="footer">
+            <p>School Library | Contact us at <a href="mailto: contact-us@pnhslibrarymanagemensystem.site">contact-us@pnhslibrarymanagemensystem.site</a></p>
+            <p>© {{ current_year }} School Library. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

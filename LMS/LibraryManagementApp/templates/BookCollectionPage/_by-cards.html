@@ -1,31 +1,46 @@
 <!-- Book List-->
 {% load static %}
 <section id="books">
-    <div class='row'> <!--Row Start-->
+    <div class='row'>
         {% for book in page_obj %}
-        <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 col-xxl-3"> <!-- Column Start -->
+        <div class="col-12 col-sm-6 col-md-4 col-lg-4 col-xl-3 col-xxl-3">
             <div class="card">
                 <div class="card-content">
                     <div style="display: flex; justify-content: center;">
-                        <img class="card-img-top img-fluid mt-3"
-                            src="{{ book.image.url }}" alt="Card image cap"
+                        {% if book.image %}
+                        <img class="card-img-top img-fluid mt-3" src="{{ book.image.url }}" alt="Card image cap"
                             style="width: auto; height: 150px; object-fit: contain;">
+                        {% else %}
+                        <img class="card-img-top img-fluid mt-3"
+                            src="{% static 'assets/static/images/No-Image-Placeholder.svg.png' %}" alt="Card image cap"
+                            style="width: auto; height: 150px; object-fit: contain;">
+                        {% endif %}
+
                     </div>
                     <div class="card-body">
                         <h5 class="card-title text-center">{{ book.title }}</h5>
                         <p class="card-subtitle text-center">{{ book.year }}</p>
                         <p class="card-subtitle text-center my-1" data-bs-toggle="tooltip" data-bs-placement="left"
                             title="ISBN">{{ book.isbn }}</p>
-                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1"
-                            data-bs-toggle="modal" data-bs-target="#book-info-modal">More Info</button>
-                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1">Add to Shelf</button>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1" data-bs-toggle="modal"
+                            data-bs-target="#book-info-modal" data-id="{{ book.book_master_id }}" id="MoreInfo">More
+                            Info</button>
+
+                        <!-- Add to Shelf button - disabled if no available books -->
+                        <button class="btn btn-sm btn-outline-primary rounded-pill w-100 my-1 AddToBag" data-id="{{ book.book_master_id }}" 
+                             {% if book.available_books == 0 %} disabled {% endif %}>
+                            {% if book.available_books == 0 %} Out of Stock {% else %} Add to Bag {% endif %}
+                        </button>
+
+
                     </div>
                 </div>
             </div>
-        </div> <!-- Column End -->
+        </div>
         {% endfor %}
-    </div> <!--Row End-->
+    </div>
 </section>
+
 
 <div id="pagination" class="d-flex justify-content-center my-3 space">
     <!-- Pagination buttons will be dynamically added here -->

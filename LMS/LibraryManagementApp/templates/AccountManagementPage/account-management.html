@@ -29,8 +29,8 @@
                     <div class="position-relative me-3">
                         <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
                         <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="bagContent">
+                            
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     </div>
@@ -40,52 +40,18 @@
             <div class="page-content">
                 <!--Start Your Page Here-->
                 <div class="table-responsive">
-                    <table class="table table-striped" id="table1">
+                    <table class="table table-striped" id="accounts">
                         <thead>
                             <tr>
-                                <th>First Name</th>
-                                <th>Last Name</th>
-                                <th>Student ID #</th>
-                                <th>Contact Number</th>
-                                <th>Email</th>
-                                <th>Status</th>
+                                <th class="text-start">Student ID#</th>
+                                <th class="text-start">First Name</th>
+                                <th class="text-start">Last Name</th>
+                                <th class="text-start">Contact #</th>
+                                <th class="text-start">Email</th>
+                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>Dana Ellysa</td>
-                                <td>Camero</td>
-                                <td>TUPC-19-0399</td>
-                                <td>0949-444-8765</td>
-                                <td>ellysak@gmail.com</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal"
-                                        data-bs-target="#account-edit-modal">Active</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Timothy</td>
-                                <td>Bautista</td>
-                                <td>TUPC-19-0598</td>
-                                <td>0949-444-8765</td>
-                                <td>timothy@gmail.com</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-secondary w-100" data-bs-toggle="modal"
-                                        data-bs-target="#account-edit-modal">Inactive</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Vincent Jake</td>
-                                <td>Montaril</td>
-                                <td>TUPC-19-0998</td>
-                                <td>0949-444-8765</td>
-                                <td>Vincent@gmail.com</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-danger w-100" data-bs-toggle="modal"
-                                        data-bs-target="#account-edit-modal">Ban</button>
-                                </td>
-                            </tr>
-                        </tbody>
+                        
                     </table>
                 </div>
             </div>
@@ -100,19 +66,265 @@
 
 <script>
     $(document).ready(function () {
-        $("#table1").DataTable({
+        UpdateBagNumber();
+        $("#accounts").DataTable({
             dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
                 'rt' +
                 '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
             buttons: ['copy', 'excel', 'pdf'],
             responsive: false,
-            scrollX: true
+            scrollX: true,
+            ajax: {
+                url: "{% url 'get-accounts' %}",
+                type: 'GET',
+                dataSrc: 'accounts'
+            },
+            columns: [
+                { data: 'id_number', className: 'text-start' },
+                { data: 'first_name' },
+                { data: 'last_name' },
+                { data: 'cellphone_number', className: 'text-start' },
+                { data: 'email' },
+                {
+                    data: 'id',
+                    render: function (data, type, row) {
+                        var buttonClass = row.is_active ? 'btn-outline-success' : 'btn-outline-danger';  // Green for active, red for inactive
+                        var buttonIcon = row.is_active ? 'bi-dot' : 'bi-trash';  // Dot icon for active, trash for archived
+                        var buttonText = row.is_active ? 'Active' : 'Archived'; // Text to display based on status
+
+                        return `<button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#account-edit-modal" data-id="${data}" id="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn ${buttonClass} btn-sm" data-id="${data}" id="Archive">
+                                            <i class="bi ${buttonIcon}"></i> ${buttonText}
+                                        </button>`;
+                    }, className: 'text-center'
+                }
+            ]
+
+        });
+
+        // Register FilePond plugins
+        FilePond.registerPlugin(
+            FilePondPluginImagePreview,
+            FilePondPluginImageCrop,
+            FilePondPluginImageExifOrientation,
+            FilePondPluginImageFilter,
+            FilePondPluginImageResize,
+            FilePondPluginFileValidateSize,
+            FilePondPluginFileValidateType
+        );
+
+        // Initialize FilePond
+        const pond = FilePond.create(document.querySelector(".image-resize-filepond"), {
+            credits: null,
+            allowImagePreview: true,
+            allowImageFilter: false,
+            allowImageExifOrientation: false,
+            allowImageCrop: false,
+            allowImageResize: true,
+            imageResizeTargetWidth: 200,
+            imageResizeTargetHeight: 200,
+            imageResizeMode: "cover",
+            imageResizeUpscale: true,
+            acceptedFileTypes: ["image/png", "image/jpg", "image/jpeg"],
+            fileValidateTypeDetectType: (source, type) =>
+                new Promise((resolve, reject) => {
+                    // Do custom type detection here and return with promise
+                    resolve(type);
+                }),
+            storeAsFile: true
+        });
+
+        $(document).on('click', '#Edit', function () {
+            var dataId = $(this).data('id');
+
+            // First AJAX request to get the book details
+            $.ajax({
+                url: '/get-account-info/',  // Adjust this URL if needed
+                type: 'GET',
+                data: {
+                    'id': dataId
+                },
+                success: function (response) {
+                    pond.addFile(response.image_url).then(file => {
+                        console.log('File has been loaded', file);
+                    }).catch(error => {
+                        console.error('Error loading file:', error);
+                    });
+
+                    console.log(response)
+
+                    $('#account_id').val(response.account_id)
+                    $('#first_name').val(response.first_name);
+                    $('#last_name').val(response.last_name);
+                    $('#id_number').val(response.id_number);
+                    $('#contact_number').val(response.cellphone_number);
+                    $('#email').val(response.email);
+
+                    if(response.is_staff){
+                        $('#position').val('1');
+                    }else{
+                        $('#position').val('0');
+                    }
+
+                    // Open the modal after the form is populated
+                    $('#account-edit-modal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching account info:', error);
+                }
+            });
+        });
+
+        $('#contact_number').on('keypress', function (event) {
+            // Allow only numbers (ASCII codes 48-57 are for digits 0-9)
+            if (event.which < 48 || event.which > 57) {
+                event.preventDefault(); // Prevent the character from being entered
+            }
         });
 
         $('#save-button').click(function () {
-            console.log("Form saved");
-            // $('#account-edit-form').submit();
+            $('#accountEditForm').submit();
         });
-    });
 
+        $('#accountEditForm').submit(function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: "{% url 'update-account' %}",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.isSuccess == 'true') {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Account updated successfully",
+                        })
+
+                        $('#accountEditForm').find('input[type="text"], input[type="number"], input[type="file"]').val('');
+                        $('#accountEditForm').find('textarea').val('');
+                        $('#accountEditForm').find('select').prop('selectedIndex', 0);
+
+                        pond.removeFiles();
+
+                        $("#accounts").DataTable().ajax.reload(null, false); // false keeps the current page
+
+
+                    } else {
+                        Toastify({
+                            text: response.message,
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            style: {
+                                background: "#dc3545",
+                            },
+                            stopOnFocus: true,
+                        }).showToast();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
+        $(document).on('click', '#Archive', function () {
+            var userId = $(this).data('id');
+            var button = $(this);  // The clicked button
+            var isActive = button.find('i').hasClass('bi-dot'); // Check if the account is active based on the icon
+
+            // Set the appropriate confirmation message based on the account's current state
+            var actionMessage = isActive ? 'Are you sure you want to archive this account?' : 'Are you sure you want to reactivate this account?';
+            var actionConfirmText = isActive ? 'Archive' : 'Reactivate';
+            
+            // Show SweetAlert confirmation dialog
+            Swal.fire({
+                title: 'Confirm Action',
+                text: actionMessage,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: actionConfirmText,
+                cancelButtonText: 'Cancel',
+                reverseButtons: true  // Reverse buttons so cancel is on the left
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with the AJAX request if confirmed
+                    $.ajax({
+                        url: '/archive-user/',  // URL for the Django view
+                        type: 'POST',
+                        data: {
+                            'user_id': userId,
+                            'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val(),
+                        },
+                        success: function (response) {
+                            if (response.status === 'success') {
+                                // Toggle the button's appearance based on the updated status
+                                if (response.is_active) {
+                                    button.removeClass('btn-outline-danger').addClass('btn-outline-success');
+                                    button.find('i').removeClass('bi-trash').addClass('bi-dot');
+                                    button.text('Active');
+                                } else {
+                                    button.removeClass('btn-outline-success').addClass('btn-outline-danger');
+                                    button.find('i').removeClass('bi-dot').addClass('bi-trash');
+                                    button.text('Archived');
+                                }
+
+                                // Reload the table data to reflect the changes
+                                $("#accounts").DataTable().ajax.reload(null, false); // Keep the current page
+
+                                // Success Swal
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success',
+                                    text: isActive ? 'Account has been archived.' : 'Account has been reactivated.',
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.message
+                                });
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Something went wrong. Please try again later.'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+
+
+
+        function UpdateBagNumber() {
+            $.ajax({
+                url: "{% url 'update-bag-number' %}",
+                type: "GET",
+                success: function (response) {
+                    console.log(response.total_reservations);
+                    $('.notification-dot').text(response.total_reservations);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+        }
+
+    });
 </script>

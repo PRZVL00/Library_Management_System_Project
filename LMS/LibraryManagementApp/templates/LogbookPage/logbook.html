@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Library Management System</title>
+    <title>Logbook Management</title>
     {% include "_CSSreferences.html" %}
 </head>
 
@@ -15,88 +15,141 @@
     <div id="app">
         {% include "_sideNavigation.html" %}
         <div id="main">
-            <!--Header-->
             <header class="mb-3">
                 <a href="#" class="burger-btn d-block d-xl-none">
                     <i class="bi bi-justify fs-3"></i>
                 </a>
             </header>
             <div class="page-heading row">
-                <div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10">
+                <div class="col-10">
                     <h3>Logbook</h3>
                 </div>
-                <div class="col-2 col-sm-2 col-md-2 col-lg-2 col-xl-2 d-flex justify-content-end align-items-center">
-                    <!-- Icon with notification dot -->
+                <div class="col-2 d-flex justify-content-end align-items-center">
                     <div class="position-relative me-3">
                         <i class="bi bi-backpack" style="font-size: 1.5rem;"></i>
                         <span
-                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
+                            class="notification-dot position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="bagContent">
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     </div>
                 </div>
             </div>
-            <!--Main Page-->
             <div class="page-content">
-                <!--Start Your Page Here-->
-                <div class="table-responsive">
-                    <!-- Modal for edit profile will be used here but with some changes -->
-                    <!-- Buttons for each input field will be disabled and also the input fields -->
-                    <!-- Reset Password will be remove and save buttons and cancel will be replaced as close -->
-                    <table class="table table-striped" id="logs">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Name</th>
-                                <th>Time In</th>
-                                <th>Time Out</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>08-15-2024</td>
-                                <td><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Timothy Bautista</a></td>
-                                <td>01:15</td>
-                                <td>01:15</td>
-                            </tr>
-                            <tr>
-                                <td>08-15-2024</td>
-                                <td><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Millard Monzon</a></td>
-                                <td>01:15</td>
-                                <td>01:15</td>
-                            </tr>
-                            <tr>
-                                <td>08-15-2024</td>
-                                <td><a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#account-edit-modal">Dominique Fetalbo</a></td>
-                                    <td>01:15</td>
-                                <td>01:15</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row justify-content-center mb-3">
+                            <input type="text" id="log-range-picker" class="form-control w-25 text-center" placeholder="Select Date">
+                        </div>
+                        <div class="row">
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="logs">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Id Number</th>
+                                            <th>Email</th>
+                                            <th>Time In</th>
+                                            <th>Time Out</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            {% include "AccountManagementPage/_account-edit.html" %}
             {% include "_footer.html" %}
         </div>
     </div>
     {% include "_JSreferences.html" %}
 </body>
 
-</html>
 
+
+</html>
 
 <script>
     $(document).ready(function () {
-        $('#logs').DataTable({
-            dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
-                 'rt' +
-                 '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
-            buttons: ['copy', 'excel', 'pdf'],
-            responsive: false,
-            scrollX: true
-        });
+        let master_startDate = null;
+        let master_endDate = null;
+        let master_specificDate = null;
+        let master_dateCount = 0;
+
+        $('#log-range-picker').flatpickr({
+                mode: 'range',
+                dateFormat: 'Y-m-d',
+                defaultDate: [
+                    new Date(new Date().setDate(new Date().getDate() - 30)), // 30 days ago
+                    new Date() // today
+                ],
+                onReady: function (selectedDates) {
+                    if (selectedDates.length === 2) {
+                        if (selectedDates[0].toLocaleDateString() === selectedDates[1].toLocaleDateString()) {
+                            master_startDate = null;
+                            master_endDate = null;
+                            master_specificDate = selectedDates[0].toLocaleDateString('en-CA');
+                            master_dateCount = 1;
+                        } else {
+                            master_startDate = selectedDates[0].toLocaleDateString('en-CA');
+                            master_endDate = selectedDates[1].toLocaleDateString('en-CA');
+                            master_specificDate = null;
+                            master_dateCount = 2;
+                        }
+                    }
+                    InitializeLogTable(master_startDate, master_endDate, master_specificDate, master_dateCount);
+                },
+                onClose: function (selectedDates) {
+                    if (selectedDates.length === 2) {
+                        if (selectedDates[0].toLocaleDateString() === selectedDates[1].toLocaleDateString()) {
+                            master_startDate = null;
+                            master_endDate = null;
+                            master_specificDate = selectedDates[0].toLocaleDateString('en-CA');
+                            master_dateCount = 1;
+                        } else {
+                            master_startDate = selectedDates[0].toLocaleDateString('en-CA');
+                            master_endDate = selectedDates[1].toLocaleDateString('en-CA');
+                            master_specificDate = null;
+                            master_dateCount = 2;
+                        }
+                    }
+                    InitializeLogTable(master_startDate, master_endDate, master_specificDate, master_dateCount);
+                }
+            });
+
+        
+
+        function InitializeLogTable(startDate, endDate, specificDate, dateCount) {
+            if ($.fn.DataTable.isDataTable('#logs')) {
+                $('#logs').DataTable().ajax.reload();
+            } else {
+                $('#logs').DataTable({
+                    ajax: {
+                        url: "{% url 'get-log' %}",
+                        type: 'GET',
+                        data: function (d) {
+                            d.start_date = master_startDate;
+                            d.end_date = master_endDate;
+                            d.specific_date = master_specificDate;
+                            d.date_count = master_dateCount;
+                        },
+                        dataSrc: ''
+                    },
+                    columns: [
+                        { data: 'user', className: 'text-start' },
+                        { data: 'id_number', className: 'text-start' },
+                        { data: 'email', className: 'text-start' },
+                        { data: 'time_in', className: 'text-start' },
+                        { data: 'time_out', className: 'text-start' }
+                    ],
+                    dom: '<"row mb-3"<"col-12 col-md-4"l><"col-12 col-md-4 text-center"B><"col-12 col-md-4 d-flex justify-content-end"f>>' +
+                        'rt' +
+                        '<"row mt-3"<"col-12 col-md-6"i><"col-12 col-md-6 d-flex justify-content-end"p>>',
+                    buttons: ['copy', 'excel', 'pdf'],
+                    scrollX: true,
+                    responsive: false
+                });
+            }
+        }
+
     });
 </script>
-
-
