@@ -1,3 +1,4 @@
+{% load static %}
 <!-- Modal -->
 <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -9,7 +10,7 @@
             <div class="modal-body">
                 <!-- Template Download Link -->
                 <p>
-                    <a href="{{ template_url }}" download class="text-decoration-none">
+                    <a href="{% static 'Template.xlsx' %}" download class="text-decoration-none">
                         <i class="fas fa-download"></i> Download Template
                     </a>
                 </p>

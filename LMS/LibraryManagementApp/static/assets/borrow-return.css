@@ -1,0 +1,63 @@
+.card-slider {
+    position: relative;
+    overflow: hidden;
+}
+.card-deck {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+.card {
+    min-width: calc((100% / 5) - .5rem); /* Subtract the total margin for 5 cards */
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+}
+@media (max-width: 992px) {
+    .card {
+        min-width: calc((100% / 2) - .5rem); /* Adjust for 2 cards on medium screens */
+    }
+}
+@media (max-width: 768px) {
+    .card {
+        min-width: calc(100% - .5rem); /* Adjust for 1 card on small screens */
+    }
+}
+.arrow-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    background: none;
+    border: none;
+    outline: none;
+    z-index: 1;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.arrow-btn.left {
+    left: 10px; /* Adjusted for better visibility */
+}
+.arrow-btn.right {
+    right: 10px; /* Adjusted for better visibility */
+}
+.indicators {
+    text-align: center;
+    margin-top: 10px;
+}
+.indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #ddd;
+    border-radius: 50%;
+    margin: 0 5px;
+    cursor: pointer;
+}
+.indicator.active {
+    background-color: #333;
+}
