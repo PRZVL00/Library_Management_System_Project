@@ -20,11 +20,7 @@ db.sqlite3
 # # Static and media files
 staticfiles/
 media/
-css/
-js/
-images/
-data/
-plugins/
+
 
 # Private directories
 venv/

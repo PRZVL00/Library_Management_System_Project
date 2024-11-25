@@ -2,6 +2,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path # type: ignore
 from . import views
+from django.contrib.auth.views import LogoutView
+
 
 urlpatterns = [
     path('', views.Login, name="login"),
@@ -65,6 +67,7 @@ urlpatterns = [
     path('get-to-return', views.GetToReturn, name='get-to-return'),
     path('add-book-copy/', views.AddBookCopy, name='add-book-copy'),
     path('archive-user/', views.ArchiveUser, name='archive-user'),
+    path('logout/', views.Logout, name='logout'),
 
 
 

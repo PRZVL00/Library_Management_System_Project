@@ -748,7 +748,9 @@ def GetBookInfo(request):
             return JsonResponse({'error': 'Book not found or does not have a book with status 1'}, status=404)
 
         authors = BookAuthor.objects.filter(book_master=book_master_id).values_list('author', flat=True)
-        categories = BookCategory.objects.filter(book_master=book_master_id).values_list('category_id', flat=True)
+        categories = BookCategory.objects.filter(book_master=book_master_id).values_list('category__category_name', flat=True)
+
+        print(categories)
 
 
         data = {
@@ -865,9 +867,13 @@ def UpdateBook(request):
         if 'bookPic' in request.FILES:
             book_master.image = request.FILES.get('bookPic')
             print(f"Book Picture: {book_master.image.name}")  # Debug: Check the file name
+        else:
+            book_master.image = None  # Reset image if not provided in the request
 
         if 'softcopy' in request.FILES:
             book_master.soft_copy = request.FILES.get('softcopy')
+        else:
+            book_master.soft_copy = None  # Reset soft_copy if not provided in the request
         
         # Save the book master instance
         book_master.save()
@@ -1848,7 +1854,10 @@ def BatchUpload(request):
             ]
 
             if list(df.columns) != expected_headers:
-                return JsonResponse({"error": "Invalid headers"}, status=400)
+                return JsonResponse({
+                    "isSuccess": False, 
+                    "message": "Invalid template. Please follow the required format."
+                }, status=400)
 
             # Process each row
             for index, row in df.iterrows():
@@ -2152,3 +2161,8 @@ def get_late_book_returns():
         })
         
     return late_book_info
+
+@login_required  # Ensure the user is logged in
+def Logout(request):	
+    logout(request)
+    return redirect('login')

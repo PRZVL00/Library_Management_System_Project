@@ -289,6 +289,22 @@
 
                     // Update summary
                     $('#book-summary').text(response.summary);
+                    // Update categories list
+
+                    console.log(response.categories);
+                    var categoriesHtml = '';
+                    response.categories.forEach(function (category) {
+                        console.log(category)
+                        categoriesHtml +=  `<span class="badge bg-primary me-1">${category}</span>`;
+                    });
+                    $('#book-categories').html(categoriesHtml);
+
+                    // Update soft copy link
+                    if (response.soft_copy) {
+                        $('#softcopy-link').html(`<a href="${response.soft_copy}" target="_blank" class="btn btn-primary">Download Softcopy</a>`);
+                    } else {
+                        $('#softcopy-link').html('');
+                    }
 
                     // Show the modal
                     $('#book-info-modal').modal('show');
