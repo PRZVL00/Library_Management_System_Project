@@ -19,7 +19,6 @@ db.sqlite3
 
 # # Static and media files
 staticfiles/
-static/
 media/
 css/
 js/
