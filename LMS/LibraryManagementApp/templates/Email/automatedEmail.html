@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
             margin: 0;
             padding: 0;
         }
+
         .email-container {
             max-width: 600px;
             margin: 20px auto;
@@ -20,20 +22,24 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
+
         .header {
             background-color: #004080;
             color: #ffffff;
             text-align: center;
             padding: 20px;
         }
+
         .header h1 {
             margin: 0;
             font-size: 24px;
         }
+
         .body {
             padding: 20px;
             line-height: 1.6;
         }
+
         .footer {
             background-color: #f1f1f1;
             color: #555555;
@@ -41,6 +47,7 @@
             font-size: 12px;
             padding: 10px;
         }
+
         .button {
             display: inline-block;
             margin-top: 20px;
@@ -50,62 +57,81 @@
             text-decoration: none;
             border-radius: 5px;
         }
+
         .button:hover {
             background-color: #003366;
         }
     </style>
 </head>
+
 <body>
     <div class="email-container">
-        <!-- Header Section -->
         <div class="header">
             <h1>Paliparan National High School Library System Notification</h1>
         </div>
-
-        <!-- Body Section -->
         <div class="body">
             <p>Dear Admin,</p>
             <p>This is an automated notification regarding library system activity:</p>
-            
+
             <h3>1. Users Who Haven't Clocked Out:</h3>
-            <p>The following users have not clocked out:</p>
+            {% if users_not_clocked_out %}
             <ul>
-                <!-- Loop through user list dynamically -->
-                <li>{{ user_name_1 }} (Contact: {{ user_contact_1 }}, Email: {{ user_email_1 }})</li>
-                <li>{{ user_name_2 }} (Contact: {{ user_contact_2 }}, Email: {{ user_email_2 }})</li>
-                <!-- Add more as needed -->
+                {% for user in users_not_clocked_out %}
+                <li>
+                    <strong>{{ user.name }}</strong>
+                    (Contact: {{ user.contact }},
+                    Email: <a href="mailto:{{ user.email }}">{{ user.email }}</a>)
+                </li>
+                {% endfor %}
             </ul>
+            {% else %}
+            <p>No users have been found.</p>
+            {% endif %}
 
             <h3>2. Expired Reservations:</h3>
-            <p>The following reservations have expired:</p>
+            {% if expired_reservations %}
             <ul>
-                <!-- Loop through expired reservations dynamically -->
-                <li>{{ reservation_title_1 }} - Reserved by {{ user_name_1 }} (Email: {{ user_email_1 }})</li>
-                <li>{{ reservation_title_2 }} - Reserved by {{ user_name_2 }} (Email: {{ user_email_2 }})</li>
-                <!-- Add more as needed -->
+                {% for reservation in expired_reservations %}
+                <li>
+                    <strong>{{ reservation.book_title }}</strong> - Reserved by
+                    <strong>{{ reservation.user_name }}</strong>
+                    (Email: <a href="mailto:{{ reservation.user_email }}">{{ reservation.user_email }}</a>)
+                </li>
+                {% endfor %}
             </ul>
+            {% else %}
+            <p>No expired reservations found.</p>
+            {% endif %}
 
             <h3>3. Late Book Returns:</h3>
-            <p>The following books are overdue and should be marked as late:</p>
+            {% if late_book_returns %}
             <ul>
-                <!-- Loop through late books dynamically -->
-                <li>{{ book_title_1 }} - Borrowed by {{ user_name_1 }} (Email: {{ user_email_1 }})</li>
-                <li>{{ book_title_2 }} - Borrowed by {{ user_name_2 }} (Email: {{ user_email_2 }})</li>
-                <!-- Add more as needed -->
+                {% for late_book in late_book_returns %}
+                <li>
+                    <strong>{{ late_book.book_title }}</strong> - Borrowed by
+                    <strong>{{ late_book.user_name }}</strong>
+                    (Email: <a href="mailto:{{ late_book.user_email }}">{{ late_book.user_email }}</a>)
+                </li>
+                {% endfor %}
             </ul>
-
-            <p>If you need further information, feel free to reach out.</p>
+            {% else %}
+            <p>No late books found.</p>
+            {% endif %}
 
             <p style="text-align: center;">
-                <a href="https://pnhslibrarymanagemensystem.site"><button class="button">Visit the Library Portal</button></a>
+                <a href="https://pnhslibrarymanagemensystem.site">
+                    <button class="button">Visit the Library Portal</button>
+                </a>
             </p>
         </div>
-
-        <!-- Footer Section -->
         <div class="footer">
-            <p>School Library | Contact us at <a href="mailto: contact-us@pnhslibrarymanagemensystem.site">contact-us@pnhslibrarymanagemensystem.site</a></p>
+            <p>School Library | Contact us at <a
+                    href="mailto:contact-us@pnhslibrarymanagemensystem.site">contact-us@pnhslibrarymanagemensystem.site</a>
+            </p>
             <p>© {{ current_year }} School Library. All rights reserved.</p>
         </div>
     </div>
+
 </body>
+
 </html>

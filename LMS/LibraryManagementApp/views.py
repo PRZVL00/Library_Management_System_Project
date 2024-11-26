@@ -48,6 +48,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
+from collections import defaultdict
+
 
 
 
@@ -1571,7 +1573,7 @@ def GetLog(request):
             'id_number': log.user.id_number,
             'email': log.user.email,
             'time_in': log.time_in.strftime('%Y-%m-%d %H:%M:%S') if log.time_in else 'Not In',
-            'time_out': log.time_out.strftime('%Y-%m-%d %H:%M:%S') if log.time_out else 'Not Out'
+            'time_out': "Failed to Time out" if log.time_out == datetime(1900, 1, 1, 0, 0) else log.time_out.strftime('%Y-%m-%d %H:%M:%S') if log.time_out else 'Not Out'
         }
         for log in logs
     ]
@@ -1604,14 +1606,6 @@ def GetFirstRow(request):
         'active_users': active_users
     })
 
-@login_required(login_url='login')
-def GetSecondRow(request):
-    if request.method == 'POST':
-        time_range = request.POST.get('time_range')
-        today = datetime.now()
-
-        # Initialize empty lists for data
-        labels = []@login_required(login_url='login')
 def GetSecondRow(request):
     if request.method == 'POST':
         time_range = request.POST.get('time_range')
@@ -2046,55 +2040,50 @@ def send_library_report():
     email.send()
 
 
-def send_expiration_email(user_name, user_email, book_title, reservation_end_date):
-    subject = f"Your Reservation for {book_title} Has Expired"
-    html_content = render_to_string(
+def send_expiration_email(user_name, user_email, html_content):
+    subject = "Your Library Reservations Have Expired"
+    email_content = render_to_string(
         'Email/expiredReservation.html', {
             'user_name': user_name,
-            'book_title': book_title,
-            'reservation_end_date': reservation_end_date,
+            'user_email': user_email,
+            'html_content': html_content,
             'current_year': timezone.now().year
         }
     )
 
-    # Create the email message with both plain text and HTML content
     email = EmailMultiAlternatives(
         subject=subject,
-        body='',  # Empty body as we're using HTML
+        body='',  # Empty plain text body, using HTML instead
         from_email='no-reply@pnhslibrarymanagemensystem.site',
         to=[user_email]
     )
-    email.attach_alternative(html_content, "text/html")
+    email.attach_alternative(email_content, "text/html")
     email.send()
 
 
-
-def send_late_return_email(user_name, user_email, book_title, due_date):
-    subject = f"Late Return Notice for {book_title}"
-    html_content = render_to_string(
+def send_late_return_email(user_name, user_email, html_content):
+    subject = "Late Return Notice for Your Library Books"
+    email_content = render_to_string(
         'Email/lateBook.html', {
             'user_name': user_name,
-            'book_title': book_title,
-            'due_date': due_date,
+            'html_content': html_content,  # Pass the list of late books
             'current_year': timezone.now().year
         }
     )
 
-    # Create the email message with both plain text and HTML content
     email = EmailMultiAlternatives(
         subject=subject,
         body='',  # Empty body as we're using HTML
         from_email='no-reply@pnhslibrarymanagemensystem.site',
         to=[user_email]
     )
-    email.attach_alternative(html_content, "text/html")
+    email.attach_alternative(email_content, "text/html")
     email.send()
 
 def get_users_not_clocked_out():
-    # Logic to retrieve users who haven't clocked out (based on your model's logic)
     not_clocked_out_users = Logbook.objects.filter(time_out__isnull=True)
     user_info = []
-    
+
     # Define the default value for time_out
     default_time_out = datetime(1900, 1, 1, 0, 0, 0)
 
@@ -2104,63 +2093,102 @@ def get_users_not_clocked_out():
         user.save()
 
         user_info.append({
-            'name': user.user.full_name,
+            'name': user.user.first_name + " " + user.user.last_name,  # Call the method to get the name
             'contact': user.user.cellphone_number,
             'email': user.user.email
         })
-    
+
     return user_info
 
 def get_expired_reservations():
-    # Logic to find expired reservations
-    expired_reservations = Reservation.objects.filter(date_reserved__lt=timezone.now(), is_processed=False, is_expired=False)
-    reservation_info = []
-    
+    expired_reservations = Reservation.objects.filter(expiration_date__lt=timezone.now(), is_processed=False, is_expired=False)
+    user_reservations = defaultdict(list)
+
     # Get the status object for 'Available'
     available_status = DimStatus.objects.get(status_name='Available')
 
     for reservation in expired_reservations:
-        # Send email to the reservist
-        send_expiration_email(
-            user_name=reservation.user.first_name + ' ' + reservation.user.last_name,
-            user_email=reservation.user.email,
-            book_title=reservation.book.book_master.title,
-            reservation_end_date=reservation.date_reserved
-        )
-        
         # Update the status of the reserved book to 'Available'
         reservation.book.status = available_status
         reservation.book.save()
-        
-        reservation_info.append({
-            'title': reservation.book.book_master.title,
-            'user_name': reservation.user.first_name + ' ' + reservation.user.last_name,
-            'user_email': reservation.user.email
+
+        # Mark the reservation as expired
+        reservation.is_expired = True
+        reservation.save()
+
+        # Group reservations by user
+        user_reservations[reservation.reservist].append({
+            'book_title': reservation.book.book_master.title,
+            'reservation_end_date': reservation.expiration_date,
+            'user_name': f"{reservation.reservist.first_name} {reservation.reservist.last_name}",  # Add user name
+            'user_email': reservation.reservist.email  # Add user email
         })
-        
-    return reservation_info
+    
+    # Send one email per user
+    for user, books in user_reservations.items():
+        send_expiration_email(
+            user_name=f"{user.first_name} {user.last_name}",
+            user_email=user.email,
+            html_content=books  # Pass the books list directly
+        )
+
+    # Return a summary for the report
+    return [
+        {
+            'user_name': f"{user.first_name} {user.last_name}",
+            'user_email': user.email,
+            'books': [book['book_title'] for book in books],
+        }
+        for user, books in user_reservations.items()
+    ]
+
+
 
 def get_late_book_returns():
-    # Logic to find overdue book returns
     late_books = TransactionDetail.objects.filter(expected_date_return__lt=timezone.now(), is_returned=False, is_late=False)
-    late_book_info = []
-    
+    user_late_books = defaultdict(list)
+
     for transaction in late_books:
-        # Send email to the borrower
-        send_late_return_email(
-            user_name=transaction.user.first_name + ' ' + transaction.user.last_name,
-            user_email=transaction.user.email,
-            book_title=transaction.book.book_master.title,
-            due_date=transaction.expected_date_return
-        )
-        
-        late_book_info.append({
+        # Update the is_late field
+        transaction.is_late = True
+        transaction.save()
+
+        # Format the due date
+        formatted_due_date = transaction.expected_date_return.strftime('%Y-%m-%d')
+
+        # Group late books by user
+        user_late_books[transaction.user].append({
             'book_title': transaction.book.book_master.title,
-            'user_name': transaction.user.first_name + ' ' + transaction.user.last_name,
+            'due_date': formatted_due_date,  # Use the formatted date here
+            'user_name': f"{transaction.user.first_name} {transaction.user.last_name}",
             'user_email': transaction.user.email
         })
-        
-    return late_book_info
+
+    # Send one email per user
+    for user, books in user_late_books.items():
+        send_late_return_email(
+            user_name=f"{user.first_name} {user.last_name}",
+            user_email=user.email,
+            html_content=[
+                {
+                    'book_title': book['book_title'],
+                    'due_date': book['due_date'],
+                    'user_name': book['user_name'],
+                    'user_email': book['user_email']
+                }
+                for book in books
+            ]
+        )
+
+    return [
+        {
+            'user_name': f"{user.first_name} {user.last_name}",
+            'user_email': user.email,
+            'books': [book['book_title'] for book in books],
+        }
+        for user, books in user_late_books.items()
+    ]
+
 
 @login_required  # Ensure the user is logged in
 def Logout(request):	

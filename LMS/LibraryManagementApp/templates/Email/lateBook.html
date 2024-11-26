@@ -57,37 +57,40 @@
 </head>
 <body>
     <div class="email-container">
-        <!-- Header Section -->
         <div class="header">
             <h1>Paliparan National High School Library System Notification</h1>
         </div>
-
-        <!-- Body Section -->
         <div class="body">
-            <p>Dear Admin,</p>
+            <p>Dear user,</p>
             <p>This is an automated notification regarding overdue book returns in the library system:</p>
-            
+    
             <h3>Late Book Returns:</h3>
-            <p>The following books are overdue:</p>
-            <ul>
-                <!-- Loop through late books dynamically -->
-                <li>{{ book_title_1 }} - Borrowed by {{ user_name_1 }} (Email: {{ user_email_1 }})</li>
-                <li>{{ book_title_2 }} - Borrowed by {{ user_name_2 }} (Email: {{ user_email_2 }})</li>
-                <!-- Add more as needed -->
-            </ul>
-
-            <p>If you need further information, feel free to reach out.</p>
-
+            {% if html_content %}
+                <ul>
+                    {% for late_book in html_content %}
+                        <li>
+                            <strong>{{ late_book.book_title }}</strong> - Borrowed by
+                            <strong>{{ late_book.user_name }}</strong>
+                            (Email: <a href="mailto:{{ late_book.user_email }}">{{ late_book.user_email }}</a>)<br>
+                            Due Date: <strong>{{ late_book.due_date}}</strong>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No late books at the moment.</p>
+            {% endif %}
             <p style="text-align: center;">
-                <a href="https://pnhslibrarymanagemensystem.site"><button class="button">Visit the Library Portal</button></a>
+                <a href="https://pnhslibrarymanagemensystem.site">
+                    <button class="button">Visit the Library Portal</button>
+                </a>
             </p>
         </div>
-
-        <!-- Footer Section -->
         <div class="footer">
-            <p>School Library | Contact us at <a href="mailto: contact-us@pnhslibrarymanagemensystem.site">contact-us@pnhslibrarymanagemensystem.site</a></p>
+            <p>School Library | Contact us at <a href="mailto:contact-us@pnhslibrarymanagemensystem.site">contact-us@pnhslibrarymanagemensystem.site</a></p>
             <p>© {{ current_year }} School Library. All rights reserved.</p>
         </div>
     </div>
+    
+    
 </body>
 </html>
