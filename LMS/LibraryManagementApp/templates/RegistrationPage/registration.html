@@ -4,9 +4,10 @@
 
 <head>
    <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Library Management System</title>
-   {% include "_CSSreferences.html" %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link rel="icon" href="{% static 'assets/static/images/logo_icon.ico' %}" type="image/x-icon">
+    {% include "_CSSreferences.html" %}
 </head>
 
 <body>
@@ -14,9 +15,10 @@
       <div class="row h-100">
          <div class="col-lg-5 col-12">
             <div id="auth-left" class="pb-1">
-               <div class="auth-logo mb-3">
-                  <a href="#"><img src={% static "assets/compiled/svg/logo.svg" %} alt="Logo"></a>
-               </div>
+               <div class="auth-logo d-flex align-items-center">
+                  <a href="#"><img src="{% static 'assets/static/images/logo.png' %}" alt="Logo" class="me-3" style="height: 100px;"></a>
+                  <h2 class="mb-0">PNHS Library Management System</h2> <!-- Added text here -->
+               </div>>
                <h1>Sign Up</h1>
                <form id="registrationForm" method="POST" enctype="multipart/form-data">
                   {% csrf_token %}

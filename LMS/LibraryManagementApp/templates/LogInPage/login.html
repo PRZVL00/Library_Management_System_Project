@@ -6,6 +6,7 @@
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Library Management System</title>
+   <link rel="icon" href="{% static 'assets/static/images/logo_icon.ico' %}" type="image/x-icon">
    {% include "_CSSreferences.html" %}
 </head>
 
@@ -41,7 +42,7 @@
                </form>
                <div class="text-center mt-5 text-lg fs-6">
                   <p class="text-gray-600">Don't have an account? <a href={% url "registration" %} class="font-bold">Sign up</a>.</p>
-                  <p><a class="font-bold" href="Forgotpassword">Forgot password?</a>.</p>
+                  <p><a class="font-bold" href="{% url "registration" %}">Forgot password?</a>.</p>
                </div>
             </div>
          </div>
