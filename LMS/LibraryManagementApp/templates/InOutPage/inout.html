@@ -35,11 +35,27 @@
 
         <!-- Footer with Home Button -->
         <footer class="mt-4">
-            <a href="{% url 'dashboard' %}" class="btn btn-primary">Home</a>
+            <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
         </footer>
     </div>
 
     {% include "_JSreferences.html" %}
+    
+    <audio id="Welcome_Peter-sound" src="{% static 'assets/static/sound/Welcome_Peter.mp3' %}" preload="auto"></audio>
+        
+    <audio id="Welcome_Stewie-sound" src="{% static 'assets/static/sound/Welcome_Stewie.mp3' %}" preload="auto"></audio>
+
+    <audio id="Welcome_Rick-sound" src="{% static 'assets/static/sound/Welcome_Rick.mp3' %}" preload="auto"></audio>
+
+    <audio id="Welcome_Morty-sound" src="{% static 'assets/static/sound/Welcome_Morty.mp3' %}" preload="auto"></audio>
+    
+    <audio id="Thank_Peter-sound" src="{% static 'assets/static/sound/Thank_Peter.mp3' %}" preload="auto"></audio>
+        
+    <audio id="Thank_Stewie-sound" src="{% static 'assets/static/sound/Thank_Stewie.mp3' %}" preload="auto"></audio>
+
+    <audio id="Thank_Rick-sound" src="{% static 'assets/static/sound/Thank_Rick.mp3' %}" preload="auto"></audio>
+
+    <audio id="Thank_Morty-sound" src="{% static 'assets/static/sound/Thank_Morty.mp3' %}" preload="auto"></audio>
 
     
 </body>
@@ -84,6 +100,11 @@
             },
             success: function(response) {
                 if (response.success) {
+                    if (response.message == "Thank you!"){
+                        $('#Thank_Morty-sound')[0].play();
+                    } else {
+                        $('#Welcome_Morty-sound')[0].play();
+                    }
                     Swal.fire({
                         title: response.message,
                         icon: "success",

@@ -114,25 +114,8 @@
                     <i class="bi bi-grid-fill"></i>
                     <span>Log Book</span>
                     </a>
-                </li>
-                {% if user.is_staff %}
-                <li class="sidebar-item {% if request.path == '/in-out/' %}active{% endif %}">
-                    <a href={% url "in-out" %} class='sidebar-link'>
-                    <i class="bi bi-grid-fill"></i>
-                    <span>In/Out</span>
-                    </a>
-                </li>
-                {% endif %}   
-                
+                </li>                
                 <li class="sidebar-title">Account</li>
-                {% if user.is_staff %}
-                <li class="sidebar-item {% if request.path == '/account-management/' %}active{% endif %}">
-                    <a href={% url "account-management" %} class='sidebar-link'>
-                    <i class="bi bi-grid-fill"></i>
-                    <span>Account Management</span>
-                    </a>
-                </li>
-                {% endif %}
                 <li class="sidebar-item {% if request.path == '/Profile/' %} active {% endif %}">
                     <a href={% url "profile" %} class='sidebar-link'>
                     <i class="bi bi-grid-fill"></i>

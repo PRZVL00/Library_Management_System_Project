@@ -49,6 +49,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
 from collections import defaultdict
+import random
+import string
 
 
 
@@ -56,11 +58,44 @@ from collections import defaultdict
 def Login(request):
     return render(request, 'LogInPage/login.html', {})
 
+from django.contrib.auth import login
+from django.http import JsonResponse
+from .models import CustomUser
+
+def LoginQR(request):
+    print("Verifying QR")
+    if request.method == 'POST':
+        qr_value = request.POST.get('qrData')
+
+        if not qr_value:
+            return JsonResponse({'isAuthenticated': False, 'message': 'QR Code is required'})
+
+        # Fetch the user associated with the QR code
+        user = CustomUser.objects.filter(qr_value=qr_value).first()
+
+        if not user:
+            return JsonResponse({'isAuthenticated': False, 'message': 'Invalid QR Code'})
+
+        # Log the user in directly
+        login(request, user)
+
+        # Redirect based on user type
+        if user.is_staff:
+            print("Redirecting to dashboard")
+            return JsonResponse({'isAuthenticated': True, 'message': 'Logged in successfully', 'url': 'dashboard'})
+        else:
+            print("Redirecting to book-collection")
+            return JsonResponse({'isAuthenticated': True, 'message': 'Logged in successfully', 'url': 'book-collection'})
+
+
+
 def VerifyLogin(request):
     print("Verifying")
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+
+        print(username, password)
 
         if not username or not password:
             return JsonResponse({'isAuthenticated': False,'message': 'Username and password is required'})
@@ -80,7 +115,7 @@ def VerifyLogin(request):
                return JsonResponse({'isAuthenticated': True,'message': 'Logged in successfully', 'url': 'book-collection'})
 
 def Forgotpassword(request):
-    return render(request, 'ForgotpasswordPage/ForgotpasswordPage.html', {})
+    return render(request, 'ForgotPasswordPage/ForgotpasswordPage.html', {})
 
 def ResetPasswordRequest(request):
     if request.method == "POST":
@@ -160,7 +195,7 @@ def ResetPassword(request, uidb64, token):
         is_valid = False
         error_message = 'Invalid link or user not found.'
 
-    return render(request, 'ForgotpasswordPage/ResetPassword.html', {
+    return render(request, 'ForgotPasswordPage/ResetPassword.html', {
         'uidb64': uidb64,
         'token': token,
         'is_valid': is_valid,
@@ -172,6 +207,10 @@ def ResetPassSucc(request):
 
 def Registration(request):
     return render(request, 'RegistrationPage/registration.html', {})
+
+# Function to generate random strings
+def generate_random_string(length=10):
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 def RegisterUser(request):
     if request.method == 'POST':
@@ -216,7 +255,13 @@ def RegisterUser(request):
             user_profile.set_password(password)
             user_profile.save()
 
-            user_profile.qr_value = f"QR-{user_profile.id}-{last_name}-{email}"
+# Generate random strings for the QR value
+            random_string1 = generate_random_string()
+            random_string2 = generate_random_string()
+            random_string3 = generate_random_string()
+            random_string4 = generate_random_string()   
+
+            user_profile.qr_value = f"QR-{random_string1}-{user_profile.id}-{random_string2}-PNHSxLMS-{random_string3}"
             user_profile.save()
 
             # Generate QR code
@@ -653,13 +698,15 @@ def GetBooks(request):
         # If the caller is 'Management', get all books regardless of status
         if caller == 'Management':
             bookList = list(
-                BookMaster.objects.filter(is_archived=False).annotate(
+                BookMaster.objects.filter(is_archived=False)
+                .annotate(
                     has_invalid_books=Case(
                         When(book__status__in=[1, 2], then=False),
                         default=True,
-                        output_field=BooleanField()
+                        output_field=BooleanField(),
                     )
-                ).values(
+                )
+                .values(
                     'book_master_id',
                     'title',
                     'publisher',
@@ -667,9 +714,16 @@ def GetBooks(request):
                     'isbn',
                     'location',
                     'late_fee',
-                    'has_invalid_books',  # Add this field to the response
-                ).distinct()
+                    'has_invalid_books',
+                )
             )
+            unique_books = {}
+            for book in bookList:
+                unique_books[book['book_master_id']] = book
+
+            bookList = list(unique_books.values())
+
+            print(bookList)
         else:
             # Get only books with at least one related Book with status 1
             bookList = list(
@@ -960,12 +1014,13 @@ def UpdateAccount(request):
         account.last_name = request.POST.get('last_name')
         account.id_number = request.POST.get('id_number')
         account.cellphone_number = request.POST.get('contact_number')
-        account.email = request.POST.get('email')
-
-        if request.POST.get('position') == "0":
-            account.is_staff = False
-        else:
-            account.is_staff = True
+        
+        if request.user.is_staff:
+            if request.POST.get('position') == "0":
+                account.is_staff = False
+            else:
+                account.is_staff = True
+        
 
         print(request.FILES.get('profile_picture'))
 
@@ -1516,14 +1571,16 @@ def GetUserTransaction(request):
 def InOut(request):
     return render(request, 'InOutPage/inout.html', {})
 
-@login_required(login_url='login')
 def CreateLog(request):
     if request.method == 'POST':
         try:
             qr_value = request.POST.get('qr_value')
 
+            print("shit")
+
             # Check if the QR value exists
             user = CustomUser.objects.filter(qr_value=qr_value).first()
+            print(user)
             if not user:
                 return JsonResponse({'success': False, 'message': 'Invalid QR code. Please try again.'})
 
@@ -2027,7 +2084,7 @@ def send_library_report():
 
     # Send email
     subject = 'Library System Notification'
-    recipient_list = ['sheikjosiahbautista@gmail.com']  # Add your admin's email here
+    recipient_list = ['pnhslibrarymanagementsystem@gmail.com']  # Add your admin's email here
 
     # Create the email message with both plain text and HTML content
     email = EmailMultiAlternatives(
@@ -2145,21 +2202,30 @@ def get_expired_reservations():
 
 
 def get_late_book_returns():
-    late_books = TransactionDetail.objects.filter(expected_date_return__lt=timezone.now(), is_returned=False, is_late=False)
+    now = timezone.now()
+    one_day_before = now - timedelta(days=1)
+
+    # Retrieve books that are overdue or will be overdue by the end of the day
+    late_books = TransactionDetail.objects.filter(
+        expected_date_return__lt=now,  # Due before now
+        expected_date_return__gte=one_day_before,  # Due in the last 24 hours
+        is_returned=False,  # Not yet returned
+        is_late=False  # Not yet marked as late
+    )
+
+    # Update the `is_late` field for all relevant transactions
+    late_books.update(is_late=True)
+
     user_late_books = defaultdict(list)
 
     for transaction in late_books:
-        # Update the is_late field
-        transaction.is_late = True
-        transaction.save()
-
         # Format the due date
         formatted_due_date = transaction.expected_date_return.strftime('%Y-%m-%d')
 
         # Group late books by user
         user_late_books[transaction.user].append({
             'book_title': transaction.book.book_master.title,
-            'due_date': formatted_due_date,  # Use the formatted date here
+            'due_date': formatted_due_date,
             'user_name': f"{transaction.user.first_name} {transaction.user.last_name}",
             'user_email': transaction.user.email
         })
@@ -2169,22 +2235,20 @@ def get_late_book_returns():
         send_late_return_email(
             user_name=f"{user.first_name} {user.last_name}",
             user_email=user.email,
-            html_content=[
-                {
-                    'book_title': book['book_title'],
-                    'due_date': book['due_date'],
-                    'user_name': book['user_name'],
-                    'user_email': book['user_email']
-                }
-                for book in books
-            ]
+            html_content=[{
+                'book_title': book['book_title'],
+                'due_date': book['due_date'],
+                'user_name': book['user_name'],
+                'user_email': book['user_email']
+            } for book in books]
         )
 
+    # Return user data along with book titles for logging or reporting purposes
     return [
         {
             'user_name': f"{user.first_name} {user.last_name}",
             'user_email': user.email,
-            'books': [book['book_title'] for book in books],
+            'books': [book['book_title'] for book in books]
         }
         for user, books in user_late_books.items()
     ]
