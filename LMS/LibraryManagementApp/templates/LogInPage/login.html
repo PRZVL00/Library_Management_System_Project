@@ -15,34 +15,50 @@
       <div class="row h-100">
          <div class="col-lg-5 col-12">
             <div id="auth-left">
+               <div class="position-absolute top-0 start-0 ms-3 mt-3">
+                  <a href="{% url 'in-out' %}" class="d-flex align-items-center text-decoration-none text-primary">
+                     <i class="bi-arrow-left me-2" style="font-size: 1.25rem;"></i> Go to In/Out page
+                  </a>
+               </div>
+               
+               
+
                <div class="auth-logo d-flex align-items-center">
-                  <a href="#"><img src="{% static 'assets/static/images/logo.png' %}" alt="Logo" class="me-3" style="height: 100px;"></a>
-                  <h2 class="mb-0">PNHS Library Management System</h2> <!-- Added text here -->
+                  <a href="#"><img src="{% static 'assets/static/images/logo.png' %}" alt="Logo" class="me-3"
+                        style="height: 100px;"></a>
+                  <h2 class="mb-0">PNHS Library Management System</h2>
                </div>
                <h1 class="auth-title">Log in.</h1>
                <form id="loginForm" method="POST">
                   {% csrf_token %}
                   <div class="form-group position-relative has-icon-left mb-4">
-                     <input type="text" class="form-control form-control-l" placeholder="Username" id="username" name="username">
+                     <input type="text" class="form-control form-control-l" placeholder="Username" id="username"
+                        name="username">
                      <div class="form-control-icon">
                         <i class="bi bi-person"></i>
                      </div>
                   </div>
                   <div class="form-group position-relative has-icon-left mb-4">
-                     <input type="password" class="form-control form-control-l" placeholder="Password" id="password" name="password">
+                     <input type="password" class="form-control form-control-l" placeholder="Password" id="password"
+                        name="password">
                      <div class="form-control-icon">
                         <i class="bi bi-shield-lock"></i>
                      </div>
-                     <!-- Show/Hide password toggle with eye icons -->
-                     <div class="position-absolute" style="right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+                     <div class="position-absolute"
+                        style="right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
                         <i class="bi bi-eye-slash" id="togglePassword"></i>
                      </div>
                   </div>
-                  <button class="btn btn-primary btn-block btn-l shadow-lg mt-5" id='login' type='submit'>Log in</button>
+                  <button class="btn btn-primary btn-block btn-l shadow-lg mt-2" id='login' type='submit'>Log
+                     in</button>
                </form>
-               <div class="text-center mt-5 text-lg fs-6">
-                  <p class="text-gray-600">Don't have an account? <a href={% url "registration" %} class="font-bold">Sign up</a>.</p>
-                  <p><a class="font-bold" href="{% url "registration" %}">Forgot password?</a>.</p>
+               <p class="text-center mt-3">
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#qrModal" class="font-bold">Login with QR</a>
+               </p>
+               <div class="text-center mt-3 text-lg fs-6">
+                  <p class="text-gray-600">Don't have an account? <a href={% url "registration" %}
+                        class="font-bold">Sign up</a>.</p>
+                  <p><a class="font-bold" href="{% url 'registration' %}">Forgot password?</a>.</p>
                </div>
             </div>
          </div>
@@ -52,6 +68,40 @@
          </div>
       </div>
    </div>
+
+   <!-- QR Login Modal -->
+   <div class="modal fade" id="qrModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+         <div class="modal-content border-0">
+            <div class="modal-body py-5">
+               <h5 class="text-center mb-4">Tap your QR in the scanner.</h5>
+               <p class="text-center text-muted mb-4">
+                  No scanner? <a href="javascript:void(0)"  id="openCamera">Open camera</a> or <a href="javascript:void(0)"  id="uploadQR">Upload QR</a>
+               </p>
+
+               <!-- Camera Scanner Section -->
+               <div id="qrScannerContainer" class="text-center" style="display:none;">
+                  <button id="stopScanning" class="btn btn-secondary w-100 mb-3">
+                     Stop Scanning
+                  </button>
+                  <div id="qr-reader" class="w-100 mx-auto"
+                     style="height: 300px; max-height: 300px; overflow: hidden; border: 1px solid #ddd; border-radius: 8px;">
+                  </div>
+               </div>
+
+
+
+               <!-- File Upload Section -->
+               <div id="fileUploadContainer" class="text-center" style="display:none;">
+                  <input type="file" id="fileInput" accept="image/*" class="form-control mt-3" />
+                  <button id="uploadQRButton" class="btn btn-primary w-100 mt-3">Upload</button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+
+
    {% include "_JSreferences.html" %}
 </body>
 
@@ -59,6 +109,78 @@
 
 <script>
    $(document).ready(function () {
+      let qrData = '';
+      let qrListenerActivated = false;
+      let html5QrCode = null; // The QR Code scanner object
+
+      // Function to activate the event listener
+      function activateQRListener() {
+         if (!qrListenerActivated) {
+            document.addEventListener('keypress', qrKeyPressHandler);
+            qrListenerActivated = true;
+         }
+      }
+
+      // Function to deactivate the event listener
+      function deactivateQRListener() {
+         if (qrListenerActivated) {
+            document.removeEventListener('keypress', qrKeyPressHandler);
+            qrListenerActivated = false;
+         }
+      }
+
+      // QR key press handler
+      function qrKeyPressHandler(event) {
+         if (event.key === 'Enter') {
+            if (qrData) {
+               console.log(qrData);
+               sendQRData(qrData); // Send the collected QR data
+               qrData = ''; // Reset for the next scan
+            }
+         } else {
+            qrData += event.key; // Collect QR code characters
+         }
+      }
+
+      // When the close (X) button is clicked in the modal
+      $('.btn-close').click(function () {
+         stopScanning(); // Stop scanning when the close button is clicked
+         $('#qrModal').modal('hide'); // Close the modal when X button is clicked
+      });
+
+       // When the "Stop Scanning" button is clicked
+      $('#stopScanning').click(function () {
+         stopScanning(); // Stop the scanning when the button is clicked
+      });
+
+      // Listen for when the modal is shown (opened)
+      $('#qrModal').on('shown.bs.modal', function () {
+         activateQRListener(); // Activate listener when modal is opened
+      });
+
+      // Listen for when the modal is hidden (closed)
+      $('#qrModal').on('hidden.bs.modal', function () {
+         deactivateQRListener(); // Deactivate listener when modal is closed
+         stopScanning(); // Stop any ongoing scanning
+         $('#qrScannerContainer, #fileUploadContainer').hide(); // Hide scanner and upload containers
+         $('#stopScanning').hide(); // Hide the "Stop Scanning" button
+      });
+
+      // Deactivate listener when camera or upload option is selected
+      $('#openCamera').click(function () {
+         $('#qrScannerContainer').show(); // Show the scanner
+         $('#fileUploadContainer').hide(); // Hide file upload
+         $('#stopScanning').show(); // Show the "Stop Scanning" button
+         startScanning(); // Start scanning from the camera
+      });
+
+      $('#uploadQR').click(function () {
+         $('#fileUploadContainer').show(); // Show file upload
+         $('#qrScannerContainer').hide(); // Hide the scanner
+         deactivateQRListener(); // Deactivate the keypress listener when uploading QR
+         $('#stopScanning').hide(); // Hide the "Stop Scanning" button
+      });
+
       $('#togglePassword').click(function () {
          var passwordField = $('#password');
          var icon = $(this);
@@ -71,6 +193,7 @@
             icon.removeClass('bi-eye').addClass('bi-eye-slash'); // Change to closed eye icon
          }
       });
+
       $('#loginForm').submit(function (e) {
          e.preventDefault();
 
@@ -97,7 +220,7 @@
                      gravity: "top",
                      position: "right",
                      style: {
-                        background: "#dc3545", // Bootstrap's danger color
+                        background: "#dc3545",
                      },
                      stopOnFocus: true,
                   }).showToast();
@@ -107,6 +230,120 @@
                console.log("An error occurred: " + error);
             }
          });
-      })
+      });
+
+      // Start scanning from the camera using html5-qrcode
+      function startScanning() {
+         html5QrCode = new Html5Qrcode("qr-reader");
+
+         // Start scanning with the camera
+         html5QrCode.start(
+            { facingMode: "environment" }, // Use the back camera by default
+            {
+               fps: 10,    // Scan rate
+               qrbox: 250  // Size of the scanning box
+            },
+            function (decodedText) {
+               qrData = decodedText; // Collect the QR code data
+               console.log(decodedText);
+               sendQRData(qrData); // Send the QR data to your server
+               stopScanning(); // Stop scanning once a QR code is detected
+            },
+            function (errorMessage) {
+               // console.error("Error scanning QR code:", errorMessage);
+            }
+         ).catch(function (err) {
+            console.error("Error starting QR scan: ", err);
+         });
+      }
+
+      // Function to stop scanning the QR code
+      function stopScanning() {
+         $('#stopScanning').hide(); // Hide the "Stop Scanning" button
+         if (html5QrCode) {
+            html5QrCode.stop().then(function () {
+               console.log("QR Code scanning stopped.");
+               $('#qrScannerContainer').hide(); // Hide the QR scanner container
+            }).catch(function (error) {
+               console.log("Error stopping QR scan: ", error);
+            });
+
+
+         }
+      }
+
+      // Handle file upload for QR code image
+      $('#uploadQRButton').click(function () {
+         let fileInput = $('#fileInput')[0];
+         let file = fileInput.files[0];
+
+         if (file) {
+            const html5QrCodeInstance = new Html5Qrcode("qr-reader"); // Initialize Html5Qrcode
+
+            html5QrCodeInstance.scanFile(file, true) // Pass the File object and set `true` for auto-detection of format
+               .then(decodedText => {
+                  qrData = decodedText;
+                  console.log("Decoded QR from image:", qrData);
+                  sendQRData(qrData); // Send the QR data
+               })
+               .catch(err => {
+                  console.error("Error decoding QR from image:", err);
+               });
+         } else {
+            console.error("No file selected.");
+         }
+      });
+
+
+      // Scan an image for QR code
+      function scanImageForQR(imageDataUrl) {
+         console.log(imageDataUrl);
+         const html5QrCodeInstance = new Html5Qrcode("qr-reader"); // Create a new instance
+
+         html5QrCodeInstance.scanFile(imageDataUrl, false) // Set `false` for no error overlay
+            .then(decodedText => {
+               qrData = decodedText;
+               console.log("Decoded QR from image:", qrData);
+               sendQRData(qrData); // Send the QR data
+            })
+            .catch(err => {
+               console.error("Error decoding QR from image:", err);
+            });
+      }
+
+
+      // Function to send QR data to your server (example)
+      function sendQRData(qrData) {
+         $.ajax({
+            url: '{% url "login-qr" %}',  // URL to handle the cancellation
+            type: 'POST',
+            data: {
+               'qrData': qrData,  // Passing the book_master_id
+               'csrfmiddlewaretoken': '{{ csrf_token }}'  // CSRF token for security
+            },
+            success: function (response) {
+               if (response.isAuthenticated) {
+                  window.location.href = response.url;
+               }
+               else {
+                  Toastify({
+                     text: response.message,
+                     duration: 3000,
+                     close: true,
+                     gravity: "top",
+                     position: "right",
+                     style: {
+                        background: "#dc3545",
+                     },
+                     stopOnFocus: true,
+                  }).showToast();
+               }
+            },
+            error: function (xhr, status, error) {
+               console.log("An error occurred: " + error);
+            }
+         });
+         console.log("Sending QR data:", qrData);
+      }
    });
 </script>

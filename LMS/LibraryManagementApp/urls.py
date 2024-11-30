@@ -6,7 +6,9 @@ from django.contrib.auth.views import LogoutView
 
 
 urlpatterns = [
-    path('', views.Login, name="login"),
+    path('', views.InOut, name="in-out"),
+    path('login', views.Login, name="login"),
+    path('login-qr', views.LoginQR, name="login-qr"),
     path('verify-login/', views.VerifyLogin, name="verify-login"),
     path('Forgotpassword/', views.Forgotpassword, name="Forgotpassword"),
     path("reset-password-request", views.ResetPasswordRequest, name="reset-password-request"),
@@ -53,7 +55,6 @@ urlpatterns = [
     path('get-transaction-detail', views.GetTransactionDetail, name="get-transaction-detail"),
     path('get-user-profile', views.GetUserProfile, name="get-user-profile"),
     path('get-user-transaction', views.GetUserTransaction, name="get-user-transaction"),
-    path('in-out/', views.InOut, name="in-out"),
     path('create-log', views.CreateLog, name="create-log"),
     path('get-log', views.GetLog, name="get-log"),
     path('get-first-row', views.GetFirstRow, name="get-first-row"),
